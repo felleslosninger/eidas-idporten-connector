@@ -1,0 +1,28 @@
+management:
+  server:
+    port:
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+spring:
+  application:
+    environment: local-docker
+  main:
+    log-startup-info: true
+  data:
+    redis:
+      port: 6400
+      host: localhost
+  devtools:
+    restart:
+      enabled: false
+digdir:
+  event:
+    logging:
+      feature-enabled: false
+
+eidas:
+  cache:
+    secret: mySecretConnectorRequest
+
