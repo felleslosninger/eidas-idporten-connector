@@ -1,0 +1,26 @@
+name: eidas
+networks:
+  eidas:
+    name: eidas
+
+services:
+  eidas-idporten-connector:
+    build:
+      context: .
+      dockerfile: docker/dev.Dockerfile
+      args:
+        GIT_PACKAGE_TOKEN: ${GIT_PACKAGE_TOKEN}
+        GIT_PACKAGE_USERNAME: ${GIT_PACKAGE_USERNAME}
+    environment:
+      spring_profiles_active: local-docker
+      OTEL_SDK_DISABLED: "true"
+    ports:
+      - "8088:8080"
+      - "5099:5006"
+    networks:
+      - eidas
+    entrypoint: "/bin/bash -c"
+    command:
+      - |
+        cd /usr/local/webapps
+        java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006 -jar application.jar

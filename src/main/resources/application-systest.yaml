@@ -1,0 +1,20 @@
+---
+management:
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+spring:
+  application:
+    environment: systest
+  main:
+    log-startup-info: true
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+      port: 6379
+      host: eidas-redis-sentinel-master
+eidas:
+  cache:
+    response-secret: ${LIGHT_TOKEN_CONNECTORSERVICE_RESPONSE_SECRET}
+    request-secret: ${LIGHT_TOKEN_CONNECTORSERVICE_REQUEST_SECRET}

@@ -1,0 +1,77 @@
+---
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json
+    min-response-size: 1024
+  http2:
+    enabled: true
+  error:
+    whitelabel:
+      enabled: true
+# Spring Boot Actuator
+management:
+  server:
+    port: 8090
+  endpoints:
+    web:
+      exposure:
+        include: info,version,prometheus,health
+      base-path: /
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${spring.application.environment}
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: redis
+spring:
+  application:
+    name: eidas-idporten-connector
+    environment: prod
+  main:
+    lazy-initialization: false
+    banner-mode: "off"
+    log-startup-info: false
+  web:
+    resources:
+      add-mappings: true
+  cache:
+    type: redis
+  data:
+    redis:
+      connect-timeout: 3s
+      timeout: 3s
+eidas:
+  cache:
+    response-issuer-name: specificCommunicationDefinitionProxyserviceResponse
+    request-issuer-name: specificCommunicationDefinitionProxyserviceRequest
+    issuer-name: specificCommunicationDefinitionProxyserviceResponse
+    algorithm: SHA-256
+    light-response-lifetime-seconds: 120
+    oidc-request-state-lifetime-seconds: 700
+
+digdir:
+  audit:
+    application-name: ${spring.application.name}
+    application-environment: ${spring.application.environment}
+    log-dir:
+    filters:
+      bearer-token: false
+
+  event:
+    logging:
+      feature-enabled: false
+      environment-name: ${spring.application.environment}
+---
+spring:
+  config:
+    activate:
+      on-cloud-platform: 'kubernetes'
+    import:
+      - 'optional:file:/etc/config/'

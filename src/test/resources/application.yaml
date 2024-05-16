@@ -1,0 +1,47 @@
+---
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json
+    min-response-size: 1024
+  http2:
+    enabled: true
+  error:
+    whitelabel:
+      enabled: true
+# Spring Boot Actuator
+management:
+  server:
+    port:
+  endpoints:
+    web:
+      exposure:
+        include: info,version,prometheus,health
+      base-path: /
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${spring.application.environment}
+  endpoint:
+    health:
+      probes:
+        enabled: false
+
+spring:
+  application:
+    name: junit
+    environment: junit
+digdir:
+  audit:
+    application-name: ${spring.application.name}
+    application-environment: ${spring.application.environment}
+    log-dir:
+    filters:
+      bearer-token: false
+
+  event:
+    logging:
+      feature-enabled: false
+      environment-name: ${spring.application.environment}
+
