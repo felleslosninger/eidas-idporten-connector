@@ -28,7 +28,7 @@ sequenceDiagram
     EC ->> EIC: light token
     EIC ->> RED: get LightProtocol response
     rect lightgrey
-        EIC ->> FRG: get persondata
+        EIC ->> FRG: match identity
     end
     EIC -->> IL: OIDC code
     IL ->> EIC: getToken
