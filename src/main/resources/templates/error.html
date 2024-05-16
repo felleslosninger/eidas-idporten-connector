@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html th:with="lang=${#locale.language}" th:lang="${lang}" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}">...</head>
+<body>
+
+<header th:replace="~{fragments/toppanel :: toppanel-nolang}">...</header>
+
+<main>
+    <div class="box" id="main-content">
+        <div class="box__body">
+            <div class="notification">
+                <h1 th:text="#{no.idporten.error.header}"></h1>
+                <p th:text="#{no.idporten.error.line1}"></p>
+                <p th:text="#{no.idporten.error.line2}"></p>
+            </div>
+
+            <form method="get" th:action="@{/exit}"
+                  th:if="${session.get('scopedTarget.IDPortenSession') != null and session.get('scopedTarget.IDPortenSession').getAuthorizationSessionId() != null}">
+
+                <div class="buttons">
+                    <button class="button  button--primary" type="submit" id="exit-button" tabindex="1"
+                            th:data-btn-waiting-text="#{no.idporten.error.waiting}">
+                        <span th:text="#{no.idporten.error.button}"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <br/>
+        <div class="box__footer">
+            <span th:if="${status != null or error != null}">
+                <h3><span th:if="${status}" th:text="${status}" th:remove="tag">-</span>
+                    <span th:if="${error}" th:text="${error}" th:remove="tag"></span>
+                    <span th:if="${(status != null or error != null) and errorDescription != null}"
+                          th:remove="tag"> </span>
+                </h3>
+                <p>
+                    <span th:if="${errorDescription}" th:text="${errorDescription}"></span>
+                </p>
+            </span>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}">...</footer>
+<span th:replace="~{fragments/javascripts :: javascripts}">...</span>
+</body>
+</html>

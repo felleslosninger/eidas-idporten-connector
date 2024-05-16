@@ -4,6 +4,14 @@ networks:
     name: eidas
 
 services:
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6400:6379"
+    networks:
+      - eidas
+    command: redis-server --maxmemory-policy allkeys-lru
   eidas-idporten-connector:
     build:
       context: .
@@ -24,3 +32,4 @@ services:
       - |
         cd /usr/local/webapps
         java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006 -jar application.jar
+

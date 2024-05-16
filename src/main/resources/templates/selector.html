@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html th:with="lang=${#locale.language}" th:lang="${lang}" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}"/>
+
+<body>
+
+<header th:replace="~{fragments/toppanel :: toppanel}">...</header>
+
+<main>
+    <div class="box" id="main-content">
+
+        <div class="box__header">
+            <h1 class="title-bar">
+                <span class="title-bar__name" th:text="#{no.idporten.eidas.caption}"></span>
+            </h1>
+
+        </div>
+
+        <div class="box__body">
+            <div class="section">
+                <form th:action="@{/citizencountry}" th:object="${citizenForm}" th:method="post">
+                    <div class="service-provider">
+                        <input type="text" id="country">
+                        <input type="hidden" id="country_code" th:name="countryId" th:value="*{countryId}"/>
+                    </div>
+                    <p>
+                    <div class="btn-group">
+                    <button class="button button--secondary" tabindex="11" name="action" value="cancel" type="submit">
+                        <span th:text="#{no.idporten.eidas.box.no}"></span>
+                    </button>
+                        <button class="button" tabindex="10" name="action" value="save" type="submit">
+                            <span th:text="#{no.idporten.eidas.box.yes}"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}">...</footer>
+<span th:replace="~{fragments/javascripts :: javascripts}">...</span>
+</body>
+</html>

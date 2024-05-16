@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<header th:fragment="toppanel">
+    <div class="top-bar">
+        <div class="top-bar__container">
+            <div class="top-bar__left">
+                <img class="top-bar__logo" th:src=" @{/img/logo/logo-{themeId}.svg(themeId=idporten)}"
+                     src="../img/logo/logo-idporten.svg"
+                     th:alt="#{no.idporten.themed.logo.alt}">
+                <img class="top-bar__logo--mobile" th:src=" @{/img/logo/logo-idporten-bare.svg}"
+                     src="../img/logo/logo-idporten-bare.svg"
+                     th:alt="#{no.idporten.themed.logo.alt}">
+            </div>
+            <div class="top-bar__middle">
+                <div class="top-bar__sp">
+                    <span th:text="Digitaliseringsdirektoratet"></span>
+                </div>
+            </div>
+            <div class="top-bar__right">
+                <div class="dropdowns">
+                    <div class="dropdowns__opacity"></div>
+                    <button class="dropdowns__toggle" aria-label="Meny">
+                    </button>
+                    <div class="dropdowns__container">
+                        <div class="dropdowns__title">
+                            Meny
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<header th:fragment="toppanel-nolang">
+    <div class="top-bar">
+        <div class="top-bar__container">
+            <div class="top-bar__left">
+                <img class="top-bar__logo" th:src=" @{/img/logo/logo-{themeId}.svg(themeId=idporten)}"
+                     src="../img/logo/logo-idporten.svg"
+                     th:alt="#{no.idporten.themed.logo.alt}">
+                <img class="top-bar__logo--mobile" th:src=" @{/img/logo/logo-idporten-bare.svg}"
+                     src="../img/logo/logo-idporten-bare.svg"
+                     th:alt="#{no.idporten.themed.logo.alt}">
+            </div>
+        </div>
+    </div>
+</header>
+
+</html>

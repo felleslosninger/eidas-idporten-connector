@@ -21,6 +21,26 @@ digdir:
       feature-enabled: false
 
 eidas:
+  oidc-server:
+    issuer: http://eidas-idporten-connector:8088
+    clients:
+      - client-id: idporten
+        client-secret: password
+        scopes:
+          - openid
+        redirect-uris:
+          - http://127.0.0.1:7070/authorize/callback/testid
+          - http://127.0.0.1:7070/authorize/callback/testid1
+      - client-id: testclient
+        client-secret: password
+        scopes:
+          - openid
+          - profile
+        redirect-uris:
+          - http://localhost:8888/idporten-oidc-client/authorize/response
+          - http://127.0.0.1:8888/idporten-oidc-client/authorize/response
+          - http://localhost:8888/authorize/response
+          - http://127.0.0.1:8888/authorize/response
   cache:
     response-secret: mySecretConnectorResponse
     request-secret: mySecretConnectorRequest
