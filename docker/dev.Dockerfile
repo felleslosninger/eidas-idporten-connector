@@ -30,4 +30,4 @@ COPY --from=builder /home/app/opentelemetry-javaagent.jar .
 ENV TZ=Europe/Oslo
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-EXPOSE 8081
+EXPOSE 8080
