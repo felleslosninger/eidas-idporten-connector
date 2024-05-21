@@ -30,7 +30,9 @@ public class AuditService implements OpenIDConnectAuditLogger {
         OIDC_TOKEN_REQUEST("%s-RECEIVE-TOKEN-REQUEST"),
         OIDC_TOKEN_RESPONSE("%s-SEND-TOKEN-RESPONSE"),
         OIDC_USERINFO_REQUEST("%s-RECEIVE-USERINFO-REQUEST"),
-        OIDC_USERINFO_RESPONSE("%s-SEND-USERINFO-RESPONSE");
+        OIDC_USERINFO_RESPONSE("%s-SEND-USERINFO-RESPONSE"),
+        EIDAS_CONNECTOR_COUNTRY_SELECTION("%s-SELECT-COUNTRY")
+        ;
 
         private String pattern;
 
@@ -105,6 +107,14 @@ public class AuditService implements OpenIDConnectAuditLogger {
     @Override
     public void auditUserInfoResponse(UserInfoResponse userInfoResponse) {
         log(AuditIdPattern.OIDC_USERINFO_RESPONSE, "userinfo_response", userInfoResponse);
+    }
+
+    public void auditCountrySelection(String countryId) {
+        auditLogger.log(AuditEntry.builder()
+                .auditId(AuditIdPattern.EIDAS_CONNECTOR_COUNTRY_SELECTION.auditIdentifier())
+                .logNullAttributes(false)
+                .attribute("selected_country", countryId)
+                .build());
     }
 
 }
