@@ -40,8 +40,36 @@ digdir:
     filters:
       bearer-token: false
 
-  event:
-    logging:
-      feature-enabled: false
-      environment-name: ${spring.application.environment}
 
+eidas:
+  oidc-server:
+    issuer: http://junittest/testid/
+    par-lifetime-seconds: 6
+    authorization-lifetime-seconds: 6
+    accesstoken-lifetime-seconds: 12
+    authorization-response-iss-parameter-supported: true
+    response-modes-supported:
+      - query
+      - query.jwt
+    scopes-supported:
+      - openid
+      - profile
+      - eidas:mds
+    acr-values:
+      - idporten-loa-low
+      - idporten-loa-substantial
+      - idporten-loa-high
+    clients:
+      - client-id: junit
+        client-secret: password
+        scopes:
+          - openid
+        redirect-uris:
+          - http://127.0.0.1:7070/authorize/callback/testid
+  lightprotocol-cache:
+    response-issuer-name: specificCommunicationDefinitionProxyserviceResponse
+    request-issuer-name: specificCommunicationDefinitionProxyserviceRequest
+    issuer-name: specificCommunicationDefinitionProxyserviceResponse
+    algorithm: SHA-256
+    light-response-lifetime-seconds: 120
+    oidc-request-state-lifetime-seconds: 700

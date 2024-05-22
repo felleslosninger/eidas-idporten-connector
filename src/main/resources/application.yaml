@@ -38,17 +38,40 @@ spring:
     lazy-initialization: false
     banner-mode: "off"
     log-startup-info: false
-  web:
-    resources:
-      add-mappings: true
   cache:
     type: redis
   data:
     redis:
       connect-timeout: 3s
       timeout: 3s
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 2592000
+          stale-while-revalidate: 604800
+          cache-public: true
+          must-revalidate: true
+          stale-if-error: 604800
+          no-transform: true
 eidas:
-  cache:
+  oidc-server:
+    par-lifetime-seconds: 60
+    authorization-lifetime-seconds: 60
+    accesstoken-lifetime-seconds: 120
+    authorization-response-iss-parameter-supported: true
+    response-modes-supported:
+      - query
+      - query.jwt
+    scopes-supported:
+      - openid
+      - profile
+      - eidas:mds
+    acr-values:
+      - idporten-loa-low
+      - idporten-loa-substantial
+      - idporten-loa-high
+  lightprotocol-cache:
     response-issuer-name: specificCommunicationDefinitionProxyserviceResponse
     request-issuer-name: specificCommunicationDefinitionProxyserviceRequest
     issuer-name: specificCommunicationDefinitionProxyserviceResponse
@@ -64,10 +87,6 @@ digdir:
     filters:
       bearer-token: false
 
-  event:
-    logging:
-      feature-enabled: false
-      environment-name: ${spring.application.environment}
 ---
 spring:
   config:

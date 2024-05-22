@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<footer th:fragment="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <img class="footer__logo" th:src="@{/img/logo/logo-{themeId}-negative.svg(themeId=idporten)}"
+                     src="../img/logo/logo-idporten-negative.svg" th:alt="#{no.idporten.themed.logo.alt}">
+                <div class="footer__desc">
+                    <span th:text="#{no.idporten.themed.footer.info}"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h2 class="footer__header">
+                    <span th:text="#{no.idporten.common.footer.links}"></span>
+                </h2>
+                <ul class="footer__links">
+                    <li>
+                        <a class="footer__link" th:href="#{no.idporten.common.support.link.login}">
+                            <span th:text="#{no.idporten.common.footer.loginhelp}"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="footer__link" th:href="#{no.idporten.common.security.link}">
+                            <span th:text="#{no.idporten.common.footer.security}"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="footer__link" th:href="#{no.idporten.themed.geteid.link}">
+                            <span th:text="#{no.idporten.common.footer.getid}"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="footer__link" th:href="#{no.idporten.themed.uustatus.link}">
+                            <span th:text="#{no.idporten.common.footer.uustatus}"></span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h2 class="footer__header">
+                    <span th:text="#{no.idporten.common.footer.contact}"></span>
+                </h2>
+                <ul class="footer__links">
+                    <li>
+                        <a class="footer__link footer__link--phone"
+                           th:href="#{no.idporten.themed.footer.telephone.number.href}">
+                            <span th:text="#{no.idporten.themed.footer.telephone.number}"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="footer__link footer__link--email"
+                           th:href="'mailto:' + #{no.idporten.common.footer.email.address}">
+                            <span th:text="#{no.idporten.common.footer.email.address}"></span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+</html>
