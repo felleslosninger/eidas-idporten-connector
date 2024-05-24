@@ -66,10 +66,20 @@ eidas:
           - openid
         redirect-uris:
           - http://127.0.0.1:7070/authorize/callback/testid
-  lightprotocol-cache:
-    response-issuer-name: specificCommunicationDefinitionProxyserviceResponse
-    request-issuer-name: specificCommunicationDefinitionProxyserviceRequest
-    issuer-name: specificCommunicationDefinitionProxyserviceResponse
+  eu-connector:
+    issuer-name: ${eidas.cache.request-issuer-name}
+  cache:
+    response-issuer-name: specificCommunicationDefinitionConnectorserviceResponse
+    request-issuer-name: specificCommunicationDefinitionConnectorserviceRequest
     algorithm: SHA-256
     light-response-lifetime-seconds: 120
     oidc-request-state-lifetime-seconds: 700
+  acr:
+    supported-acr-values:
+      - http://eidas.europa.eu/LoA/low
+      - http://eidas.europa.eu/LoA/substantial
+      - http://eidas.europa.eu/LoA/high
+    acr-value-map:
+      idporten-loa-low: "http://eidas.europa.eu/LoA/low"
+      idporten-loa-substantial: "http://eidas.europa.eu/LoA/substantial"
+      idporten-loa-high: "http://eidas.europa.eu/LoA/high"
