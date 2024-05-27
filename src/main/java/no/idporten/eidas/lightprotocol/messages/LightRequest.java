@@ -10,7 +10,7 @@ import lombok.*;
 import java.io.Serial;
 import java.util.List;
 
-@XmlRootElement(namespace = "http://cef.eidas.eu/LightRequest")
+@XmlRootElement(name = "lightRequest", namespace = "http://cef.eidas.eu/LightRequest")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Data
 @AllArgsConstructor
@@ -18,13 +18,13 @@ import java.util.List;
 @ToString(exclude = "requestedAttributes")
 @EqualsAndHashCode
 @Builder
+@XmlType
 public class LightRequest implements ILightRequest {
     @Serial
     private static final long serialVersionUID = 1L;
     private String citizenCountryCode;
     private String id;
     private String issuer;
-    @XmlElement(namespace = "http://cef.eidas.eu/LightRequest")
     private LevelOfAssurance levelOfAssurance;
     private String relayState;
     private String providerName;
@@ -32,8 +32,8 @@ public class LightRequest implements ILightRequest {
     private String nameIdFormat;
     private String requesterId;
     private String spCountryCode;
-    @XmlElementWrapper(name = "requestedAttributes", namespace = "http://cef.eidas.eu/LightRequest")
-    @XmlElement(name = "attribute", namespace = "http://cef.eidas.eu/LightRequest")
+    @XmlElementWrapper(name = "requestedAttributes")
+    @XmlElement(name = "attribute")
     private List<RequestedAttribute> requestedAttributes;
 
     @Nonnull

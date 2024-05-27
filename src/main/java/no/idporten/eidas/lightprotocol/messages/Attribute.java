@@ -19,8 +19,8 @@ import java.util.List;
 public class Attribute implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    @XmlElement(name = "definition")
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String definition;
-    @XmlElement(name = "value")
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private List<String> value;
 }

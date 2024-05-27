@@ -24,17 +24,6 @@ public class LevelOfAssurance implements ILevelOfAssurance {
     public static LevelOfAssurance fromString(String assuranceLevelURI) {
         LevelOfAssurance loa = new LevelOfAssurance();
         loa.setValue(assuranceLevelURI);
-
-        // Determine the type based on the URI
-        if (assuranceLevelURI != null) {
-            switch (assuranceLevelURI) {
-                case ILevelOfAssurance.EIDAS_LOA_LOW -> loa.setType("low");
-                case ILevelOfAssurance.EIDAS_LOA_SUBSTANTIAL -> loa.setType("substantial");
-                case ILevelOfAssurance.EIDAS_LOA_HIGH -> loa.setType("high");
-                default -> loa.setType("low");
-            }
-        }
-
         return loa;
     }
 }

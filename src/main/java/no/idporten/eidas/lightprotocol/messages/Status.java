@@ -3,10 +3,7 @@ package no.idporten.eidas.lightprotocol.messages;
 import eu.eidas.auth.commons.light.IResponseStatus;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -22,13 +19,13 @@ import java.io.Serial;
 public class Status implements IResponseStatus {
     @Serial
     private static final long serialVersionUID = 1L;
-
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String statusCode;
-
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String statusMessage;
-
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String subStatusCode;
-
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private boolean failure;
 
     @Nonnull

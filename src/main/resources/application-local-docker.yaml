@@ -22,7 +22,7 @@ digdir:
 
 eidas:
   eu-connector:
-    redirect-uri: http://eidas-connector:8080/SpecificConnectorRequest
+    redirect-uri: http://eidas-connector:8083/SpecificConnectorRequest
   oidc-server:
     issuer: http://eidas-idporten-connector:8088
     clients:

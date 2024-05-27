@@ -11,40 +11,40 @@ import lombok.*;
 import java.io.Serial;
 import java.util.List;
 
-@XmlRootElement(name = "lightResponse", namespace = "http://cef.eidas.eu/LightResponse")
-@XmlType
+@XmlRootElement(namespace = "http://cef.eidas.eu/LightResponse")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
 @Builder
+@ToString(exclude = "attributes")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class LightResponse implements ILightResponse {
     @Serial
     private static final long serialVersionUID = 1L;
-    @XmlElement
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String citizenCountryCode;
-    @XmlElement
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String id;
-    @XmlElement
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String issuer;
-    @XmlElement
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String levelOfAssurance;
-    @XmlElement
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String relayState;
 
-    @XmlElement
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String ipAddress;
 
-    @XmlElement
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String inResponseToId;
 
-    @XmlElement
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String consent;
 
     private String subject;
 
-    @XmlElement
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String subjectNameIdFormat;
 
     @XmlElement(name = "status", namespace = "http://cef.eidas.eu/LightResponse")

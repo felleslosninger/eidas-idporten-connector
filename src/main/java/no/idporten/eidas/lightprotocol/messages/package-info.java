@@ -1,5 +1,5 @@
 @XmlSchema(
-        namespace = "http://cef.eidas.eu/LightResponse",
+        namespace = "http://cef.eidas.eu/LightRequest",
         elementFormDefault = XmlNsForm.QUALIFIED
 )
 package no.idporten.eidas.lightprotocol.messages;
