@@ -1,13 +1,11 @@
 package no.idporten.eidas.connector.web;
 
-import eu.eidas.auth.commons.Country;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import no.idporten.eidas.connector.logging.AuditService;
 import no.idporten.sdk.oidcserver.OAuth2Exception;
 import no.idporten.sdk.oidcserver.OpenIDConnectIntegration;
@@ -19,21 +17,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST;
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor
 public class IDPortenConnectorController {
-
-    private static final String SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST = PushedAuthorizationRequest.class.getName();
 
 
     private final OpenIDConnectIntegration openIDConnectSdk;
@@ -63,7 +58,7 @@ public class IDPortenConnectorController {
             sendHttpResponse(openIDConnectSdk.createClientResponse(openIDConnectSdk.errorResponse(authorizationRequest, e.error(), e.errorDescription())), response);
             return null;
         }
-        return authorize(authorizationRequest, request, model);
+        return authorize(authorizationRequest, request);
     }
 
     protected void sendHttpResponse(ClientResponse clientResponse, HttpServletResponse response) throws IOException {
@@ -85,7 +80,7 @@ public class IDPortenConnectorController {
         request.getSession().invalidate();
         try {
             PushedAuthorizationRequest pushedAuthorizationRequest = openIDConnectSdk.process(new AuthorizationRequest(headers, parameters));
-            return authorize(pushedAuthorizationRequest, request, model);
+            return authorize(pushedAuthorizationRequest, request);
         } catch (OAuth2Exception e) {
             log.warn("Failed to process authorization request", e);
             return "error";
@@ -93,8 +88,7 @@ public class IDPortenConnectorController {
     }
 
     public String authorize(PushedAuthorizationRequest authorizationRequest,
-                            HttpServletRequest request,
-                            Model model) {
+                            HttpServletRequest request) {
         request.getSession().invalidate();
         request.getSession(true).setAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, authorizationRequest);
         return "redirect:/citizencountry";

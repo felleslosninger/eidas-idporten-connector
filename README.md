@@ -2,7 +2,6 @@
 
 eIDAS spesific connector for ID-porten/Norway
 
-We won't implement the freg gateway bit yet.
 
 ## Sequence diagrams
 
@@ -27,9 +26,7 @@ sequenceDiagram
     EC ->> RED: store LightProtocol response
     EC ->> EIC: light token
     EIC ->> RED: get LightProtocol response
-    rect lightgrey
-        EIC ->> FRG: match identity
-    end
+    EIC ->> FRG: match identity
     EIC -->> IL: OIDC code
     IL ->> EIC: getToken
 
