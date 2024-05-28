@@ -1,32 +1,35 @@
 package no.idporten.eidas.connector.web;
 
-import eu.eidas.auth.commons.Country;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.connector.logging.AuditService;
+import no.idporten.eidas.connector.service.SpecificConnectorService;
+import no.idporten.eidas.lightprotocol.messages.LightRequest;
+import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.List;
+import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST;
 
 @Controller
 @RequestMapping("/citizencountry")
 @RequiredArgsConstructor
 public class CitizenCountryController {
 
+    private static final String CITIZEN_FORM = "citizenForm";
+    private static final String ERROR = "error";
     private final AuditService auditService;
+    private final SpecificConnectorService specificConnectorService;
 
     @GetMapping
     public String showForm(Model model) {
-        model.addAttribute("citizenForm", new CitizenCountryForm());
+        model.addAttribute(CITIZEN_FORM, new CitizenCountryForm());
         return "selector";
     }
 
     @PostMapping
-    public ModelAndView submitSelection(@ModelAttribute("citizenForm") CitizenCountryForm form,
-                                        Model model,
+    public ModelAndView submitSelection(@ModelAttribute(CITIZEN_FORM) CitizenCountryForm form,
                                         @RequestParam("action") String action) {
         ModelAndView modelAndView = new ModelAndView();
 
@@ -35,41 +38,40 @@ public class CitizenCountryController {
             modelAndView.setViewName("confirmation");
             modelAndView.addObject("selectedCountry", form.getCountryId());
             form.setCountryId(form.getCountryId()) ;
-            modelAndView.addObject("citizenForm", form);
+            modelAndView.addObject(CITIZEN_FORM, form);
         } else if ("cancel".equals(action)) {
             modelAndView.setViewName("redirect:/some-other-page");
         } else {
-            modelAndView.setViewName("error");
-            modelAndView.addObject("error", "Unknown action: %s".formatted(action));
+            modelAndView.setViewName(ERROR);
+            modelAndView.addObject(ERROR, "Unknown action: %s".formatted(action));
         }
         return modelAndView;
     }
 
     @PostMapping("/confirm")
-    public ModelAndView confirmation(@ModelAttribute("citizenForm") CitizenCountryForm form,
-
+    public ModelAndView confirmation(@ModelAttribute(CITIZEN_FORM) CitizenCountryForm form,
+                                     @SessionAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST) PushedAuthorizationRequest authorizationRequest,
                                      @RequestParam("action") String action) {
         ModelAndView modelAndView = new ModelAndView();
 
         if ("confirm".equals(action)) {
-            String selectedCountry = form.getCountryId();
+            String selectedCountry = form.getCountryId().toUpperCase();
             auditService.auditCountrySelection(selectedCountry);
-            //todo add light request and send token to connector.https://digdir.atlassian.net/browse/ID-4291
-            if ("is".equalsIgnoreCase(selectedCountry)) {
-                modelAndView.setViewName("redirect:https://www.visiticeland.com");
-            } else if ("ca".equalsIgnoreCase(selectedCountry)) {
-                modelAndView.setViewName("redirect:https://www.turing.ac.uk/research/research-projects/demoland");
-            } else {
-                modelAndView.setViewName("error");
-                modelAndView.addObject("error", "Unsupported country: %s".formatted(selectedCountry));
-            }
+            modelAndView.setViewName(createLightRequest(selectedCountry, authorizationRequest));
         } else if ("back".equals(action)) {
-            modelAndView.addObject("citizenForm", new CitizenCountryForm());
+            modelAndView.addObject(CITIZEN_FORM, new CitizenCountryForm());
             modelAndView.setViewName("selector");
         } else {
-            modelAndView.setViewName("error");
-            modelAndView.addObject("error", "Unknown action: %s".formatted(action));
+            modelAndView.setViewName(ERROR);
+            modelAndView.addObject(ERROR, "Unknown action: %s".formatted(action));
         }
         return modelAndView;
+    }
+
+    private String createLightRequest(String selectedCountry, PushedAuthorizationRequest pushedAuthorizationRequest) {
+        LightRequest lightRequest = specificConnectorService.buildLightRequest(selectedCountry, pushedAuthorizationRequest);
+        String lightToken = specificConnectorService.createStoreBinaryLightTokenRequestBase64(lightRequest);
+        specificConnectorService.storeStateParams(lightRequest, pushedAuthorizationRequest);
+        return "redirect:%s?token=%s".formatted(specificConnectorService.getEuConnectorRedirectUri(), lightToken);
     }
 }
