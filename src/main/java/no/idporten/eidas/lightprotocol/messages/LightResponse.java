@@ -7,7 +7,9 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.*;
 import lombok.*;
+import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 
+import java.beans.Transient;
 import java.io.Serial;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import java.util.List;
 public class LightResponse implements ILightResponse {
     @Serial
     private static final long serialVersionUID = 1L;
+    public static final String EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER = "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier";
     @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String citizenCountryCode;
     @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
@@ -42,6 +45,7 @@ public class LightResponse implements ILightResponse {
     @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String consent;
 
+    @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String subject;
 
     @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
@@ -89,6 +93,19 @@ public class LightResponse implements ILightResponse {
     @Nonnull
     public String getIssuer() {
         return issuer;
+    }
+
+    @Transient
+    public String getPid() {
+
+        // Attempt to extract the PID based on predefined format and validation rules
+        return getAttributesList().stream()
+                .filter(attribute -> EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER.equals(attribute.getDefinition()))
+                .map(Attribute::getValue)
+                .filter(values -> !values.isEmpty())
+                .map(List::getFirst)
+                .findFirst()
+                .orElseThrow(() -> new SpecificConnectorException("invalid_request", "Personidentifier was missing or has unsupported format in attributes list."));
     }
 
 
