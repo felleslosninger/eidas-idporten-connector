@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version>
+        <version>3.3.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>no.idporten.eidas</groupId>
@@ -21,6 +21,7 @@
         <logback-access.version>1.4.14</logback-access.version>
         <idporten-audit.version>1.2.1</idporten-audit.version>
         <idporten-access-log.version>2.3.4</idporten-access-log.version>
+        <logback-access.version>1.4.14</logback-access.version>
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
         <idporten-actuator-starter.version>1.2.0</idporten-actuator-starter.version>
         <nimbus.oauth2-oidc-sdk.version>11.10.1</nimbus.oauth2-oidc-sdk.version>
