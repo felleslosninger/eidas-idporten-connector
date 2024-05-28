@@ -55,7 +55,7 @@ public class CitizenCountryController {
         ModelAndView modelAndView = new ModelAndView();
 
         if ("confirm".equals(action)) {
-            String selectedCountry = form.getCountryId();
+            String selectedCountry = form.getCountryId().toUpperCase();
             auditService.auditCountrySelection(selectedCountry);
             modelAndView.setViewName(createLightRequest(selectedCountry, authorizationRequest));
         } else if ("back".equals(action)) {

@@ -68,7 +68,7 @@ public class SpecificConnectorService {
 
         return LightRequest.builder()
                 .id(UUID.randomUUID().toString())
-                .citizenCountryCode(citizenCountryCode)
+                .citizenCountryCode(citizenCountryCode.toUpperCase())
                 .requestedAttributes(List.of(
                         RequestedAttribute.builder().definition(FAMILY_NAME).build(),
                         RequestedAttribute.builder().definition(FIRST_NAME).build(),
@@ -79,6 +79,7 @@ public class SpecificConnectorService {
                 .levelOfAssurance(levelOfAssuranceHelper.idportenAcrToEidasAcr(pushedAuthorizationRequest.getAcrValues().getFirst()))
                 .issuer(euConnectorProperties.getIssuer())
                 .relayState(UUID.randomUUID().toString())
+                .spType("public")
                 .build();
 
     }
