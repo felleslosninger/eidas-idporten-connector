@@ -38,9 +38,9 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
 
     @Override
     public ILightResponse getAndRemoveResponse(String lightTokenId, Collection<AttributeDefinition<?>> registry) throws SpecificConnectorException {
-        log.info("getAndRemoveResponse  {}", lightTokenId);
+        log.debug("getAndRemoveResponse  {}", lightTokenId);
         String xmlMessage = (String) lightRedisCache.get(eidasCacheProperties.getLightResponsePrefix(lightTokenId));
-        log.info("Got message from cache {}", xmlMessage);
+        log.debug("Got message from cache {}", xmlMessage);
         try {
             return LightResponseParser.parseXml(xmlMessage);
         } catch (JAXBException e) {
@@ -58,7 +58,7 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
         String xmlRequest;
         try {
             xmlRequest = LightRequestToXML.toXml(lightRequest);
-            log.info("Storing xml lightRequest {}", xmlRequest);
+            log.debug("Storing xml lightRequest {}", xmlRequest);
         } catch (JAXBException e) {
             log.error("Failed to convert lightRequest to XML {}", e.getMessage());
             throw new SpecificConnectorException("Failed to convert lightRequest to XML", e);
@@ -67,7 +67,7 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
                 .createBinaryLightToken(eidasCacheProperties.getRequestIssuerName(),
                         eidasCacheProperties.getRequestSecret(),
                         eidasCacheProperties.getAlgorithm());
-        log.info("putRequest {}", binaryLightToken.getToken().getId());
+        log.debug("putRequest {}", binaryLightToken.getToken().getId());
         lightRedisCache.set(eidasCacheProperties.getLightRequestPrefix(binaryLightToken.getToken().getId()), xmlRequest, Duration.ofSeconds(eidasCacheProperties.getLightRequestLifetimeSeconds()));
         return binaryLightToken;
 

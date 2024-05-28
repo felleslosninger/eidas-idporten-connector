@@ -27,7 +27,7 @@ digdir:
 
 eidas:
   eu-connector:
-    redirect-uri: http://eidas-connector:8099/SpecificConnectorRequest
+    redirect-uri: http://eidas-connector:8083/SpecificConnectorRequest
   oidc-server:
     issuer: http://localhost:8080
     clients:
