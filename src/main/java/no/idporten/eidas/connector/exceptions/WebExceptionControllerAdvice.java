@@ -1,6 +1,5 @@
 package no.idporten.eidas.connector.exceptions;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +28,8 @@ public class WebExceptionControllerAdvice {
     private final OpenIDConnectIntegration openIDConnectSdk;
 
     @ExceptionHandler(SpecificConnectorException.class)
-    public String handleOAuth2Exception(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, SpecificConnectorException e) {
-        log.error("SpecificConnectorException occurred for request: {} ", e.getMessage());
-        log.warn("Exception occurred :{}", e.getMessage());
+    public String handleSpecificConnectorException(HttpServletResponse response, HttpSession httpSession, SpecificConnectorException e) {
+        log.warn("SpecificConnectorException occurred for request: {} ", e.getMessage());
         try {
             sendHttpResponse(openIDConnectSdk.createClientResponse(openIDConnectSdk.errorResponse((PushedAuthorizationRequest) httpSession.getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST), OAuth2Exception.SERVER_ERROR, e.getMessage())), response);
         } catch (IOException ex) {
@@ -43,7 +41,7 @@ public class WebExceptionControllerAdvice {
     }
 
     @ExceptionHandler(Exception.class)
-    public String handleException(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, Exception e) {
+    public String handleException(HttpServletResponse response, HttpSession httpSession, Exception e) {
         log.warn("Exception occurred :{}", e.getMessage());
         try {
             sendHttpResponse(openIDConnectSdk.createClientResponse(openIDConnectSdk.errorResponse((PushedAuthorizationRequest) httpSession.getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST), OAuth2Exception.SERVER_ERROR, e.getMessage())), response);

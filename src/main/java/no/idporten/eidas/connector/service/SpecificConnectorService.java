@@ -8,11 +8,11 @@ import eu.eidas.auth.commons.tx.BinaryLightToken;
 import lombok.RequiredArgsConstructor;
 import no.idporten.eidas.connector.config.EuConnectorProperties;
 import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
-import no.idporten.eidas.connector.integration.specificcommunication.BinaryLightTokenHelper;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.OIDCRequestCache;
 import no.idporten.eidas.connector.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationServiceImpl;
+import no.idporten.eidas.lightprotocol.BinaryLightTokenHelper;
 import no.idporten.eidas.lightprotocol.messages.LightRequest;
 import no.idporten.eidas.lightprotocol.messages.RequestedAttribute;
 import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
@@ -58,9 +58,9 @@ public class SpecificConnectorService {
 
     }
 
-    public CorrelatedRequestHolder getCachedRequest(State state) {
-        CorrelatedRequestHolder correlatedRequestHolder = oidcRequestCache.get(state.getValue());
-        oidcRequestCache.remove(state.getValue());
+    public CorrelatedRequestHolder getCachedRequest(String relayState) {
+        CorrelatedRequestHolder correlatedRequestHolder = oidcRequestCache.get(relayState);
+        oidcRequestCache.remove(relayState);
         return correlatedRequestHolder;
     }
 

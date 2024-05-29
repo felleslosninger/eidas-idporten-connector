@@ -56,9 +56,9 @@ eidas:
       - profile
       - eidas:mds
     acr-values:
-      - idporten-loa-low
-      - idporten-loa-substantial
-      - idporten-loa-high
+      - eidas-loa-low
+      - eidas-loa-substantial
+      - eidas-loa-high
     clients:
       - client-id: junit
         client-secret: password
@@ -80,6 +80,6 @@ eidas:
       - http://eidas.europa.eu/LoA/substantial
       - http://eidas.europa.eu/LoA/high
     acr-value-map:
-      idporten-loa-low: "http://eidas.europa.eu/LoA/low"
-      idporten-loa-substantial: "http://eidas.europa.eu/LoA/substantial"
-      idporten-loa-high: "http://eidas.europa.eu/LoA/high"
+      eidas-loa-low: "http://eidas.europa.eu/LoA/low"
+      eidas-loa-substantial: "http://eidas.europa.eu/LoA/substantial"
+      eidas-loa-high: "http://eidas.europa.eu/LoA/high"

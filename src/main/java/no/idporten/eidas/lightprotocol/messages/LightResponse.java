@@ -12,6 +12,7 @@ import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 import java.beans.Transient;
 import java.io.Serial;
 import java.util.List;
+import java.util.Map;
 
 @XmlRootElement(namespace = "http://cef.eidas.eu/LightResponse")
 @Data
@@ -25,6 +26,13 @@ public class LightResponse implements ILightResponse {
     @Serial
     private static final long serialVersionUID = 1L;
     public static final String EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER = "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier";
+
+    public static final Map<String, String> EIDAS_EUROPA_EU_ATTRIBUTES = Map.of(
+            EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, "eidas_identifier",
+            "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName", "eidas_lastname",
+            "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName", "eidas_firstname",
+            "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth", "eidas_date_of_birth"
+    );
     @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String citizenCountryCode;
     @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")

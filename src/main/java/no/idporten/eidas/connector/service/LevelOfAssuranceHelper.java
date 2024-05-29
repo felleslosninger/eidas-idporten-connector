@@ -53,7 +53,7 @@ public class LevelOfAssuranceHelper {
                 .filter(entry -> entry.getValue().equals(eidasAcr))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElse("idporten-loa-low");
+                .orElse("eidas-loa-low");
     }
 
     public LevelOfAssurance idportenAcrToEidasAcr(String idportenAcrLevel) {
