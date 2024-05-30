@@ -19,7 +19,7 @@
 
         <div class="box__body">
             <h2>Your Selection:</h2>
-            <p><strong th:text="${selectedCountry}"></strong></p>
+            <p><strong th:text="${selectedCountry.toUpperCase()}"></strong></p>
         </div>
         <form th:action="@{/citizencountry/confirm}" th:object="${citizenForm}" th:method="post">
             <input type="hidden" name="countryId" th:value="${selectedCountry}">

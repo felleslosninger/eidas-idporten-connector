@@ -3,7 +3,6 @@ package no.idporten.eidas.connector.web;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.connector.logging.AuditService;
@@ -17,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -94,26 +92,6 @@ public class IDPortenConnectorController {
         return "redirect:/citizencountry";
     }
 
-    @PostMapping("/return")
-    public String authenticate(HttpServletRequest request,
-                               HttpServletResponse response,
-                               Model model,
-                               @Valid CitizenCountryForm authenticateForm,
-                               BindingResult bindingResult) throws IOException {
-        if (bindingResult.hasErrors()) {
-            return "eidas_idporten_connector";
-        }
-        PushedAuthorizationRequest authorizationRequest = (PushedAuthorizationRequest) request.getSession().getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST);
-        Authorization authorization = Authorization.builder()
-                .sub("NO/12345678901")
-                .acr("bob")
-                .amr("nancy")
-                .build();
-        AuthorizationResponse authorizationResponse = openIDConnectSdk.authorize(authorizationRequest, authorization);
-        request.getSession().invalidate();
-        sendHttpResponse(openIDConnectSdk.createClientResponse(authorizationResponse), response);
-        return null;
-    }
 
     @GetMapping("/cancel")
     public void cancel(HttpServletRequest request, HttpServletResponse response) throws IOException {

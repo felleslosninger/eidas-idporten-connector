@@ -15,7 +15,7 @@
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence
  */
-package no.idporten.eidas.connector.integration.specificcommunication;
+package no.idporten.eidas.lightprotocol;
 
 import eu.eidas.auth.commons.EidasStringUtil;
 import eu.eidas.auth.commons.light.impl.LightToken;

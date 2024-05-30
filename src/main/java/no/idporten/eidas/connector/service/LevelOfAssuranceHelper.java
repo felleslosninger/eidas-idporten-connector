@@ -42,17 +42,18 @@ public class LevelOfAssuranceHelper {
     }
 
     protected List<String> eidasAcrListToIdportenAcrList(List<ILevelOfAssurance> acrLevels) {
-        Map<String, String> acrValueMap = acrProperties.getAcrValueMap();
         return acrLevels.stream()
-                .map(a -> {
-                    String eidasAcr = a.getValue();
-                    return acrValueMap.entrySet().stream()
-                            .filter(entry -> entry.getValue().equals(eidasAcr))
-                            .map(Map.Entry::getKey)
-                            .findFirst()
-                            .orElse("idporten-loa-low");
-                })
+                .map(a -> eidasAcrToIdportenAcr(a.getValue()))
                 .toList();
+    }
+
+    public String eidasAcrToIdportenAcr(String eidasAcr) {
+        Map<String, String> acrValueMap = acrProperties.getAcrValueMap();
+        return acrValueMap.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(eidasAcr))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse("eidas-loa-low");
     }
 
     public LevelOfAssurance idportenAcrToEidasAcr(String idportenAcrLevel) {
