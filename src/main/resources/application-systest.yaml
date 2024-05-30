@@ -18,5 +18,24 @@ eidas:
   eu-connector:
     redirect-uri: https://connector.eidasnode.dev/SpecificConnectorRequest
   cache:
-    response-secret: ${LIGHT_TOKEN_CONNECTORSERVICE_RESPONSE_SECRET}
-    request-secret: ${LIGHT_TOKEN_CONNECTORSERVICE_REQUEST_SECRET}
+    response-secret: ${LIGHT_TOKEN_CONNECTOR_RESPONSE_SECRET}
+    request-secret: ${LIGHT_TOKEN_CONNECTOR_REQUEST_SECRET}
+  oidc-server:
+    issuer: http://idporten-connector.eidasnode.dev
+    clients:
+      - client-id: idporten
+        client-secret: ${CLIENT_SECRET_IDPORTEN_SYSTEST_CLIENT_SECRET_BASIC}
+        scopes:
+          - openid
+        redirect-uris:
+          - https://login.idporten.dev/authorize/callback/testid
+      - client-id: testclient
+        client-secret: password
+        scopes:
+          - openid
+          - profile
+        redirect-uris:
+          - http://localhost:8888/idporten-oidc-client/authorize/response
+          - http://127.0.0.1:8888/idporten-oidc-client/authorize/response
+          - http://localhost:8888/authorize/response
+          - http://127.0.0.1:8888/authorize/response
