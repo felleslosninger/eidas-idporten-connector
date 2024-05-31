@@ -30,12 +30,9 @@ eidas:
         redirect-uris:
           - https://login.idporten.dev/authorize/callback/testid
       - client-id: testclient
-        client-secret: password
+        client-secret: ${CLIENT_SECRET_EIDAS_SYSTEST}
         scopes:
           - openid
           - profile
         redirect-uris:
-          - http://localhost:8888/idporten-oidc-client/authorize/response
-          - http://127.0.0.1:8888/idporten-oidc-client/authorize/response
-          - http://localhost:8888/authorize/response
-          - http://127.0.0.1:8888/authorize/response
+          - https://test-client.tools.idporten.dev/authorize/response
