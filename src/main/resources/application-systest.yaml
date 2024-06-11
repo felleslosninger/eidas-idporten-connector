@@ -21,7 +21,7 @@ eidas:
     response-secret: ${LIGHT_TOKEN_CONNECTOR_RESPONSE_SECRET}
     request-secret: ${LIGHT_TOKEN_CONNECTOR_REQUEST_SECRET}
   oidc-server:
-    issuer: http://idporten-connector.eidasnode.dev
+    issuer: https://idporten-connector.eidasnode.dev
     clients:
       - client-id: idporten
         client-secret: ${CLIENT_SECRET_IDPORTEN_SYSTEST_CLIENT_SECRET_BASIC}
