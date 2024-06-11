@@ -2,6 +2,8 @@ name: eidas
 networks:
   eidas:
     name: eidas
+  idporten:
+    name: idporten
 
 services:
   redis:
@@ -23,10 +25,11 @@ services:
       spring_profiles_active: local-docker
       OTEL_SDK_DISABLED: "true"
     ports:
-      - "8088:8080"
+      - "8088:8086"
       - "5099:5006"
     networks:
       - eidas
+      - idporten
     entrypoint: "/bin/bash -c"
     command:
       - |
