@@ -33,6 +33,7 @@ eidas:
         redirect-uris:
           - http://127.0.0.1:7070/authorize/callback/testid
           - http://127.0.0.1:7070/authorize/callback/testid1
+          - http://idporten:7070/authorize/callback/eidas
       - client-id: testclient
         client-secret: password
         scopes:
@@ -43,6 +44,10 @@ eidas:
           - http://127.0.0.1:8888/idporten-oidc-client/authorize/response
           - http://localhost:8888/authorize/response
           - http://127.0.0.1:8888/authorize/response
+          - http://testclient:8888/authorize/response
+          - http://idporten:7070/authorize/callback/eidas
   cache:
     response-secret: mySecretConnectorResponse
     request-secret: mySecretConnectorRequest
+server:
+  port: 8086
