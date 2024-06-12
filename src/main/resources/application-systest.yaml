@@ -28,7 +28,7 @@ eidas:
         scopes:
           - openid
         redirect-uris:
-          - https://login.idporten.dev/authorize/callback/testid
+          - https://login.idporten.dev/authorize/callback/eidas
       - client-id: testclient
         client-secret: ${CLIENT_SECRET_EIDAS_SYSTEST}
         scopes:
