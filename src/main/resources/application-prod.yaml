@@ -1,0 +1,22 @@
+---
+spring:
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+      port: 6379
+      host: eidas-redis-sentinel-master
+eidas:
+  eu-connector:
+    redirect-uri: https://idporten-connector.eidasnode.no/SpecificConnectorRequest
+  cache:
+    response-secret: ${LIGHT_TOKEN_CONNECTOR_RESPONSE_SECRET}
+    request-secret: ${LIGHT_TOKEN_CONNECTOR_REQUEST_SECRET}
+  oidc-server:
+    issuer: https://idporten-connector.eidasnode.no
+    clients:
+      - client-id: idporten
+        client-secret: ${CLIENT_SECRET_IDPORTEN_PROD_CLIENT_SECRET_BASIC}
+        scopes:
+          - openid
+        redirect-uris:
+          - https://login.idporten.no/authorize/callback/testid
