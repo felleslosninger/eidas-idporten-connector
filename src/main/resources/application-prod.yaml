@@ -1,7 +1,5 @@
 ---
 spring:
-  application:
-    environment: prod
   data:
     redis:
       password: ${REDIS_PASSWORD}
