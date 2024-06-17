@@ -25,7 +25,7 @@
         <idporten-actuator-starter.version>1.2.0</idporten-actuator-starter.version>
         <nimbus.oauth2-oidc-sdk.version>11.10.1</nimbus.oauth2-oidc-sdk.version>
         <joda-time.version>2.12.7</joda-time.version>
-        <idporten-oidc-server-redis-cache-starter.version>0.1.0</idporten-oidc-server-redis-cache-starter.version>
+        <idporten-oidc-server-redis-cache-starter.version>0.1.1</idporten-oidc-server-redis-cache-starter.version>
     </properties>
     <dependencies>
 
