@@ -36,8 +36,7 @@ eidas:
         scopes:
           - openid
         redirect-uris:
-          - http://127.0.0.1:7070/authorize/callback/testid
-          - http://127.0.0.1:7070/authorize/callback/testid1
+          - http://127.0.0.1:7070/authorize/callback/eidas
       - client-id: testclient
         client-secret: password
         scopes:

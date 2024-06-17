@@ -19,4 +19,4 @@ eidas:
         scopes:
           - openid
         redirect-uris:
-          - https://login.idporten.no/authorize/callback/testid
+          - https://login.idporten.no/authorize/callback/eidas
