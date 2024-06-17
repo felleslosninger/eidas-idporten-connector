@@ -7,7 +7,7 @@ spring:
       host: eidas-redis-sentinel-master
 eidas:
   eu-connector:
-    redirect-uri: https://idporten-connector.eidasnode.no/SpecificConnectorRequest
+    redirect-uri: https://connector.eidasnode.no/SpecificConnectorRequest
   cache:
     response-secret: ${LIGHT_TOKEN_CONNECTOR_RESPONSE_SECRET}
     request-secret: ${LIGHT_TOKEN_CONNECTOR_REQUEST_SECRET}
