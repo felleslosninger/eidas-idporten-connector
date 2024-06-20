@@ -11,7 +11,6 @@ import no.idporten.eidas.connector.integration.specificcommunication.caches.Corr
 import no.idporten.eidas.connector.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.connector.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationService;
-import no.idporten.eidas.connector.service.LevelOfAssuranceHelper;
 import no.idporten.eidas.connector.service.SpecificConnectorService;
 import no.idporten.eidas.lightprotocol.BinaryLightTokenHelper;
 import no.idporten.eidas.lightprotocol.IncomingLightResponseValidator;
@@ -20,10 +19,12 @@ import no.idporten.sdk.oidcserver.OpenIDConnectIntegration;
 import no.idporten.sdk.oidcserver.protocol.Authorization;
 import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
 import no.idporten.sdk.oidcserver.protocol.RedirectedResponse;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -52,9 +53,6 @@ class ConnectorResponseControllerTest {
     private OpenIDConnectIntegration openIDConnectSdk;
 
     @MockBean
-    private LevelOfAssuranceHelper levelOfAssuranceHelper;
-
-    @MockBean
     private SpecificConnectorService specificConnectorService;
     @MockBean
     private EidasCacheProperties eidasCacheProperties;
@@ -64,19 +62,22 @@ class ConnectorResponseControllerTest {
     private ILightResponse mockLightResponse;
     private State state;
 
-    @BeforeAll
-    static void setup() {
-        String tokenBase64 = "mockedTokenBase64";
-        mockStatic(BinaryLightTokenHelper.class);
-        mockStatic(IncomingLightResponseValidator.class);
-        when(BinaryLightTokenHelper.getBinaryToken(any(HttpServletRequest.class), eq(EidasParameterKeys.TOKEN.toString()))).thenReturn(tokenBase64);
-        when(BinaryLightTokenHelper.getBinaryLightTokenId(eq(tokenBase64), any(), any())).thenReturn(lightTokenId);
-        when(IncomingLightResponseValidator.validate(any(ILightResponse.class))).thenReturn(true);
-    }
+    private static MockedStatic<BinaryLightTokenHelper> binaryLightTokenHelperMock;
+    private static MockedStatic<IncomingLightResponseValidator> incomingLightResponseValidatorMock;
+
 
     @BeforeEach
     void setupEach() {
+        // Mock the static methods using try-with-resources
+        binaryLightTokenHelperMock = Mockito.mockStatic(BinaryLightTokenHelper.class);
+        incomingLightResponseValidatorMock = Mockito.mockStatic(IncomingLightResponseValidator.class);
+
+        String tokenBase64 = "mockedTokenBase64";
         mockLightResponse = mock(ILightResponse.class);
+        // Mock static method behaviors
+        binaryLightTokenHelperMock.when(() -> BinaryLightTokenHelper.getBinaryToken(any(HttpServletRequest.class), eq(EidasParameterKeys.TOKEN.toString()))).thenReturn(tokenBase64);
+        binaryLightTokenHelperMock.when(() -> BinaryLightTokenHelper.getBinaryLightTokenId(eq(tokenBase64), any(), any())).thenReturn(lightTokenId);
+        incomingLightResponseValidatorMock.when(() -> IncomingLightResponseValidator.validate(any(ILightResponse.class))).thenReturn(true);
 
         state = new State("123q");
         when(mockLightResponse.getRelayState()).thenReturn("relayState");
@@ -95,6 +96,7 @@ class ConnectorResponseControllerTest {
         RedirectedResponse clientResponse = mock(RedirectedResponse.class);
         when(clientResponse.toQueryRedirectUri()).thenReturn(new URI("http//junit?client_id=123&request_uri=http://redirect-url.com"));
         PushedAuthorizationRequest authorizationRequest = mock(PushedAuthorizationRequest.class);
+        when(specificConnectorService.getAuthorization(eq(lightResponse))).thenReturn(mock(Authorization.class));
         when(openIDConnectSdk.authorize(eq(authorizationRequest), any(Authorization.class))).thenReturn(mock(no.idporten.sdk.oidcserver.protocol.AuthorizationResponse.class));
         when(openIDConnectSdk.createClientResponse(any(no.idporten.sdk.oidcserver.protocol.AuthorizationResponse.class))).thenReturn(clientResponse);
         mockMvc.perform(post("/ConnectorResponse")
@@ -138,6 +140,13 @@ class ConnectorResponseControllerTest {
                 .status(Status.builder().statusCode(EIDASStatusCode.SUCCESS_URI.getValue()).failure(false).statusMessage("ok").build())
                 .build();
         return lightResponse;
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Ensure that the static mocks are closed after each test
+        binaryLightTokenHelperMock.close();
+        incomingLightResponseValidatorMock.close();
     }
 
 }

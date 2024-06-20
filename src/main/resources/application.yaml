@@ -97,7 +97,12 @@ eidas:
     algorithm: SHA-256
     light-response-lifetime-seconds: 120
     oidc-request-state-lifetime-seconds: 700
-
+  freg-gw:
+    enabled: true
+    read-timeout-ms: 5000
+    connect-timeout-ms: 5000
+    base-uri: http://eidas-freg-gateway-service:8080
+    api-key: ${FREG_GW_API_KEY}
 digdir:
   audit:
     application-name: ${spring.application.name}

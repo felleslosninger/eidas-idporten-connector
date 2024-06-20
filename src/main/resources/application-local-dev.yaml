@@ -46,6 +46,8 @@ eidas:
           - http://127.0.0.1:8888/idporten-oidc-client/authorize/response
           - http://localhost:8888/authorize/response
           - http://127.0.0.1:8888/authorize/response
-
+  freg-gw:
+    base-uri: http://localhost:7799
+    api-key: addf4903-9b76-47ca-b6f5-beb937cab8bb
   cache:
     secret: mySecretConnectorRequest

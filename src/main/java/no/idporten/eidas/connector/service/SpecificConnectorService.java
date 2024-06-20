@@ -6,36 +6,46 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.tx.BinaryLightToken;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import no.idporten.eidas.connector.config.EidasClaims;
 import no.idporten.eidas.connector.config.EuConnectorProperties;
+import no.idporten.eidas.connector.exceptions.ErrorCodes;
 import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
+import no.idporten.eidas.connector.integration.freggateway.service.MatchingServiceClient;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.OIDCRequestCache;
 import no.idporten.eidas.connector.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationServiceImpl;
 import no.idporten.eidas.lightprotocol.BinaryLightTokenHelper;
 import no.idporten.eidas.lightprotocol.messages.LightRequest;
+import no.idporten.eidas.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.lightprotocol.messages.RequestedAttribute;
+import no.idporten.sdk.oidcserver.protocol.Authorization;
 import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+
+import static no.idporten.eidas.connector.config.EidasClaims.*;
 
 /**
  * The main service
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SpecificConnectorService {
-    private final EuConnectorProperties euConnectorProperties;
 
+    protected static final String EIDAS_AMR = "eidas";
+    protected static final String PID_CLAIM = "pid";
+
+    private final EuConnectorProperties euConnectorProperties;
     private final SpecificCommunicationServiceImpl specificCommunicationServiceImpl;
     private final LevelOfAssuranceHelper levelOfAssuranceHelper;
     private final OIDCRequestCache oidcRequestCache;
-    private static final String FAMILY_NAME = "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName";
-    private static final String FIRST_NAME = "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName";
-    private static final String DATE_OF_BIRTH = "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth";
-    private static final String PID = "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier";
+    private final Optional<MatchingServiceClient> matchingServiceClient;
 
     public String getEuConnectorRedirectUri() {
         return euConnectorProperties.getRedirectUri();
@@ -55,7 +65,6 @@ public class SpecificConnectorService {
                         codeVerifier));
         oidcRequestCache.put(lightRequest.getRelayState(), correlatedRequestHolder);
         return lightRequest.getRelayState();
-
     }
 
     public CorrelatedRequestHolder getCachedRequest(String relayState) {
@@ -70,19 +79,57 @@ public class SpecificConnectorService {
                 .id(UUID.randomUUID().toString())
                 .citizenCountryCode(citizenCountryCode.toUpperCase())
                 .requestedAttributes(List.of(
-                        RequestedAttribute.builder().definition(FAMILY_NAME).build(),
-                        RequestedAttribute.builder().definition(FIRST_NAME).build(),
-                        RequestedAttribute.builder().definition(DATE_OF_BIRTH).build(),
-                        RequestedAttribute.builder().definition(PID).build()
+                        RequestedAttribute.builder().definition(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME).build(),
+                        RequestedAttribute.builder().definition(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME).build(),
+                        RequestedAttribute.builder().definition(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH).build(),
+                        RequestedAttribute.builder().definition(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER).build()
                 ))
-                //todo støtte mer enn en acr level
+                //todo støtte mer enn en acr level https://digdir.atlassian.net/browse/ID-4449
                 .levelOfAssurance(levelOfAssuranceHelper.idportenAcrToEidasAcr(pushedAuthorizationRequest.getAcrValues().getFirst()))
                 .issuer(euConnectorProperties.getIssuer())
                 .relayState(UUID.randomUUID().toString())
                 .spType("public")
                 .build();
-
     }
 
+    protected Map<String, String> extractEidasClaims(LightResponse lightResponse) {
+        Map<String, String> eidasClaims = new HashMap<>();
+        lightResponse.getAttributesList().forEach(attribute -> {
+            String definition = attribute.getDefinition();
+            if (StringUtils.isNotEmpty(definition) && !CollectionUtils.isEmpty(attribute.getValue())) {
+                eidasClaims.put(getAttributeName(definition), attribute.getValue().getFirst());
+            }
+        });
+        if (!EIDASIdentifier.isValid(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM))) {
+            log.error("Invalid or missing personidentifier was missing from foreign IDP {}.", eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM));
+            throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Invalid or missing personidentifier was missing from foreign IDP.");
+        }
+        return eidasClaims;
+    }
 
+    protected Optional<String> matchUser(Map<String, String> eidasClaims) {
+        if (matchingServiceClient.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return matchingServiceClient.get().match(new EIDASIdentifier(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)),
+                eidasClaims.get(IDPORTEN_EIDAS_DATE_OF_BIRTH_CLAIM));
+    }
+
+    private String getAttributeName(String definition) {
+        return EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES.get(definition);
+    }
+
+    public Authorization getAuthorization(LightResponse lightResponse) {
+        Map<String, String> eidasClaims = extractEidasClaims(lightResponse);
+        Authorization.AuthorizationBuilder authorizationBuilder = Authorization.builder()
+                .acr(levelOfAssuranceHelper.eidasAcrToIdportenAcr(lightResponse.getLevelOfAssurance()))
+                .amr(EIDAS_AMR);
+
+        eidasClaims.forEach(authorizationBuilder::attribute);
+        Optional<String> userMatch = matchUser(eidasClaims);
+        userMatch.ifPresentOrElse(s -> authorizationBuilder.attribute(PID_CLAIM, s).sub(s),
+                () -> authorizationBuilder.sub(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)));
+        return authorizationBuilder.build();
+    }
 }
