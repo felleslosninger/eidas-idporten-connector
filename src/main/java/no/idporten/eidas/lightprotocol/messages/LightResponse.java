@@ -7,12 +7,12 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.*;
 import lombok.*;
+import no.idporten.eidas.connector.config.EidasClaims;
 import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 
 import java.beans.Transient;
 import java.io.Serial;
 import java.util.List;
-import java.util.Map;
 
 @XmlRootElement(namespace = "http://cef.eidas.eu/LightResponse")
 @Data
@@ -25,14 +25,7 @@ import java.util.Map;
 public class LightResponse implements ILightResponse {
     @Serial
     private static final long serialVersionUID = 1L;
-    public static final String EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER = "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier";
 
-    public static final Map<String, String> EIDAS_EUROPA_EU_ATTRIBUTES = Map.of(
-            EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, "eidas_identifier",
-            "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName", "eidas_lastname",
-            "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName", "eidas_firstname",
-            "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth", "eidas_date_of_birth"
-    );
     @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
     private String citizenCountryCode;
     @XmlElement(namespace = "http://cef.eidas.eu/LightResponse")
@@ -108,7 +101,7 @@ public class LightResponse implements ILightResponse {
 
         // Attempt to extract the PID based on predefined format and validation rules
         return getAttributesList().stream()
-                .filter(attribute -> EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER.equals(attribute.getDefinition()))
+                .filter(attribute -> EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER.equals(attribute.getDefinition()))
                 .map(Attribute::getValue)
                 .filter(values -> !values.isEmpty())
                 .map(List::getFirst)

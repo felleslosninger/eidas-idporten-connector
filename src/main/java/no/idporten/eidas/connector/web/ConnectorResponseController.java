@@ -14,16 +14,13 @@ import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.connector.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationService;
-import no.idporten.eidas.connector.service.LevelOfAssuranceHelper;
 import no.idporten.eidas.connector.service.SpecificConnectorService;
 import no.idporten.eidas.lightprotocol.BinaryLightTokenHelper;
 import no.idporten.eidas.lightprotocol.IncomingLightResponseValidator;
 import no.idporten.eidas.lightprotocol.messages.LightResponse;
 import no.idporten.sdk.oidcserver.OpenIDConnectIntegration;
 import no.idporten.sdk.oidcserver.protocol.*;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -36,11 +33,11 @@ import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUT
 @Controller
 @RequiredArgsConstructor
 public class ConnectorResponseController {
-    private static final String EIDAS_AMR = "eidas";
+
     private final SpecificCommunicationService specificCommunicationService;
     private final EidasCacheProperties eidasCacheProperties;
     private final OpenIDConnectIntegration openIDConnectSdk;
-    private final LevelOfAssuranceHelper levelOfAssuranceHelper;
+
     private final SpecificConnectorService specificConnectorService;
 
     @RequestMapping(path = "/ConnectorResponse", method = {RequestMethod.GET, RequestMethod.POST})
@@ -62,32 +59,17 @@ public class ConnectorResponseController {
         } else {
             throw new SpecificConnectorException(ErrorCodes.INVALID_REQUEST.getValue(), "IDP reported an error status: %s.".formatted(iLightResponse.getStatus()));
         }
-
     }
 
     private String returnAuthorizationCode(HttpServletRequest request, HttpServletResponse response, LightResponse lightResponse) throws IOException {
         PushedAuthorizationRequest authorizationRequest = (PushedAuthorizationRequest) request.getSession().getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST);
-        Authorization.AuthorizationBuilder authorizationBuilder = Authorization.builder()
-                .sub(lightResponse.getPid())
-                .acr(levelOfAssuranceHelper.eidasAcrToIdportenAcr(lightResponse.getLevelOfAssurance()))
-                .amr(EIDAS_AMR);
-
-        lightResponse.getAttributesList().forEach(attribute -> {
-            String definition = attribute.getDefinition();
-            if (StringUtils.isNotEmpty(definition) && !CollectionUtils.isEmpty(attribute.getValue())) {
-                authorizationBuilder.attribute(getAttributeName(definition), attribute.getValue().getFirst());
-            }
-        });
-
-        AuthorizationResponse authorizationResponse = openIDConnectSdk.authorize(authorizationRequest, authorizationBuilder.build());
+        Authorization authorization = specificConnectorService.getAuthorization(lightResponse);
+        AuthorizationResponse authorizationResponse = openIDConnectSdk.authorize(authorizationRequest, authorization);
         request.getSession().invalidate();
         sendHttpResponse(openIDConnectSdk.createClientResponse(authorizationResponse), response);
         return null;
     }
 
-    private String getAttributeName(String definition) {
-        return LightResponse.EIDAS_EUROPA_EU_ATTRIBUTES.get(definition);
-    }
 
     private ILightResponse getIncomingiLightResponse(@Nonnull HttpServletRequest request, final Collection<AttributeDefinition<?>> registry) {
         final String lightTokenId = getLightTokenId(request);

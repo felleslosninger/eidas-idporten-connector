@@ -48,5 +48,8 @@ eidas:
   cache:
     response-secret: mySecretConnectorResponse
     request-secret: mySecretConnectorRequest
+  freg-gw:
+    base-uri: http://freg-gateway:8080
+    api-key: addf4903-9b76-47ca-b6f5-beb937cab8bb
 server:
   port: 8086

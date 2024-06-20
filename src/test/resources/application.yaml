@@ -83,3 +83,10 @@ eidas:
       eidas-loa-low: "http://eidas.europa.eu/LoA/low"
       eidas-loa-substantial: "http://eidas.europa.eu/LoA/substantial"
       eidas-loa-high: "http://eidas.europa.eu/LoA/high"
+  freg-gw:
+    enabled: true
+    read-timeout-ms: 50000
+    connect-timeout-ms: 1000
+    base-uri: http://localhost:8080/
+    api-key: 123
+
