@@ -1,6 +1,7 @@
 package no.idporten.eidas.connector.service;
 
 import eu.eidas.auth.commons.EIDASStatusCode;
+import no.idporten.eidas.connector.config.EidasClaims;
 import no.idporten.eidas.connector.config.EuConnectorProperties;
 import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 import no.idporten.eidas.connector.integration.freggateway.service.MatchingServiceClient;
@@ -54,8 +55,17 @@ class SpecificConnectorServiceTest {
     void testGetAuthorizationWithPid() {
         LightResponse lightResponse = getLightResponse("relayState");
         Authorization authorization = specificConnectorService.getAuthorization(lightResponse);
-        assertTrue(authorization.getAttributes().containsKey(PID_CLAIM));
-        assertEquals(authorization.getAttributes().get(PID_CLAIM), authorization.getSub());
+        assertAll("all claims are present", () ->
+                        assertTrue(authorization.getAttributes().containsKey(PID_CLAIM)),
+                () -> assertEquals(authorization.getAttributes().get(PID_CLAIM), authorization.getSub()),
+                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)),
+                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_DATE_OF_BIRTH_CLAIM)),
+                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_FAMILY_NAME_CLAIM)),
+                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_GIVEN_NAME_CLAIM)),
+                () -> assertTrue(authorization.getAttributes().containsKey(PID_CLAIM)),
+                () -> assertEquals(authorization.getAttributes().get(PID_CLAIM), authorization.getSub())
+        );
+
     }
 
     @Test
