@@ -29,7 +29,7 @@ public class FregConfiguration {
 
         return RestClient.builder()
                 .requestFactory(requestFactory)
-                .defaultHeader(HttpHeaders.ACCEPT, "%s+%s".formatted(MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE))
+                .defaultHeader(HttpHeaders.ACCEPT, "%s,%s".formatted(MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE))
                 .defaultHeader("X-API-KEY", fregProperties.getApiKey())
                 .defaultHeader("Client-Id", "eidas-idporten-connector-%s".formatted(environment))
                 .baseUrl(fregProperties.getBaseUri().toString());
