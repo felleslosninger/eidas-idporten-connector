@@ -1,6 +1,5 @@
 package no.idporten.eidas.connector.service;
 
-import eu.eidas.auth.commons.light.ILevelOfAssurance;
 import lombok.RequiredArgsConstructor;
 import no.idporten.eidas.connector.config.AcrProperties;
 import no.idporten.eidas.lightprotocol.messages.LevelOfAssurance;
@@ -41,7 +40,7 @@ public class LevelOfAssuranceHelper {
         return acrProperties.getSupportedAcrValues().contains(returnedAcr);
     }
 
-    protected List<String> eidasAcrListToIdportenAcrList(List<ILevelOfAssurance> acrLevels) {
+    protected List<String> eidasAcrListToIdportenAcrList(List<LevelOfAssurance> acrLevels) {
         return acrLevels.stream()
                 .map(a -> eidasAcrToIdportenAcr(a.getValue()))
                 .toList();
@@ -56,13 +55,9 @@ public class LevelOfAssuranceHelper {
                 .orElse("eidas-loa-low");
     }
 
-    public LevelOfAssurance idportenAcrToEidasAcr(String idportenAcrLevel) {
-        return LevelOfAssurance.fromString(acrProperties.getAcrValueMap().get(idportenAcrLevel));
-    }
-
     public List<LevelOfAssurance> idportenAcrListToEidasAcr(List<String> idportenAcrLevel) {
         return idportenAcrLevel.stream()
-                .map(acr -> LevelOfAssurance.fromString(acrProperties.getAcrValueMap().get(acr)))
+                .map(acr -> new LevelOfAssurance(acrProperties.getAcrValueMap().get(acr)))
                 .toList();
     }
 }

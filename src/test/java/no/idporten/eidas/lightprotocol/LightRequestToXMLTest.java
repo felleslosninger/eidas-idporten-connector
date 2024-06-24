@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Fail.fail;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LightRequestToXMLTest {
 
@@ -18,7 +17,7 @@ class LightRequestToXMLTest {
     void testSerializeToXML() {
         LightRequest lightRequest = LightRequest.builder()
                 .id("123")
-                .levelOfAssurance(LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW))
+                .levelOfAssurance(List.of(new LevelOfAssurance(LevelOfAssurance.EIDAS_LOA_LOW), new LevelOfAssurance(LevelOfAssurance.EIDAS_LOA_HIGH)))
                 .issuer("issuer")
                 .requestedAttributes(List.of(new RequestedAttribute("name", "first_name")))
                 .citizenCountryCode("NO")
@@ -27,8 +26,22 @@ class LightRequestToXMLTest {
                 .build();
         try {
             String xml = LightRequestToXML.toXml(lightRequest);
-            assertNotNull(xml);
-            assertFalse(xml.contains("ns2:"), "should not include any namespace prefix (ns2:)");
+            assertAll("Check xml",
+                    () -> assertNotNull(xml),
+                    () -> assertFalse(xml.contains("ns2:"), "should not include any namespace prefix (ns2:)"),
+                    () -> assertTrue(xml.contains("levelOfAssurance"), "should include element levelOfAssurance"),
+                    () -> assertTrue(xml.contains("123"), "should include id"),
+                    () -> assertTrue(xml.contains("issuer"), "should include issuer"),
+                    () -> assertTrue(xml.contains("NO"), "should include citizenCountryCode"),
+                    () -> assertTrue(xml.contains("123"), "should include relayState"),
+                    () -> assertTrue(xml.contains("requester_id"), "should include requesterId"),
+                    () -> assertTrue(xml.contains("first_name"), "should include requested attribute first_name"),
+                    () -> assertTrue(xml.contains("name"), "should include requested attribute name"),
+                    () -> assertTrue(xml.contains(LevelOfAssurance.EIDAS_LOA_LOW), "should include level of assurance LOW"),
+                    () -> assertTrue(xml.contains(LevelOfAssurance.EIDAS_LOA_HIGH), "should include level of assurance HIGH")
+            );
+
+
         } catch (JAXBException e) {
             fail("Failed to serialize to XML %s : %s: %s", e.getErrorCode(), e.getMessage(), e.getCause());
         }
