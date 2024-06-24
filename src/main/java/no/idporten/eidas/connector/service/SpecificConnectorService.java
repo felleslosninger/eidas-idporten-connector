@@ -84,8 +84,7 @@ public class SpecificConnectorService {
                         RequestedAttribute.builder().definition(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH).build(),
                         RequestedAttribute.builder().definition(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER).build()
                 ))
-                //todo støtte mer enn en acr level https://digdir.atlassian.net/browse/ID-4449
-                .levelOfAssurance(levelOfAssuranceHelper.idportenAcrToEidasAcr(pushedAuthorizationRequest.getAcrValues().getFirst()))
+                .levelOfAssurance(levelOfAssuranceHelper.idportenAcrListToEidasAcr(pushedAuthorizationRequest.getAcrValues()))
                 .issuer(euConnectorProperties.getIssuer())
                 .relayState(UUID.randomUUID().toString())
                 .spType("public")

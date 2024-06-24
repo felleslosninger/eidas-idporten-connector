@@ -8,6 +8,7 @@ import jakarta.xml.bind.annotation.*;
 import lombok.*;
 
 import java.io.Serial;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "lightRequest", namespace = "http://cef.eidas.eu/LightRequest")
@@ -25,7 +26,7 @@ public class LightRequest implements ILightRequest {
     private String citizenCountryCode;
     private String id;
     private String issuer;
-    private LevelOfAssurance levelOfAssurance;
+    private List<LevelOfAssurance> levelOfAssurance;
     private String relayState;
     private String providerName;
     private String spType;
@@ -52,12 +53,12 @@ public class LightRequest implements ILightRequest {
 
     @Override
     public String getLevelOfAssurance() {
-        return levelOfAssurance.getValue();
+        return levelOfAssurance.getFirst().getValue();
     }
 
     @Override
     public List<ILevelOfAssurance> getLevelsOfAssurance() {
-        return List.of(levelOfAssurance);
+        return new ArrayList<>(levelOfAssurance);
     }
 
     @Nonnull
