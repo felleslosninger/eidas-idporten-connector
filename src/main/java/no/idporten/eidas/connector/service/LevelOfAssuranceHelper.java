@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Representation of Level of Assurance
@@ -52,12 +53,18 @@ public class LevelOfAssuranceHelper {
                 .filter(entry -> entry.getValue().equals(eidasAcr))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElse("eidas-loa-low");
+                .orElseThrow(() -> new IllegalArgumentException("No mapping found for eidas acr %s".formatted(eidasAcr)));
+    }
+
+    public LevelOfAssurance idportenAcrToEidasAcr(String idportenAcrLevel) {
+        return new LevelOfAssurance(Optional.of(acrProperties.getAcrValueMap()
+                        .get(idportenAcrLevel))
+                .orElseThrow(() -> new IllegalArgumentException("No mapping found for idporten acr %s".formatted(idportenAcrLevel))));
     }
 
     public List<LevelOfAssurance> idportenAcrListToEidasAcr(List<String> idportenAcrLevel) {
         return idportenAcrLevel.stream()
-                .map(acr -> new LevelOfAssurance(acrProperties.getAcrValueMap().get(acr)))
+                .map(this::idportenAcrToEidasAcr)
                 .toList();
     }
 }
