@@ -51,5 +51,7 @@ eidas:
   freg-gw:
     base-uri: http://freg-gateway:8080
     api-key: addf4903-9b76-47ca-b6f5-beb937cab8bb
+    demo-country-code-map:
+      CA: SWE
 server:
   port: 8086

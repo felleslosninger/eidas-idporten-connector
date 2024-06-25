@@ -22,3 +22,6 @@ eidas:
           - openid
         redirect-uris:
           - https://login.test.idporten.no/authorize/callback/eidas
+  freg-gw:
+    demo-country-code-map:
+      CA: SWE

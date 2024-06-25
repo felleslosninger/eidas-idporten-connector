@@ -16,9 +16,10 @@ import java.util.Optional;
 public class MatchingServiceClient {
 
     private final RestClient.Builder fregGatewayEndpointBuilder;
+    private final CountryCodeConverter countryCodeConverter;
 
     public Optional<String> match(EIDASIdentifier eidasIdentifier, String birthdate) {
-        String isoAlpha3CountryCode = CountryCodeConverter.getISOAlpha3CountryCode(eidasIdentifier.getSubjectCountryCode());
+        String isoAlpha3CountryCode = countryCodeConverter.getISOAlpha3CountryCode(eidasIdentifier.getSubjectCountryCode());
         return fregGatewayEndpointBuilder.build().get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/eidas/entydig")
