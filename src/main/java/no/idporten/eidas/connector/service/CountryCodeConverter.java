@@ -1,17 +1,24 @@
 package no.idporten.eidas.connector.service;
 
 import com.ibm.icu.util.ULocale;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.Optional;
+
+@Component
+@RequiredArgsConstructor
 public class CountryCodeConverter {
 
-    //we fake the country code for the demo land to be sweden for now
-    public static final String DEMOLAND = "CA";
+    private final Optional<Map<String, String>> demoCountryCodeMap;
 
-    public static String getISOAlpha3CountryCode(String countryCode) {
-        if (DEMOLAND.equals(countryCode)) {
-            return "SWE";
+    public String getISOAlpha3CountryCode(String countryCode) {
+        if (demoCountryCodeMap.isPresent() && demoCountryCodeMap.get().containsKey(countryCode)) {
+            return demoCountryCodeMap.get().get(countryCode);
         }
+
         if (StringUtils.isNotEmpty(countryCode) && countryCode.length() == 2) {
             ULocale locale = new ULocale("und-" + countryCode);
             return locale.getISO3Country();

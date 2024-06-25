@@ -89,4 +89,5 @@ eidas:
     connect-timeout-ms: 1000
     base-uri: http://localhost:8080/
     api-key: 123
-
+    demo-country-code-map:
+      CA: SWE

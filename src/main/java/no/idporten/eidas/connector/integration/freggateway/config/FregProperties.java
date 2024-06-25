@@ -7,9 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.codehaus.commons.nullanalysis.NotNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
 import java.net.URI;
+import java.util.Map;
 
 @Data
 @Validated
@@ -30,11 +32,17 @@ public class FregProperties implements InitializingBean {
     @Min(1)
     private long readTimeoutMs;
 
+    private Map<String, String> demoCountryCodeMap;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         log.info("FregProperties enabled and initialized with apiKey: {}, baseUri: {}, connectTimeoutMs: {}, readTimeoutMs: {}",
                 maskString(apiKey), baseUri, connectTimeoutMs, readTimeoutMs);
+        if (!CollectionUtils.isEmpty(this.demoCountryCodeMap)) {
+            log.info("Loaded Demo Country Map properties: {}", this.demoCountryCodeMap.entrySet());
+        }
     }
+
 
     public static String maskString(String input) {
         if (input == null || input.length() <= 3) {
