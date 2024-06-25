@@ -87,8 +87,6 @@ eidas:
       - profile
       - eidas:mds
     acr-values:
-      - eidas-loa-low
-      - eidas-loa-substantial
       - eidas-loa-high
   lightprotocol-cache:
     response-issuer-name: specificCommunicationDefinitionProxyserviceResponse
