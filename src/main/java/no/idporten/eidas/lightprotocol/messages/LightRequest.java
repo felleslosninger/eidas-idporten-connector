@@ -6,6 +6,8 @@ import eu.eidas.auth.commons.light.ILightRequest;
 import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.*;
 import lombok.*;
+import no.idporten.sdk.oidcserver.protocol.AuditData;
+import no.idporten.sdk.oidcserver.protocol.AuditDataProvider;
 
 import java.io.Serial;
 import java.util.ArrayList;
@@ -20,7 +22,7 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 @XmlType
-public class LightRequest implements ILightRequest {
+public class LightRequest implements ILightRequest, AuditDataProvider {
     @Serial
     private static final long serialVersionUID = 1L;
     private String citizenCountryCode;
@@ -67,5 +69,16 @@ public class LightRequest implements ILightRequest {
     }
 
 
+    @Override
+    public AuditData getAuditData() {
+        return AuditData.builder()
+                .attribute("id", id)
+                .attribute("relay_state", relayState)
+                .attribute("citizen_country_code", citizenCountryCode)
+                .attribute("level_of_assurance", levelOfAssurance)
+                .attribute("sp_country_code", spCountryCode)
+                .attribute("requested_attributes", requestedAttributes)
+                .build();
+    }
 }
 

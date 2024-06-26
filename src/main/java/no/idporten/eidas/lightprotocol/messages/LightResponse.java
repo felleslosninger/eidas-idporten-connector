@@ -9,6 +9,8 @@ import jakarta.xml.bind.annotation.*;
 import lombok.*;
 import no.idporten.eidas.connector.config.EidasClaims;
 import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
+import no.idporten.sdk.oidcserver.protocol.AuditData;
+import no.idporten.sdk.oidcserver.protocol.AuditDataProvider;
 
 import java.beans.Transient;
 import java.io.Serial;
@@ -22,7 +24,7 @@ import java.util.List;
 @Builder
 @ToString(exclude = "attributes")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class LightResponse implements ILightResponse {
+public class LightResponse implements ILightResponse, AuditDataProvider {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -110,5 +112,16 @@ public class LightResponse implements ILightResponse {
     }
 
 
+    @Override
+    public AuditData getAuditData() {
+        return AuditData.builder()
+                .attribute("in_response_to_id", inResponseToId)
+                .attribute("relay_state", relayState)
+                .attribute("country_code", citizenCountryCode)
+                .attribute("level_of_assurance", levelOfAssurance)
+                .attribute("sub", subject)
+                .attribute("attributes", attributes)
+                .build();
+    }
 }
 
