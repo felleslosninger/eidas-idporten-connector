@@ -41,7 +41,7 @@ public class AuditService implements OpenIDConnectAuditLogger {
         private String pattern;
 
         AuditIdentifier auditIdentifier() {
-            return () -> String.format(getPattern(), "EIDAS_IDPORTEN_CONNECTOR");
+            return () -> String.format(getPattern(), "EIDAS-IDPORTEN-CONNECTOR");
         }
     }
 
