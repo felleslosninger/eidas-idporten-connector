@@ -95,7 +95,7 @@ class ConnectorResponseControllerTest {
         RedirectedResponse clientResponse = mock(RedirectedResponse.class);
         when(clientResponse.toQueryRedirectUri()).thenReturn(new URI("http//junit?client_id=123&request_uri=http://redirect-url.com"));
         PushedAuthorizationRequest authorizationRequest = mock(PushedAuthorizationRequest.class);
-        when(specificConnectorService.getAuthorization(eq(lightResponse))).thenReturn(mock(Authorization.class));
+        when(specificConnectorService.getAuthorization(lightResponse)).thenReturn(mock(Authorization.class));
         when(openIDConnectSdk.authorize(eq(authorizationRequest), any(Authorization.class))).thenReturn(mock(no.idporten.sdk.oidcserver.protocol.AuthorizationResponse.class));
         when(openIDConnectSdk.createClientResponse(any(no.idporten.sdk.oidcserver.protocol.AuthorizationResponse.class))).thenReturn(clientResponse);
         mockMvc.perform(post("/ConnectorResponse")
