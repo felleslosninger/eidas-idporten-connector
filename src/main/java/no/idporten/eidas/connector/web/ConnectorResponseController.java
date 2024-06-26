@@ -14,6 +14,7 @@ import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.connector.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationService;
+import no.idporten.eidas.connector.logging.AuditService;
 import no.idporten.eidas.connector.service.SpecificConnectorService;
 import no.idporten.eidas.lightprotocol.BinaryLightTokenHelper;
 import no.idporten.eidas.lightprotocol.IncomingLightResponseValidator;
@@ -37,8 +38,8 @@ public class ConnectorResponseController {
     private final SpecificCommunicationService specificCommunicationService;
     private final EidasCacheProperties eidasCacheProperties;
     private final OpenIDConnectIntegration openIDConnectSdk;
-
     private final SpecificConnectorService specificConnectorService;
+    private final AuditService auditService;
 
     @RequestMapping(path = "/ConnectorResponse", method = {RequestMethod.GET, RequestMethod.POST})
     public String handleConnectorResponse(@Nonnull final HttpServletRequest request, @Nonnull final HttpServletResponse response) throws IOException {
@@ -47,6 +48,12 @@ public class ConnectorResponseController {
         if (!IncomingLightResponseValidator.validate(iLightResponse)) {
             throw new SpecificConnectorException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Response is invalid. Rejecting request.");
         }
+        if (iLightResponse instanceof LightResponse lightResponse) {
+            auditService.auditLightResponse(lightResponse);
+        } else {
+            log.warn("Not instance of LightResponse");
+        }
+
         CorrelatedRequestHolder cachedRequest = specificConnectorService.getCachedRequest(iLightResponse.getRelayState());
         if (cachedRequest == null || !iLightResponse.getInResponseToId().equals(cachedRequest.getiLightRequest().getId())) {
             throw new SpecificConnectorException(ErrorCodes.INVALID_REQUEST.getValue()

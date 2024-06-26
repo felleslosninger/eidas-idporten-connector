@@ -37,7 +37,7 @@ public class CitizenCountryController {
             // Logic for save action
             modelAndView.setViewName("confirmation");
             modelAndView.addObject("selectedCountry", form.getCountryId());
-            form.setCountryId(form.getCountryId()) ;
+            form.setCountryId(form.getCountryId());
             modelAndView.addObject(CITIZEN_FORM, form);
         } else if ("cancel".equals(action)) {
             modelAndView.setViewName("redirect:/some-other-page");
@@ -70,6 +70,7 @@ public class CitizenCountryController {
 
     private String createLightRequest(String selectedCountry, PushedAuthorizationRequest pushedAuthorizationRequest) {
         LightRequest lightRequest = specificConnectorService.buildLightRequest(selectedCountry, pushedAuthorizationRequest);
+        auditService.auditLightRequest(lightRequest);
         String lightToken = specificConnectorService.createStoreBinaryLightTokenRequestBase64(lightRequest);
         specificConnectorService.storeStateParams(lightRequest, pushedAuthorizationRequest);
         return "redirect:%s?token=%s".formatted(specificConnectorService.getEuConnectorRedirectUri(), lightToken);
