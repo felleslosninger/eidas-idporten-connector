@@ -1,6 +1,5 @@
 package no.idporten.eidas.connector.service;
 
-import eu.eidas.auth.commons.light.ILevelOfAssurance;
 import lombok.RequiredArgsConstructor;
 import no.idporten.eidas.connector.config.AcrProperties;
 import no.idporten.eidas.lightprotocol.messages.LevelOfAssurance;
@@ -8,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Representation of Level of Assurance
@@ -41,7 +41,7 @@ public class LevelOfAssuranceHelper {
         return acrProperties.getSupportedAcrValues().contains(returnedAcr);
     }
 
-    protected List<String> eidasAcrListToIdportenAcrList(List<ILevelOfAssurance> acrLevels) {
+    protected List<String> eidasAcrListToIdportenAcrList(List<LevelOfAssurance> acrLevels) {
         return acrLevels.stream()
                 .map(a -> eidasAcrToIdportenAcr(a.getValue()))
                 .toList();
@@ -53,16 +53,18 @@ public class LevelOfAssuranceHelper {
                 .filter(entry -> entry.getValue().equals(eidasAcr))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElse("eidas-loa-low");
+                .orElseThrow(() -> new IllegalArgumentException("No mapping found for eidas acr %s".formatted(eidasAcr)));
     }
 
     public LevelOfAssurance idportenAcrToEidasAcr(String idportenAcrLevel) {
-        return LevelOfAssurance.fromString(acrProperties.getAcrValueMap().get(idportenAcrLevel));
+        return new LevelOfAssurance(Optional.of(acrProperties.getAcrValueMap()
+                        .get(idportenAcrLevel))
+                .orElseThrow(() -> new IllegalArgumentException("No mapping found for idporten acr %s".formatted(idportenAcrLevel))));
     }
 
     public List<LevelOfAssurance> idportenAcrListToEidasAcr(List<String> idportenAcrLevel) {
         return idportenAcrLevel.stream()
-                .map(acr -> LevelOfAssurance.fromString(acrProperties.getAcrValueMap().get(acr)))
+                .map(this::idportenAcrToEidasAcr)
                 .toList();
     }
 }

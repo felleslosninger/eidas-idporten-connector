@@ -1,6 +1,7 @@
 package no.idporten.eidas.connector.service;
 
 import eu.eidas.auth.commons.EIDASStatusCode;
+import no.idporten.eidas.connector.config.EidasClaims;
 import no.idporten.eidas.connector.config.EuConnectorProperties;
 import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 import no.idporten.eidas.connector.integration.freggateway.service.MatchingServiceClient;
@@ -52,18 +53,30 @@ class SpecificConnectorServiceTest {
     @Test
     @DisplayName("when pid exists then get authorization with pid and sub claim set to pid")
     void testGetAuthorizationWithPid() {
-        LightResponse lightResponse = getLightResponse("relayState");
+        LightResponse lightResponse = getLightResponse("relayState", "SE/NO/1234");
         Authorization authorization = specificConnectorService.getAuthorization(lightResponse);
-        assertTrue(authorization.getAttributes().containsKey(PID_CLAIM));
-        assertEquals(authorization.getAttributes().get(PID_CLAIM), authorization.getSub());
+        assertAll("all claims are present", () ->
+                        assertTrue(authorization.getAttributes().containsKey(PID_CLAIM)),
+                () -> assertEquals(authorization.getAttributes().get(PID_CLAIM), authorization.getSub()),
+                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)),
+                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_DATE_OF_BIRTH_CLAIM)),
+                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_FAMILY_NAME_CLAIM)),
+                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_GIVEN_NAME_CLAIM)),
+                () -> assertTrue(authorization.getAttributes().containsKey(PID_CLAIM)),
+                () -> assertEquals(authorization.getAttributes().get(PID_CLAIM), authorization.getSub())
+        );
+
     }
 
     @Test
     @DisplayName("when pid doesn't exists then get authorization without pid and sub claim set to eidas identifier")
     void testGetAuthorizationWithoutPid() {
-        LightResponse lightResponse = getLightResponse("relayState");
-        lightResponse.setAttributes(List.of(new Attribute("http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier", List.of("SE/NO/4321"))));
+        LightResponse lightResponse = getLightResponse("relayState", "SE/NO/4321");
         Authorization authorization = specificConnectorService.getAuthorization(lightResponse);
+        assertAll("pid not set when no match",
+                () -> assertFalse(authorization.getAttributes().containsKey(PID_CLAIM)),
+                () -> assertEquals("SE/NO/4321", authorization.getSub())
+        );
         assertFalse(authorization.getAttributes().containsKey(PID_CLAIM));
         assertEquals("SE/NO/4321", authorization.getSub());
     }
@@ -71,25 +84,23 @@ class SpecificConnectorServiceTest {
     @Test
     @DisplayName("when  personal identifier is invalid then throw a specificconnector exception")
     void testGetAuthorizationWhenNoEidasSet() {
-        LightResponse lightResponse = getLightResponse("relayState");
-        lightResponse.setAttributes(List.of(new Attribute("http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier", List.of("banan"))));
+        LightResponse lightResponse = getLightResponse("relayState", "banan");
         assertThrows(SpecificConnectorException.class, () -> specificConnectorService.getAuthorization(lightResponse));
     }
 
-    private static LightResponse getLightResponse(String relayState) {
-        LightResponse lightResponse = LightResponse.builder()
+    private static LightResponse getLightResponse(String relayState, String eidasId) {
+        return LightResponse.builder()
                 .citizenCountryCode("NO")
                 .id("123")
                 .issuer("issuer")
-                .attributes(List.of(new Attribute("http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName", List.of("myFamilyName")),
-                        new Attribute("http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName", List.of("myFirstName")),
-                        new Attribute("http://eidas.europa.eu/attributes/naturalperson/DateOfBirth", List.of("2000-12-1")),
-                        new Attribute("http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier", List.of("SE/NO/1234"))))
+                .attributes(List.of(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME, List.of("myFamilyName")),
+                        new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME, List.of("myFirstName")),
+                        new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-1")),
+                        new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, List.of(eidasId))))
                 .levelOfAssurance(LevelOfAssurance.EIDAS_LOA_LOW)
                 .relayState(relayState)
                 .inResponseToId("abc")
                 .status(Status.builder().statusCode(EIDASStatusCode.SUCCESS_URI.getValue()).failure(false).statusMessage("ok").build())
                 .build();
-        return lightResponse;
     }
 }

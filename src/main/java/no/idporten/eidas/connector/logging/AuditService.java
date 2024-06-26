@@ -3,6 +3,8 @@ package no.idporten.eidas.connector.logging;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import no.idporten.eidas.lightprotocol.messages.LightRequest;
+import no.idporten.eidas.lightprotocol.messages.LightResponse;
 import no.idporten.logging.audit.AuditEntry;
 import no.idporten.logging.audit.AuditIdentifier;
 import no.idporten.logging.audit.AuditLogger;
@@ -31,7 +33,9 @@ public class AuditService implements OpenIDConnectAuditLogger {
         OIDC_TOKEN_RESPONSE("%s-SEND-TOKEN-RESPONSE"),
         OIDC_USERINFO_REQUEST("%s-RECEIVE-USERINFO-REQUEST"),
         OIDC_USERINFO_RESPONSE("%s-SEND-USERINFO-RESPONSE"),
-        EIDAS_CONNECTOR_COUNTRY_SELECTION("%s-SELECT-COUNTRY")
+        EIDAS_CONNECTOR_COUNTRY_SELECTION("%s-SELECT-COUNTRY"),
+        EIDAS_LIGHT_REQUEST("%s-LIGHT-REQUEST"),
+        EIDAS_LIGHT_RESPONSE("%s-LIGHT-RESPONSE")
         ;
 
         private String pattern;
@@ -115,6 +119,14 @@ public class AuditService implements OpenIDConnectAuditLogger {
                 .logNullAttributes(false)
                 .attribute("selected_country", countryId)
                 .build());
+    }
+
+    public void auditLightRequest(LightRequest lightRequest) {
+        log(AuditIdPattern.EIDAS_LIGHT_REQUEST, "light_request", lightRequest);
+    }
+
+    public void auditLightResponse(LightResponse lightResponse) {
+        log(AuditIdPattern.EIDAS_LIGHT_RESPONSE, "light_response", lightResponse);
     }
 
 }

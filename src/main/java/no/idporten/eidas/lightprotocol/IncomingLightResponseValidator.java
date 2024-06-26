@@ -35,17 +35,20 @@ import java.util.function.Predicate;
  */
 public class IncomingLightResponseValidator {
 
+    public static final String INVALID_REQUEST = "invalid_request";
+
     private IncomingLightResponseValidator() {
     }
 
 
     public static boolean validate(ILightResponse lightResponse) {
         if (null == lightResponse) {
-            throw new SpecificConnectorException("invalid_request", "LightResponse is null");
+            throw new SpecificConnectorException(INVALID_REQUEST, "LightResponse is null");
         }
         try {
             validateResponseStatus(lightResponse.getStatus());
             validateNameIDFormat(lightResponse.getSubjectNameIdFormat());
+
         } catch (Exception e) {
             return false;
         }
@@ -60,7 +63,7 @@ public class IncomingLightResponseValidator {
      */
     private static void validateResponseStatus(IResponseStatus responseStatus) throws SpecificConnectorException {
         if (null == responseStatus) {
-            throw new SpecificConnectorException("invalid_request", "ResponseStatus cannot be null");
+            throw new SpecificConnectorException(INVALID_REQUEST, "ResponseStatus cannot be null");
         }
         validateStatusCodeValue(responseStatus.getStatusCode());
         validateSubStatusCodeValue(responseStatus.getSubStatusCode());
@@ -72,7 +75,7 @@ public class IncomingLightResponseValidator {
                     .map(EIDASStatusCode::getValue)
                     .filter(Predicate.isEqual(statusCode))
                     .findAny()
-                    .orElseThrow(() -> new SpecificConnectorException("invalid_request", "StatusCode : " + statusCode + " is invalid"));
+                    .orElseThrow(() -> new SpecificConnectorException(INVALID_REQUEST, "StatusCode : " + statusCode + " is invalid"));
         }
     }
 
@@ -82,7 +85,7 @@ public class IncomingLightResponseValidator {
                     .map(EIDASSubStatusCode::getValue)
                     .filter(Predicate.isEqual(subStatusCode))
                     .findAny()
-                    .orElseThrow(() -> new SpecificConnectorException("invalid_request", "SubStatusCode : " + subStatusCode + " is invalid"));
+                    .orElseThrow(() -> new SpecificConnectorException(INVALID_REQUEST, "SubStatusCode : " + subStatusCode + " is invalid"));
         }
     }
 
@@ -92,7 +95,7 @@ public class IncomingLightResponseValidator {
                     .map(SamlNameIdFormat::getNameIdFormat)
                     .filter(Predicate.isEqual(nameIDFormat))
                     .findAny()
-                    .orElseThrow(() -> new SpecificConnectorException("invalid_request", "NameID Format : " + nameIDFormat + " is invalid"));
+                    .orElseThrow(() -> new SpecificConnectorException(INVALID_REQUEST, "NameID Format : " + nameIDFormat + " is invalid"));
         }
     }
 

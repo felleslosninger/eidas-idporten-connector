@@ -36,3 +36,6 @@ eidas:
           - profile
         redirect-uris:
           - https://test-client.tools.idporten.dev/authorize/response
+  freg-gw:
+    demo-country-code-map:
+      CA: SWE

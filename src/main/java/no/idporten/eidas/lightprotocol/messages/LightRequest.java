@@ -6,8 +6,11 @@ import eu.eidas.auth.commons.light.ILightRequest;
 import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.*;
 import lombok.*;
+import no.idporten.sdk.oidcserver.protocol.AuditData;
+import no.idporten.sdk.oidcserver.protocol.AuditDataProvider;
 
 import java.io.Serial;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "lightRequest", namespace = "http://cef.eidas.eu/LightRequest")
@@ -19,13 +22,13 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 @XmlType
-public class LightRequest implements ILightRequest {
+public class LightRequest implements ILightRequest, AuditDataProvider {
     @Serial
     private static final long serialVersionUID = 1L;
     private String citizenCountryCode;
     private String id;
     private String issuer;
-    private LevelOfAssurance levelOfAssurance;
+    private List<LevelOfAssurance> levelOfAssurance;
     private String relayState;
     private String providerName;
     private String spType;
@@ -52,12 +55,12 @@ public class LightRequest implements ILightRequest {
 
     @Override
     public String getLevelOfAssurance() {
-        return levelOfAssurance.getValue();
+        return levelOfAssurance.getFirst().getValue();
     }
 
     @Override
     public List<ILevelOfAssurance> getLevelsOfAssurance() {
-        return List.of(levelOfAssurance);
+        return new ArrayList<>(levelOfAssurance);
     }
 
     @Nonnull
@@ -66,5 +69,16 @@ public class LightRequest implements ILightRequest {
     }
 
 
+    @Override
+    public AuditData getAuditData() {
+        return AuditData.builder()
+                .attribute("id", id)
+                .attribute("relay_state", relayState)
+                .attribute("citizen_country_code", citizenCountryCode)
+                .attribute("level_of_assurance_requested", levelOfAssurance)
+                .attribute("sp_country_code", spCountryCode)
+                .attribute("requested_attributes", requestedAttributes)
+                .build();
+    }
 }
 
