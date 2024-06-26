@@ -75,7 +75,7 @@ public class LightRequest implements ILightRequest, AuditDataProvider {
                 .attribute("id", id)
                 .attribute("relay_state", relayState)
                 .attribute("citizen_country_code", citizenCountryCode)
-                .attribute("level_of_assurance", levelOfAssurance)
+                .attribute("level_of_assurance_requested", levelOfAssurance)
                 .attribute("sp_country_code", spCountryCode)
                 .attribute("requested_attributes", requestedAttributes)
                 .build();
