@@ -115,6 +115,7 @@ public class LightResponse implements ILightResponse, AuditDataProvider {
     @Override
     public AuditData getAuditData() {
         return AuditData.builder()
+                .attribute("status", status)
                 .attribute("in_response_to_id", inResponseToId)
                 .attribute("relay_state", relayState)
                 .attribute("country_code", citizenCountryCode)
