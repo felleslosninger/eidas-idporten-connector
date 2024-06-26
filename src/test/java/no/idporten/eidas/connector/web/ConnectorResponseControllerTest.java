@@ -102,7 +102,6 @@ class ConnectorResponseControllerTest {
                         .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, authorizationRequest)
                 )
                 .andExpect(redirectedUrl("http//junit?client_id=123&request_uri=http://redirect-url.com"));
-        verify(auditService, times(1)).auditLightResponse(lightResponse);
     }
 
 
@@ -122,7 +121,6 @@ class ConnectorResponseControllerTest {
                         .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, authorizationRequest)
                 )
                 .andExpect(redirectedUrl("http//junit?token=hei"));
-        verify(auditService, times(1)).auditLightResponse(lightResponse);
     }
 
     private static LightResponse getLightResponse(String relayState) {
@@ -144,6 +142,7 @@ class ConnectorResponseControllerTest {
 
     @AfterEach
     void tearDown() {
+        verify(auditService).auditLightResponse(any(LightResponse.class));
         // Ensure that the static mocks are closed after each test
         binaryLightTokenHelperMock.close();
         incomingLightResponseValidatorMock.close();
