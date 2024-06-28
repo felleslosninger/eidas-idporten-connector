@@ -1,7 +1,7 @@
 package no.idporten.eidas.connector.service;
 
 import lombok.Data;
-import org.apache.commons.lang.StringUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.regex.Pattern;
 
@@ -28,7 +28,7 @@ public class EIDASIdentifier {
     }
 
     public static boolean isValid(String value) {
-        if (StringUtils.isEmpty(value)) {
+        if (!StringUtils.hasText(value)) {
             return false;
         }
         return PATTERN.matcher(value).matches();
