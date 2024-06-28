@@ -12,6 +12,7 @@ import no.idporten.sdk.oidcserver.protocol.AuditDataProvider;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @XmlRootElement(name = "lightRequest", namespace = "http://cef.eidas.eu/LightRequest")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -75,9 +76,9 @@ public class LightRequest implements ILightRequest, AuditDataProvider {
                 .attribute("id", id)
                 .attribute("relay_state", relayState)
                 .attribute("citizen_country_code", citizenCountryCode)
-                .attribute("level_of_assurance", levelOfAssurance != null ? levelOfAssurance.stream().map(LevelOfAssurance::getValue).toList() : null)
+                .attribute("level_of_assurance", levelOfAssurance != null ? levelOfAssurance.stream().map(LevelOfAssurance::getValue).collect(Collectors.joining(", ")) : null)
                 .attribute("sp_country_code", spCountryCode)
-                .attribute("attributes", requestedAttributes != null ? requestedAttributes.stream().map(RequestedAttribute::toString).toList() : null)
+                .attribute("attributes", requestedAttributes != null ? requestedAttributes.stream().map(RequestedAttribute::getDefinition).collect(Collectors.joining(", ")) : null)
                 .build();
     }
 }
