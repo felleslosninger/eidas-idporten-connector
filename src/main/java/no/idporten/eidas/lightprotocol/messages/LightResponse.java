@@ -15,6 +15,7 @@ import no.idporten.sdk.oidcserver.protocol.AuditDataProvider;
 import java.beans.Transient;
 import java.io.Serial;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @XmlRootElement(namespace = "http://cef.eidas.eu/LightResponse")
 @Data
@@ -119,9 +120,9 @@ public class LightResponse implements ILightResponse, AuditDataProvider {
                 .attribute("in_response_to_id", inResponseToId)
                 .attribute("relay_state", relayState)
                 .attribute("country_code", citizenCountryCode)
-                .attribute("level_of_assurance_returned", levelOfAssurance)
+                .attribute("level_of_assurance", levelOfAssurance)
                 .attribute("sub", subject)
-                .attribute("attributes", attributes)
+                .attribute("attributes", attributes != null ? attributes.stream().map(a -> "%s=%s".formatted(a.getDefinition(), a.getValue())).collect(Collectors.joining(", ")) : null)
                 .build();
     }
 }
