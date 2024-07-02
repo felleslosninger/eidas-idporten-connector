@@ -38,7 +38,7 @@ public abstract class AbstractCorrelationMap<T> implements CorrelationMap<T> {
     @jakarta.annotation.Nonnull
     protected LightRedisCache<String, T> lightRedisCache;
 
-    protected AbstractCorrelationMap(LightRedisCache lightRedisCache, long lifetimeInSeconds) {
+    protected AbstractCorrelationMap(LightRedisCache<String, T> lightRedisCache, long lifetimeInSeconds) {
         this.lightRedisCache = lightRedisCache;
         this.lifetimeInSeconds = lifetimeInSeconds;
     }

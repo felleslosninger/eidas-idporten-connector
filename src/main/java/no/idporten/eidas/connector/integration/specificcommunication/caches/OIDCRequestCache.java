@@ -28,7 +28,7 @@ import no.idporten.eidas.connector.integration.specificcommunication.service.Lig
  */
 public final class OIDCRequestCache extends AbstractCorrelationMap<CorrelatedRequestHolder> {
 
-    public OIDCRequestCache(final LightRedisCache lightRedisCache, final EidasCacheProperties eidasCacheProperties) {
+    public OIDCRequestCache(final LightRedisCache<String, CorrelatedRequestHolder> lightRedisCache, final EidasCacheProperties eidasCacheProperties) {
         super(lightRedisCache, eidasCacheProperties.getOidcRequestStateLifetimeSeconds());
     }
 }

@@ -29,6 +29,7 @@ public class LightRedisCache<K, V> {
         }
     }
 
+
     public V get(K cacheKey) {
         try {
             return redisTemplate.opsForValue().get(cacheKey);
@@ -48,4 +49,6 @@ public class LightRedisCache<K, V> {
             throw e;
         }
     }
+
+
 }

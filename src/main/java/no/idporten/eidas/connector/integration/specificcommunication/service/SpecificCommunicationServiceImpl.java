@@ -13,6 +13,7 @@ import no.idporten.eidas.connector.integration.specificcommunication.config.Eida
 import no.idporten.eidas.lightprotocol.BinaryLightTokenHelper;
 import no.idporten.eidas.lightprotocol.LightRequestToXML;
 import no.idporten.eidas.lightprotocol.LightResponseParser;
+import org.apache.commons.lang.NotImplementedException;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -23,14 +24,9 @@ import java.util.Collection;
 @Slf4j
 public class SpecificCommunicationServiceImpl implements SpecificCommunicationService {
 
-    private final LightRedisCache lightRedisCache;
+    private final LightRedisCache<String, String> lightRedisCache;
     private final EidasCacheProperties eidasCacheProperties;
 
-    public ILightRequest getAndRemoveRequest(String lightTokenId, Collection<AttributeDefinition<?>> registry) {
-        log.debug("getAndRemoveRequest {}", lightTokenId);
-        return (ILightRequest) lightRedisCache.get(eidasCacheProperties.getLightRequestPrefix(lightTokenId));
-
-    }
 
     @Override
     public BinaryLightToken putResponse(ILightResponse lightResponse) throws SpecificConnectorException {
@@ -40,7 +36,7 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
     @Override
     public ILightResponse getAndRemoveResponse(String lightTokenId, Collection<AttributeDefinition<?>> registry) throws SpecificConnectorException {
         log.debug("getAndRemoveResponse  {}", lightTokenId);
-        String xmlMessage = (String) lightRedisCache.get(eidasCacheProperties.getLightResponsePrefix(lightTokenId));
+        String xmlMessage = lightRedisCache.get(eidasCacheProperties.getLightResponsePrefix(lightTokenId));
         log.debug("Got message from cache {}", xmlMessage);
         try {
             return LightResponseParser.parseXml(xmlMessage);
@@ -71,6 +67,10 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
         lightRedisCache.set(eidasCacheProperties.getLightRequestPrefix(binaryLightToken.getToken().getId()), xmlRequest, Duration.ofSeconds(eidasCacheProperties.getLightRequestLifetimeSeconds()));
         return binaryLightToken;
 
+    }
 
+    @Override
+    public ILightRequest getAndRemoveRequest(String tokenBase64, Collection<AttributeDefinition<?>> registry) throws SpecificConnectorException {
+        throw new NotImplementedException("Not relevant for this service implementation");
     }
 }
