@@ -27,7 +27,7 @@ import no.idporten.eidas.connector.integration.specificcommunication.service.Lig
  */
 public final class LightningTokenRequestCache extends AbstractCorrelationMap<ILightRequest> {
 
-    public LightningTokenRequestCache(final LightRedisCache lightRedisCache, final EidasCacheProperties eidasCacheProperties) {
+    public LightningTokenRequestCache(final LightRedisCache<String, ILightRequest> lightRedisCache, final EidasCacheProperties eidasCacheProperties) {
         super(lightRedisCache, eidasCacheProperties.getLightRequestLifetimeSeconds());
     }
 }

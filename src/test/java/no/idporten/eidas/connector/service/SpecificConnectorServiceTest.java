@@ -7,11 +7,9 @@ import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 import no.idporten.eidas.connector.integration.freggateway.service.MatchingServiceClient;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.OIDCRequestCache;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationServiceImpl;
-import no.idporten.eidas.lightprotocol.messages.Attribute;
-import no.idporten.eidas.lightprotocol.messages.LevelOfAssurance;
-import no.idporten.eidas.lightprotocol.messages.LightResponse;
-import no.idporten.eidas.lightprotocol.messages.Status;
+import no.idporten.eidas.lightprotocol.messages.*;
 import no.idporten.sdk.oidcserver.protocol.Authorization;
+import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,8 +20,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 import java.util.Optional;
 
+import static no.idporten.eidas.connector.config.EidasClaims.*;
 import static no.idporten.eidas.connector.service.SpecificConnectorService.PID_CLAIM;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -46,6 +47,8 @@ class SpecificConnectorServiceTest {
 
     @BeforeEach
     void setup() {
+        when(euConnectorProperties.getIssuer()).thenReturn("issuerId");
+
         when(matchingServiceClient.match(new EIDASIdentifier("SE/NO/1234"), "2000-12-1")).thenReturn(Optional.of("123-abc"));
         specificConnectorService = new SpecificConnectorService(euConnectorProperties, specificCommunicationServiceImpl, levelOfAssuranceHelper, oidcRequestCache, Optional.of(matchingServiceClient));
     }
@@ -94,13 +97,38 @@ class SpecificConnectorServiceTest {
                 .id("123")
                 .issuer("issuer")
                 .attributes(List.of(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME, List.of("myFamilyName")),
-                        new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME, List.of("myFirstName")),
-                        new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-1")),
-                        new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, List.of(eidasId))))
+                        new Attribute(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME, List.of("myFirstName")),
+                        new Attribute(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-1")),
+                        new Attribute(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, List.of(eidasId))))
                 .levelOfAssurance(LevelOfAssurance.EIDAS_LOA_LOW)
                 .relayState(relayState)
                 .inResponseToId("abc")
                 .status(Status.builder().statusCode(EIDASStatusCode.SUCCESS_URI.getValue()).failure(false).statusMessage("ok").build())
                 .build();
     }
+
+    @Test
+    @DisplayName("Build LightRequest with valid parameters")
+    void testBuildLightRequest() {
+        when(levelOfAssuranceHelper.idportenAcrListToEidasAcr(any())).thenReturn(List.of(new LevelOfAssurance(LevelOfAssurance.EIDAS_LOA_HIGH)));
+        String citizenCountryCode = "fr";
+        PushedAuthorizationRequest pushedAuthorizationRequest = mock(PushedAuthorizationRequest.class);
+        when(pushedAuthorizationRequest.getAcrValues()).thenReturn(List.of(LevelOfAssurance.EIDAS_LOA_HIGH));
+
+        LightRequest result = specificConnectorService.buildLightRequest(citizenCountryCode, pushedAuthorizationRequest);
+
+        assertNotNull(result);
+        assertEquals("FR", result.getCitizenCountryCode());
+        assertNotNull(result.getId());
+        assertNotNull(result.getRelayState());
+        assertEquals(4, result.getRequestedAttributesList().size());
+        assertEquals(LevelOfAssurance.EIDAS_LOA_HIGH, result.getLevelOfAssurance());
+        assertEquals("issuerId", result.getIssuer());
+        assertEquals("public", result.getSpType());
+        assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME)));
+        assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME)));
+        assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH)));
+        assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER)));
+    }
+
 }

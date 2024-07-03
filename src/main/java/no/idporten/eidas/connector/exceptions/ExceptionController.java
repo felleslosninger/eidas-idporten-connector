@@ -10,6 +10,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.lang.reflect.Field;
+import java.util.Optional;
+
 @Slf4j
 @RestControllerAdvice
 public class ExceptionController {
@@ -36,15 +39,21 @@ public class ExceptionController {
     }
 
     private String getJsonFieldName(BindingResult bindingResult) {
-        if (bindingResult.getFieldError() != null) {
-            try {
-                final String field = bindingResult.getFieldError().getField();
-                return bindingResult.getTarget().getClass().getDeclaredField(field).getAnnotation(JsonProperty.class).value();
-            } catch (Exception e) {
-                return bindingResult.getFieldError().getField();
-            }
-        }
-        return null;
+        return Optional.ofNullable(bindingResult.getFieldError())
+                .map(fieldError -> Optional.ofNullable(bindingResult.getTarget())
+                        .map(target -> {
+                            try {
+                                Field field = target.getClass().getDeclaredField(fieldError.getField());
+                                return Optional.ofNullable(field.getAnnotation(JsonProperty.class))
+                                        .map(JsonProperty::value)
+                                        .orElse(fieldError.getField());
+                            } catch (NoSuchFieldException | SecurityException e) {
+                                return fieldError.getField();
+                            }
+                        })
+                        .orElse(fieldError.getField()))
+                .orElse(null);
     }
+
 
 }

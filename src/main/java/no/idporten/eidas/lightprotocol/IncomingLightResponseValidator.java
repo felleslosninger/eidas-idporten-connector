@@ -42,7 +42,7 @@ public class IncomingLightResponseValidator {
 
 
     public static boolean validate(ILightResponse lightResponse) {
-        if (null == lightResponse) {
+        if (lightResponse == null) {
             throw new SpecificConnectorException(INVALID_REQUEST, "LightResponse is null");
         }
         try {
@@ -62,41 +62,48 @@ public class IncomingLightResponseValidator {
      * @throws SpecificConnectorException if the response status is not valid.
      */
     private static void validateResponseStatus(IResponseStatus responseStatus) throws SpecificConnectorException {
-        if (null == responseStatus) {
+        if (responseStatus == null) {
             throw new SpecificConnectorException(INVALID_REQUEST, "ResponseStatus cannot be null");
         }
         validateStatusCodeValue(responseStatus.getStatusCode());
         validateSubStatusCodeValue(responseStatus.getSubStatusCode());
     }
 
-    private static void validateStatusCodeValue(String statusCode) throws SpecificConnectorException {
-        if (null != statusCode) {
-            Arrays.stream(EIDASStatusCode.values())
-                    .map(EIDASStatusCode::getValue)
-                    .filter(Predicate.isEqual(statusCode))
-                    .findAny()
-                    .orElseThrow(() -> new SpecificConnectorException(INVALID_REQUEST, "StatusCode : " + statusCode + " is invalid"));
+    protected static void validateStatusCodeValue(String statusCode) throws SpecificConnectorException {
+        if (statusCode == null) {
+            return;
+        }
+        boolean isValid = Arrays.stream(EIDASStatusCode.values())
+                .map(EIDASStatusCode::getValue)
+                .anyMatch(Predicate.isEqual(statusCode));
+        if (!isValid) {
+            throw new SpecificConnectorException(INVALID_REQUEST, "StatusCode : %s is invalid".formatted(statusCode));
+        }
+
+    }
+
+    protected static void validateSubStatusCodeValue(String subStatusCode) throws SpecificConnectorException {
+        if (subStatusCode == null) {
+            return;
+        }
+        boolean isValid = Arrays.stream(EIDASSubStatusCode.values())
+                .map(EIDASSubStatusCode::getValue)
+                .anyMatch(Predicate.isEqual(subStatusCode));
+        if (!isValid) {
+            throw new SpecificConnectorException(INVALID_REQUEST, "SubStatusCode : %s is invalid".formatted(subStatusCode));
         }
     }
 
-    private static void validateSubStatusCodeValue(String subStatusCode) throws SpecificConnectorException {
-        if (null != subStatusCode) {
-            Arrays.stream(EIDASSubStatusCode.values())
-                    .map(EIDASSubStatusCode::getValue)
-                    .filter(Predicate.isEqual(subStatusCode))
-                    .findAny()
-                    .orElseThrow(() -> new SpecificConnectorException(INVALID_REQUEST, "SubStatusCode : " + subStatusCode + " is invalid"));
+
+    protected static void validateNameIDFormat(String nameIDFormat) throws SpecificConnectorException {
+        if (nameIDFormat == null) {
+            return;
+        }
+        boolean isValid = Arrays.stream(SamlNameIdFormat.values())
+                .map(SamlNameIdFormat::getNameIdFormat)
+                .anyMatch(Predicate.isEqual(nameIDFormat));
+        if (!isValid) {
+            throw new SpecificConnectorException(INVALID_REQUEST, "NameID Format : %s is invalid".formatted(nameIDFormat));
         }
     }
-
-    private static void validateNameIDFormat(String nameIDFormat) throws SpecificConnectorException {
-        if (null != nameIDFormat) {
-            Arrays.stream(SamlNameIdFormat.values())
-                    .map(SamlNameIdFormat::getNameIdFormat)
-                    .filter(Predicate.isEqual(nameIDFormat))
-                    .findAny()
-                    .orElseThrow(() -> new SpecificConnectorException(INVALID_REQUEST, "NameID Format : " + nameIDFormat + " is invalid"));
-        }
-    }
-
 }
