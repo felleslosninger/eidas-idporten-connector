@@ -16,6 +16,7 @@ import no.idporten.eidas.connector.integration.specificcommunication.caches.Corr
 import no.idporten.eidas.connector.integration.specificcommunication.caches.OIDCRequestCache;
 import no.idporten.eidas.connector.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationServiceImpl;
+import no.idporten.eidas.connector.logging.MDCFilter;
 import no.idporten.eidas.lightprotocol.BinaryLightTokenHelper;
 import no.idporten.eidas.lightprotocol.messages.LightRequest;
 import no.idporten.eidas.lightprotocol.messages.LightResponse;
@@ -62,7 +63,9 @@ public class SpecificConnectorService {
         final CorrelatedRequestHolder correlatedRequestHolder = new CorrelatedRequestHolder(lightRequest,
                 new OIDCRequestStateParams(new State(pushedAuthorizationRequest.getState()),
                         new Nonce(pushedAuthorizationRequest.getNonce()),
-                        codeVerifier));
+                        codeVerifier,
+                        MDCFilter.getTraceId()
+                ));
         oidcRequestCache.put(lightRequest.getRelayState(), correlatedRequestHolder);
         return lightRequest.getRelayState();
     }

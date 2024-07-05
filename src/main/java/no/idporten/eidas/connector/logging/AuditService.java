@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuditService implements OpenIDConnectAuditLogger {
 
+    private static final String RELATED_TRACE_ID = "related_trace_id";
     private final AuditLogger auditLogger;
 
     @Getter
@@ -35,10 +36,9 @@ public class AuditService implements OpenIDConnectAuditLogger {
         OIDC_USERINFO_RESPONSE("%s-SEND-USERINFO-RESPONSE"),
         EIDAS_CONNECTOR_COUNTRY_SELECTION("%s-SELECT-COUNTRY"),
         EIDAS_LIGHT_REQUEST("%s-LIGHT-REQUEST"),
-        EIDAS_LIGHT_RESPONSE("%s-LIGHT-RESPONSE")
-        ;
+        EIDAS_LIGHT_RESPONSE("%s-LIGHT-RESPONSE");
 
-        private String pattern;
+        private final String pattern;
 
         AuditIdentifier auditIdentifier() {
             return () -> String.format(getPattern(), "EIDAS-IDPORTEN-CONNECTOR");
@@ -46,9 +46,14 @@ public class AuditService implements OpenIDConnectAuditLogger {
     }
 
     private void log(AuditIdPattern auditIdPattern, String auditDataAttribute, AuditDataProvider auditDataProvider) {
+        log(auditIdPattern, auditDataAttribute, auditDataProvider, null);
+    }
+
+    private void log(AuditIdPattern auditIdPattern, String auditDataAttribute, AuditDataProvider auditDataProvider, String relatedTraceId) {
         auditLogger.log(AuditEntry.builder()
                 .auditId(auditIdPattern.auditIdentifier())
                 .logNullAttributes(false)
+                .attribute(RELATED_TRACE_ID, relatedTraceId)
                 .attribute(auditDataAttribute, auditDataProvider.getAuditData().getAttributes())
                 .build());
     }
@@ -125,8 +130,8 @@ public class AuditService implements OpenIDConnectAuditLogger {
         log(AuditIdPattern.EIDAS_LIGHT_REQUEST, "light_request", lightRequest);
     }
 
-    public void auditLightResponse(LightResponse lightResponse) {
-        log(AuditIdPattern.EIDAS_LIGHT_RESPONSE, "light_response", lightResponse);
+    public void auditLightResponse(LightResponse lightResponse, String relatedTraceid) {
+        log(AuditIdPattern.EIDAS_LIGHT_RESPONSE, "light_response", lightResponse, relatedTraceid);
     }
 
 }

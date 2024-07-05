@@ -49,16 +49,17 @@ public class ConnectorResponseController {
             throw new SpecificConnectorException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Response is invalid. Rejecting request.");
         }
         if (iLightResponse instanceof LightResponse lightResponse) {
-            auditService.auditLightResponse(lightResponse);
-        } else {
-            log.warn("Not instance of LightResponse");
-        }
+            CorrelatedRequestHolder cachedRequest = specificConnectorService.getCachedRequest(iLightResponse.getRelayState());
+            if (cachedRequest == null || !iLightResponse.getInResponseToId().equals(cachedRequest.getiLightRequest().getId())) {
+                auditService.auditLightResponse(lightResponse, null);
+                throw new SpecificConnectorException(ErrorCodes.INVALID_REQUEST.getValue()
+                        , "No request found for relay state %s and id %s."
+                        .formatted(iLightResponse.getRelayState(), iLightResponse.getInResponseToId()));
+            }
+            auditService.auditLightResponse(lightResponse, cachedRequest.getAuthenticationRequest().getRequestTraceId());
 
-        CorrelatedRequestHolder cachedRequest = specificConnectorService.getCachedRequest(iLightResponse.getRelayState());
-        if (cachedRequest == null || !iLightResponse.getInResponseToId().equals(cachedRequest.getiLightRequest().getId())) {
-            throw new SpecificConnectorException(ErrorCodes.INVALID_REQUEST.getValue()
-                    , "No request found for relay state %s and id %s."
-                    .formatted(iLightResponse.getRelayState(), iLightResponse.getInResponseToId()));
+        } else {
+            throw new SpecificConnectorException(ErrorCodes.INVALID_REQUEST.getValue(), "Response not instance of LightResponse");
         }
         final StatusCodeTranslator statusCodeTranslator = StatusCodeTranslator.fromEidasStatusCodeString(iLightResponse.getStatus().getStatusCode());
         if (StatusCodeTranslator.SUCCESS == statusCodeTranslator) {

@@ -42,4 +42,5 @@ public class OIDCRequestStateParams implements Serializable {
     private State state;
     private Nonce nonce;
     private CodeVerifier codeVerifier;
+    private String requestTraceId;
 }
