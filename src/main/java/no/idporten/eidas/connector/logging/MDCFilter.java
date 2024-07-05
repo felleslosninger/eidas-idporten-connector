@@ -1,5 +1,6 @@
 package no.idporten.eidas.connector.logging;
 
+import io.opentelemetry.api.trace.Span;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +38,10 @@ public class MDCFilter extends OncePerRequestFilter {
 
     protected String ipAddress(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(X_FORWARDED_FOR_HEADER)).orElse(request.getRemoteAddr());
+    }
+
+    public static String getTraceId() {
+        return Span.current().getSpanContext().getTraceId();
     }
 
 }

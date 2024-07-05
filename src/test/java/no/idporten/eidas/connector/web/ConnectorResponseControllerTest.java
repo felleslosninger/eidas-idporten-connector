@@ -90,7 +90,12 @@ class ConnectorResponseControllerTest {
     void testValidLightRequest() throws Exception {
 
         LightResponse lightResponse = getLightResponse("relayState");
-        when(specificConnectorService.getCachedRequest(any(String.class))).thenReturn(new CorrelatedRequestHolder(LightRequest.builder().id("abc").relayState("relayState").build(), new OIDCRequestStateParams(new State("123"), new Nonce("123"), null)));
+        when(specificConnectorService.getCachedRequest(any(String.class))).thenReturn(new CorrelatedRequestHolder(LightRequest.builder().id("abc").relayState("relayState").build(),
+                new OIDCRequestStateParams(new State("123"),
+                        new Nonce("123"),
+                        null,
+                        "mockedTraceId"
+                )));
         when(specificCommunicationService.getAndRemoveResponse(any(String.class), any())).thenReturn(lightResponse);
         RedirectedResponse clientResponse = mock(RedirectedResponse.class);
         when(clientResponse.toQueryRedirectUri()).thenReturn(new URI("http//junit?client_id=123&request_uri=http://redirect-url.com"));
@@ -124,7 +129,7 @@ class ConnectorResponseControllerTest {
     }
 
     private static LightResponse getLightResponse(String relayState) {
-        LightResponse lightResponse = LightResponse.builder()
+        return LightResponse.builder()
                 .citizenCountryCode("NO")
                 .id("123")
                 .issuer("issuer")
@@ -137,12 +142,11 @@ class ConnectorResponseControllerTest {
                 .inResponseToId("abc")
                 .status(Status.builder().statusCode(EIDASStatusCode.SUCCESS_URI.getValue()).failure(false).statusMessage("ok").build())
                 .build();
-        return lightResponse;
     }
 
     @AfterEach
     void tearDown() {
-        verify(auditService).auditLightResponse(any(LightResponse.class));
+        verify(auditService).auditLightResponse(any(LightResponse.class), any());
         // Ensure that the static mocks are closed after each test
         binaryLightTokenHelperMock.close();
         incomingLightResponseValidatorMock.close();
