@@ -19,7 +19,7 @@
         <open.telemetry.version>1.40.0</open.telemetry.version>
         <logstash.logback.version>8.0</logstash.logback.version>
         <idporten-audit.version>1.2.6</idporten-audit.version>
-        <idporten-access-log.version>2.3.4</idporten-access-log.version>
+        <idporten-access-log.version>2.4.0</idporten-access-log.version>
         <logback-access.version>1.4.14</logback-access.version>
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
         <idporten-actuator-starter.version>1.2.0</idporten-actuator-starter.version>
