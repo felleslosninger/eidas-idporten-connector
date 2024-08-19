@@ -23,7 +23,7 @@
         <logback-access.version>1.4.14</logback-access.version>
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
         <idporten-actuator-starter.version>1.2.0</idporten-actuator-starter.version>
-        <nimbus.oauth2-oidc-sdk.version>11.14</nimbus.oauth2-oidc-sdk.version>
+        <nimbus.oauth2-oidc-sdk.version>11.17</nimbus.oauth2-oidc-sdk.version>
         <joda-time.version>2.12.7</joda-time.version>
         <icu4j-countrycode-converter.version>75.1</icu4j-countrycode-converter.version>
         <surefire.plugin.version>3.3.1</surefire.plugin.version>
