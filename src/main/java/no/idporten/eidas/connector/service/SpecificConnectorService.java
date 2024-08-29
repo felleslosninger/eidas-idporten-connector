@@ -132,6 +132,10 @@ public class SpecificConnectorService {
         Optional<String> userMatch = matchUser(eidasClaims);
         userMatch.ifPresentOrElse(s -> authorizationBuilder.attribute(PID_CLAIM, s).sub(s),
                 () -> authorizationBuilder.sub(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)));
+
+        authorizationBuilder.attribute(IDPORTEN_EIDAS_CITIZEN_COUNTRY_CODE,
+                //already validated claim value
+                eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM).substring(0, 2));
         return authorizationBuilder.build();
     }
 }
