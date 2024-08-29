@@ -65,6 +65,8 @@ class SpecificConnectorServiceTest {
                 () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_DATE_OF_BIRTH_CLAIM)),
                 () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_FAMILY_NAME_CLAIM)),
                 () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_GIVEN_NAME_CLAIM)),
+                () -> assertTrue(authorization.getAttributes().containsKey(IDPORTEN_EIDAS_CITIZEN_COUNTRY_CODE)),
+                () -> assertEquals("SE", authorization.getAttributes().get(IDPORTEN_EIDAS_CITIZEN_COUNTRY_CODE)),
                 () -> assertTrue(authorization.getAttributes().containsKey(PID_CLAIM)),
                 () -> assertEquals(authorization.getAttributes().get(PID_CLAIM), authorization.getSub())
         );
