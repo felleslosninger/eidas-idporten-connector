@@ -1,6 +1,5 @@
-package no.idporten.eidas.lightprotocol;
+package no.idporten.eidas.lightprotocol.messages;
 
-import no.idporten.eidas.lightprotocol.messages.Status;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
