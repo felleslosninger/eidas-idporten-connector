@@ -4,9 +4,7 @@ import eu.eidas.auth.commons.light.IResponseStatus;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serial;
 
@@ -16,6 +14,8 @@ import java.io.Serial;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class Status implements IResponseStatus {
     @Serial
     private static final long serialVersionUID = 1L;
