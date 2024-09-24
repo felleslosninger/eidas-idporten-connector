@@ -38,7 +38,7 @@ class CitizenCountryControllerTest {
 
         mockMvc.perform(post("/citizencountry")
                         .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, authorizationRequest)
-                        .formField("action", "ok")
+                        .formField("action", "next")
                         .formField("countryId", "CA"))
                 .andExpect(redirectedUrl("http//junit?token=lighttoken"));
 

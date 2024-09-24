@@ -34,13 +34,10 @@ public class CitizenCountryController {
                                         @RequestParam("action") String action) {
         ModelAndView modelAndView = new ModelAndView();
 
-        if ("ok".equals(action)) {
+        if ("next".equals(action)) {
             String selectedCountry = form.getCountryId().toUpperCase();
             auditService.auditCountrySelection(selectedCountry);
             modelAndView.setViewName(createLightRequest(selectedCountry, authorizationRequest));
-
-        } else if ("cancel".equals(action)) {
-            modelAndView.setViewName("redirect:/some-other-page");
         } else {
             modelAndView.setViewName(ERROR);
             modelAndView.addObject(ERROR, "Unknown action: %s".formatted(action));
