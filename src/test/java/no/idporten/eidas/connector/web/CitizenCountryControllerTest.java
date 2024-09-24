@@ -36,9 +36,9 @@ class CitizenCountryControllerTest {
         when(specificConnectorService.createStoreBinaryLightTokenRequestBase64(any())).thenReturn("lighttoken");
         when(specificConnectorService.getEuConnectorRedirectUri()).thenReturn("http//junit");
 
-        mockMvc.perform(post("/citizencountry/confirm")
+        mockMvc.perform(post("/citizencountry")
                         .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, authorizationRequest)
-                        .formField("action", "confirm")
+                        .formField("action", "next")
                         .formField("countryId", "CA"))
                 .andExpect(redirectedUrl("http//junit?token=lighttoken"));
 
