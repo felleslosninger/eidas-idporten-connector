@@ -87,7 +87,7 @@ public class SpecificConnectorService {
                         RequestedAttribute.builder().definition(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH).build(),
                         RequestedAttribute.builder().definition(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER).build()
                 ))
-                .levelOfAssurance(levelOfAssuranceHelper.idportenAcrListToEidasAcr(pushedAuthorizationRequest.getAcrValues()))
+                .levelOfAssurance(Collections.singletonList(levelOfAssuranceHelper.getLowestSupportedAcrValueInEidasFormat(pushedAuthorizationRequest.getAcrValues())))
                 .issuer(euConnectorProperties.getIssuer())
                 .relayState(UUID.randomUUID().toString())
                 .spType("public")

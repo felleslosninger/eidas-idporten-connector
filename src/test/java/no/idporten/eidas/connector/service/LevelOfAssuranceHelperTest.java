@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -96,6 +97,24 @@ class LevelOfAssuranceHelperTest {
         assertEquals(LevelOfAssurance.EIDAS_LOA_HIGH, eidasAcr.getFirst().getValue());
         assertEquals(LevelOfAssurance.EIDAS_LOA_SUBSTANTIAL, eidasAcr.get(1).getValue());
         assertEquals(LevelOfAssurance.EIDAS_LOA_LOW, eidasAcr.getLast().getValue());
+    }
+
+    @Test
+    void testSendLowestAcrValue() {
+        LevelOfAssurance eidasAcr = levelOfAssuranceHelper.getLowestSupportedAcrValueInEidasFormat(List.of("eidas-loa-low", "eidas-loa-substantial", "eidas-loa-high"));
+        assertEquals(LevelOfAssurance.EIDAS_LOA_LOW, eidasAcr.getValue());
+    }
+
+    @Test
+    void testSendLowestAcrValueWhereSubstantial() {
+        LevelOfAssurance eidasAcr = levelOfAssuranceHelper.getLowestSupportedAcrValueInEidasFormat(List.of("eidas-loa-substantial", "eidas-loa-high"));
+        assertEquals(LevelOfAssurance.EIDAS_LOA_SUBSTANTIAL, eidasAcr.getValue());
+    }
+
+    @Test
+    void testSendLowestAcrValueWhereHigh() {
+        LevelOfAssurance eidasAcr = levelOfAssuranceHelper.getLowestSupportedAcrValueInEidasFormat(Collections.singletonList("eidas-loa-high"));
+        assertEquals(LevelOfAssurance.EIDAS_LOA_HIGH, eidasAcr.getValue());
     }
 
 }

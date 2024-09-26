@@ -112,7 +112,7 @@ class SpecificConnectorServiceTest {
     @Test
     @DisplayName("Build LightRequest with valid parameters")
     void testBuildLightRequest() {
-        when(levelOfAssuranceHelper.idportenAcrListToEidasAcr(any())).thenReturn(List.of(new LevelOfAssurance(LevelOfAssurance.EIDAS_LOA_HIGH)));
+        when(levelOfAssuranceHelper.getLowestSupportedAcrValueInEidasFormat(any())).thenReturn(new LevelOfAssurance(LevelOfAssurance.EIDAS_LOA_HIGH));
         String citizenCountryCode = "fr";
         PushedAuthorizationRequest pushedAuthorizationRequest = mock(PushedAuthorizationRequest.class);
         when(pushedAuthorizationRequest.getAcrValues()).thenReturn(List.of(LevelOfAssurance.EIDAS_LOA_HIGH));

@@ -67,4 +67,20 @@ public class LevelOfAssuranceHelper {
                 .map(this::idportenAcrToEidasAcr)
                 .toList();
     }
+
+    public LevelOfAssurance getLowestSupportedAcrValueInEidasFormat(List<String> idportenAcrLevel) {
+        if (idportenAcrLevel.isEmpty()) {
+            return new LevelOfAssurance(acrProperties.getSupportedAcrValues().getFirst());
+        }
+        //must come in order
+        for (String idportenAcr : idportenAcrLevel) {
+            LevelOfAssurance eidasAcr = idportenAcrToEidasAcr(idportenAcr);
+            if (acrProperties.getSupportedAcrValues().contains(eidasAcr.getValue())) {
+                return eidasAcr;
+            }
+        }
+        throw new IllegalArgumentException("Acr levels %s are supported".formatted(idportenAcrLevel));
+    }
+
+
 }
