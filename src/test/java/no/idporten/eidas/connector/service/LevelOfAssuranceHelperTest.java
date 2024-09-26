@@ -91,9 +91,11 @@ class LevelOfAssuranceHelperTest {
 
     @Test
     void testAcrValueFromIdportenToEidasMapping() {
-        List<LevelOfAssurance> eidasAcr = levelOfAssuranceHelper.idportenAcrListToEidasAcr(List.of("eidas-loa-high"));
+        List<LevelOfAssurance> eidasAcr = levelOfAssuranceHelper.idportenAcrListToEidasAcr(List.of("eidas-loa-high", "eidas-loa-substantial", "eidas-loa-low"));
         assertNotNull(eidasAcr);
         assertEquals(LevelOfAssurance.EIDAS_LOA_HIGH, eidasAcr.getFirst().getValue());
+        assertEquals(LevelOfAssurance.EIDAS_LOA_SUBSTANTIAL, eidasAcr.get(1).getValue());
+        assertEquals(LevelOfAssurance.EIDAS_LOA_LOW, eidasAcr.getLast().getValue());
     }
 
 }
