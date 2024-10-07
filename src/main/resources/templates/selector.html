@@ -17,53 +17,58 @@
         </div>
 
         <div class="box__body">
-                <form th:action="@{/citizencountry}" th:object="${citizenForm}" th:method="post">
-                    <div class="country-selector" data-included="se,is,dk,be,cz" data-test="true" data-translate-item="land"
-                         data-translate-items="land" data-translate-no-results="Ingen land funnet"
-                         data-error-message="Landet finnes ikke i listen">
-                        <label class="country-selector__label" for="countryName"
-                               th:text="#{no.idporten.eidas.selector.label}"></label>
-                        <div class="country-selector__container">
-                            <button type="button" id="dropdownButton" class="country-selector__toggle"
-                                    aria-expanded="false" aria-haspopup="true">
+            <form th:action="@{/citizencountry}" th:object="${citizenForm}" th:method="post">
+                <div class="country-selector"
+                     th:attr="data-included=${countriesIncluded},
+                                        data-test=${isTest},
+                            data-excluded=${countriesExcluded},
+                             data-translate-no-results=#{no.idporten.eidas.selector.search.noresults},
+                            data-error-message=#{no.idporten.eidas.selector.search.noresults.one}"
+                     data-translate-item="land"
+                     data-translate-items="land">
+                    <label class="country-selector__label" for="countryName"
+                           th:text="#{no.idporten.eidas.selector.label}"></label>
+                    <div class="country-selector__container">
+                        <button type="button" id="dropdownButton" class="country-selector__toggle"
+                                aria-expanded="false" aria-haspopup="true">
                                 <span id="selected-flag"
                                       class="country-selector__flag country-selector__flag--default"></span>
-                                <span class="sr-only" th:text="#{no.idporten.eidas.selector.button}"></span>
-                            </button>
-                            <div class="country-selector__dropdown" aria-labelledby="dropdownButton">
-                                <div class="country-selector__dropdown-header">
-                                    <h3 th:text="#{no.idporten.eidas.selector.search}"></h3>
-                                    <button class="country-selector__close fas fa-times"
-                                            th:label="#{no.idporten.eidas.selector.search.reset}"></button>
-                                </div>
-                                <div class="country-selector__search-container">
-                                    <label class="sr-only" for="search"
-                                           th:text="#{no.idporten.eidas.selector.search}"></label>
-                                    <input class="country-selector__search" type="text"
-                                           aria-owns="country-selector-results" aria-autocomplete="list"
-                                           th:placeholder="#{no.idporten.eidas.selector.search.placeholder}" id="search"
-                                           autocomplete="off">
-                                </div>
-                                <ul id="country-selector-results" class="country-selector__list" role="listbox"></ul>
-                                <div aria-live="polite" role="status"
-                                     class="country-selector__result-text visually-hidden"></div>
+                            <span class="sr-only" th:text="#{no.idporten.eidas.selector.button}"></span>
+                        </button>
+                        <div class="country-selector__dropdown" aria-labelledby="dropdownButton">
+                            <div class="country-selector__dropdown-header">
+                                <h3 th:text="#{no.idporten.eidas.selector.search}"></h3>
+                                <button class="country-selector__close fas fa-times"
+                                        th:label="#{no.idporten.eidas.selector.search.reset}"></button>
                             </div>
-                            <label class="sr-only" for="CountryName">Land</label>
-                            <input class="country-selector__input" type="text"
-                                   th:placeholder="#{no.idporten.eidas.selector.input}" name="CountryName"
-                                   id="countryName" disabled autocomplete="off">
-                            <input class="country-selector__input-hidden" type="text" name="countryId" id="countryCode">
+                            <div class="country-selector__search-container">
+                                <label class="sr-only" for="search"
+                                       th:text="#{no.idporten.eidas.selector.search}"></label>
+                                <input class="country-selector__search" type="text"
+                                       aria-owns="country-selector-results" aria-autocomplete="list"
+                                       th:placeholder="#{no.idporten.eidas.selector.search.placeholder}" id="search"
+                                       autocomplete="off">
+                            </div>
+                            <ul id="country-selector-results" class="country-selector__list" role="listbox"></ul>
+                            <div aria-live="polite" role="status"
+                                 class="country-selector__result-text visually-hidden"></div>
                         </div>
+                        <label class="sr-only" for="CountryName">Land</label>
+                        <input class="country-selector__input" type="text"
+                               th:placeholder="#{no.idporten.eidas.selector.input}" name="CountryName"
+                               id="countryName" disabled autocomplete="off">
+                        <input class="country-selector__input-hidden" type="text" name="countryId" id="countryCode">
                     </div>
-                    <p>
-                    <div class="btn-group">
+                </div>
+                <p>
+                <div class="btn-group">
                     <button class="button" tabindex="10" name="action" value="next" type="submit">
                         <span th:text="#{no.idporten.eidas.box.next}"></span>
-                        </button>
-                    </div>
+                    </button>
+                </div>
 
-                </form>
-            </div>
+            </form>
+        </div>
 
 
     </div>

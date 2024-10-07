@@ -1,6 +1,7 @@
 package no.idporten.eidas.connector.web;
 
 import lombok.RequiredArgsConstructor;
+import no.idporten.eidas.connector.config.EUCountriesProperties;
 import no.idporten.eidas.connector.logging.AuditService;
 import no.idporten.eidas.connector.service.SpecificConnectorService;
 import no.idporten.eidas.lightprotocol.messages.LightRequest;
@@ -21,10 +22,14 @@ public class CitizenCountryController {
     private static final String ERROR = "error";
     private final AuditService auditService;
     private final SpecificConnectorService specificConnectorService;
+    private final EUCountriesProperties euCountriesProperties;
 
     @GetMapping
     public String showForm(Model model) {
         model.addAttribute(CITIZEN_FORM, new CitizenCountryForm());
+        model.addAttribute("countriesIncluded", euCountriesProperties.included());
+        model.addAttribute("countriesExcluded", euCountriesProperties.excluded());
+        model.addAttribute("isTest", euCountriesProperties.isTest());
         return "selector";
     }
 
@@ -53,4 +58,5 @@ public class CitizenCountryController {
         specificConnectorService.storeStateParams(lightRequest, pushedAuthorizationRequest);
         return "redirect:%s?token=%s".formatted(specificConnectorService.getEuConnectorRedirectUri(), lightToken);
     }
+
 }

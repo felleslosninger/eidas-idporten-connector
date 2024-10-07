@@ -1,5 +1,6 @@
 package no.idporten.eidas.connector.web;
 
+import no.idporten.eidas.connector.config.EUCountriesProperties;
 import no.idporten.eidas.connector.logging.AuditService;
 import no.idporten.eidas.connector.service.SpecificConnectorService;
 import no.idporten.sdk.oidcserver.OpenIDConnectIntegration;
@@ -14,8 +15,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CitizenCountryController.class)
 @DisplayName("When calling the CitizenCountryController")
@@ -28,6 +30,8 @@ class CitizenCountryControllerTest {
     private AuditService auditService;
     @MockBean
     private SpecificConnectorService specificConnectorService;
+    @MockBean
+    private EUCountriesProperties euCountriesProperties;
 
     @Test
     @DisplayName("the a lightrequest shall be auditlogged")
@@ -43,6 +47,36 @@ class CitizenCountryControllerTest {
                 .andExpect(redirectedUrl("http//junit?token=lighttoken"));
 
         verify(auditService, times(1)).auditLightRequest(any());
+    }
+
+
+    @Test
+    @DisplayName("when countries included, include the countries")
+    void testCountryIncluded() throws Exception {
+        when(euCountriesProperties.included()).thenReturn("is,dk");
+        mockMvc.perform(get("/citizencountry"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("selector"))
+                .andExpect(model().attributeExists("countriesIncluded"))
+                .andExpect(model().attribute("countriesIncluded", "is,dk"))
+        ;
+    }
+
+    @Test
+    @DisplayName("when excluded and test countries configured, include the config")
+    void testCountryConfig() throws Exception {
+        when(euCountriesProperties.included()).thenReturn("is,dk");
+        when(euCountriesProperties.excluded()).thenReturn("se");
+        when(euCountriesProperties.isTest()).thenReturn(true);
+        mockMvc.perform(get("/citizencountry"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("selector"))
+                .andExpect(model().attributeExists("countriesIncluded"))
+                .andExpect(model().attribute("countriesIncluded", "is,dk"))
+                .andExpect(model().attribute("countriesExcluded", "se"))
+                .andExpect(model().attribute("isTest", true))
+        ;
+
     }
 
 }

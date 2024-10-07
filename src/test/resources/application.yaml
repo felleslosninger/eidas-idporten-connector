@@ -42,6 +42,11 @@ digdir:
 
 
 eidas:
+  countries:
+    included:
+      - se
+    excluded:
+    test: true
   oidc-server:
     issuer: http://junittest/testid/
     par-lifetime-seconds: 6

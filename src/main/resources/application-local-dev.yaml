@@ -26,6 +26,8 @@ digdir:
       feature-enabled: false
 
 eidas:
+  countries:
+    test: true
   eu-connector:
     redirect-uri: http://eidas-connector:8083/SpecificConnectorRequest
   oidc-server:

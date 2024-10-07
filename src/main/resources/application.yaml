@@ -57,6 +57,14 @@ spring:
   session:
     store-type: redis
 eidas:
+  countries:
+    included:
+      - SE
+      - IS
+      - DK
+      - BE
+      - CZ
+    test: false
   eu-connector:
     issuer-name: ${eidas.cache.request-issuer-name}
   cache:
