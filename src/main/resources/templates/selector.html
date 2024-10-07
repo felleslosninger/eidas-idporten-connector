@@ -18,8 +18,9 @@
 
         <div class="box__body">
                 <form th:action="@{/citizencountry}" th:object="${citizenForm}" th:method="post">
-                    <div class="country-selector" data-included="se,is,dk,be,cz" data-test="true" data-translate-item="land"
-                         data-translate-items="land" data-translate-no-results="Ingen land funnet"
+                    <div class="country-selector" data-included="${countriesIncluded}" data-test="${isTest}"
+                         data-excluded="${countriesExcluded}" data-translate-item="land"
+                         data-translate-items="land" data-translate-no-results="No countries found"
                          data-error-message="Landet finnes ikke i listen">
                         <label class="country-selector__label" for="countryName"
                                th:text="#{no.idporten.eidas.selector.label}"></label>
