@@ -12,8 +12,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-
 import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -55,7 +53,7 @@ class CitizenCountryControllerTest {
     @Test
     @DisplayName("when countries included, include the countries")
     void testCountryIncluded() throws Exception {
-        when(euCountriesProperties.getIncluded()).thenReturn(List.of("is", "dk"));
+        when(euCountriesProperties.included()).thenReturn("is,dk");
         mockMvc.perform(get("/citizencountry"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("selector"))
@@ -67,8 +65,8 @@ class CitizenCountryControllerTest {
     @Test
     @DisplayName("when excluded and test countries configured, include the config")
     void testCountryConfig() throws Exception {
-        when(euCountriesProperties.getIncluded()).thenReturn(List.of("is", "dk"));
-        when(euCountriesProperties.getExcluded()).thenReturn(List.of("se"));
+        when(euCountriesProperties.included()).thenReturn("is,dk");
+        when(euCountriesProperties.excluded()).thenReturn("se");
         when(euCountriesProperties.isTest()).thenReturn(true);
         mockMvc.perform(get("/citizencountry"))
                 .andExpect(status().isOk())

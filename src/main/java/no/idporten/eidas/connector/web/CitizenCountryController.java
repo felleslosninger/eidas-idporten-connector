@@ -8,7 +8,6 @@ import no.idporten.eidas.lightprotocol.messages.LightRequest;
 import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -28,6 +27,9 @@ public class CitizenCountryController {
     @GetMapping
     public String showForm(Model model) {
         model.addAttribute(CITIZEN_FORM, new CitizenCountryForm());
+        model.addAttribute("countriesIncluded", euCountriesProperties.included());
+        model.addAttribute("countriesExcluded", euCountriesProperties.excluded());
+        model.addAttribute("isTest", euCountriesProperties.isTest());
         return "selector";
     }
 
@@ -57,24 +59,4 @@ public class CitizenCountryController {
         return "redirect:%s?token=%s".formatted(specificConnectorService.getEuConnectorRedirectUri(), lightToken);
     }
 
-    @ModelAttribute("isTest")
-    public boolean includeTestCountries() {
-        return euCountriesProperties.isTest();
-    }
-
-    @ModelAttribute("countriesIncluded")
-    public String included() {
-        if (CollectionUtils.isEmpty(euCountriesProperties.getIncluded())) {
-            return "";
-        }
-        return String.join(",", euCountriesProperties.getIncluded());
-    }
-
-    @ModelAttribute("countriesExcluded")
-    public String excluded() {
-        if (CollectionUtils.isEmpty(euCountriesProperties.getExcluded())) {
-            return "";
-        }
-        return String.join(",", euCountriesProperties.getExcluded());
-    }
 }

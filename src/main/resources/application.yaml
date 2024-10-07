@@ -64,7 +64,6 @@ eidas:
       - dk
       - be
       - cz
-    excluded:
     test: false
   eu-connector:
     issuer-name: ${eidas.cache.request-issuer-name}
