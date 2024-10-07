@@ -27,13 +27,13 @@ public class EUCountriesProperties {
         if (CollectionUtils.isEmpty(this.included)) {
             return "";
         }
-        return String.join(",", this.included);
+        return String.join(",", this.included.stream().map(String::toLowerCase).toList());
     }
 
     public String excluded() {
         if (CollectionUtils.isEmpty(this.excluded)) {
             return "";
         }
-        return String.join(",", this.excluded);
+        return String.join(",", this.excluded.stream().map(String::toLowerCase).toList());
     }
 }

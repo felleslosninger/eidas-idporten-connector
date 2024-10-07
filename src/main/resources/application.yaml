@@ -59,11 +59,11 @@ spring:
 eidas:
   countries:
     included:
-      - se
-      - is
-      - dk
-      - be
-      - cz
+      - SE
+      - IS
+      - DK
+      - BE
+      - CZ
     test: false
   eu-connector:
     issuer-name: ${eidas.cache.request-issuer-name}
