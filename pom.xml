@@ -11,7 +11,7 @@
     <groupId>no.idporten.eidas</groupId>
     <artifactId>eidas-idporten-connector</artifactId>
     <version>DEV-SNAPSHOT</version>
-    <name>eidas-proxy</name>
+    <name>eidas-idporten-connector</name>
     <description>Specific eidas-connector for Norway</description>
     <properties>
         <java.version>21</java.version>

@@ -3,6 +3,7 @@ package no.idporten.eidas.connector.web;
 import no.idporten.eidas.connector.config.EUCountriesProperties;
 import no.idporten.eidas.connector.logging.AuditService;
 import no.idporten.eidas.connector.service.SpecificConnectorService;
+import no.idporten.eidas.lightprotocol.messages.LightRequest;
 import no.idporten.sdk.oidcserver.OpenIDConnectIntegration;
 import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,14 +41,17 @@ class CitizenCountryControllerTest {
         PushedAuthorizationRequest authorizationRequest = mock(PushedAuthorizationRequest.class);
         when(specificConnectorService.createStoreBinaryLightTokenRequestBase64(any())).thenReturn("lighttoken");
         when(specificConnectorService.getEuConnectorRedirectUri()).thenReturn("http//junit");
-
+        when(specificConnectorService.buildLightRequest(any(), any())).thenReturn(mock(LightRequest.class));
+        when(specificConnectorService.storeStateParams(any(), any())).thenReturn("123");
         mockMvc.perform(post("/citizencountry")
                         .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, authorizationRequest)
                         .formField("action", "next")
                         .formField("countryId", "CA"))
-                .andExpect(redirectedUrl("http//junit?token=lighttoken"));
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().string(containsString("Click to redirect")));
 
-        verify(auditService, times(1)).auditLightRequest(any());
+
+        verify(auditService, times(1)).auditLightRequest(any(LightRequest.class));
     }
 
 
