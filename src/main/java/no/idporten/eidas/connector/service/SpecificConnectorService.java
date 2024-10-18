@@ -26,6 +26,7 @@ import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.*;
 
@@ -114,8 +115,16 @@ public class SpecificConnectorService {
             return Optional.empty();
         }
 
-        return matchingServiceClient.get().match(new EIDASIdentifier(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)),
-                eidasClaims.get(IDPORTEN_EIDAS_DATE_OF_BIRTH_CLAIM));
+        try {
+            return matchingServiceClient.get().match(new EIDASIdentifier(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)),
+                    eidasClaims.get(IDPORTEN_EIDAS_DATE_OF_BIRTH_CLAIM));
+        } catch (HttpClientErrorException e) {
+            if (400 == e.getStatusCode().value() && e.getMessage().contains("FREG-001")) {
+                log.error("Error while matching user. {}", e.getMessage());
+                return Optional.empty();
+            }
+            throw e;
+        }
     }
 
     private String getAttributeName(String definition) {
