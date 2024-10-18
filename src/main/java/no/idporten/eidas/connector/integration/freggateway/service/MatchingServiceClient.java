@@ -32,6 +32,12 @@ public class MatchingServiceClient {
                         return Optional.empty();
                     } else if (HttpStatus.OK == response.getStatusCode()) {
                         return getResponseString(response);
+                    } else if (HttpStatus.BAD_REQUEST == response.getStatusCode()) {
+                        Optional<String> message = getResponseString(response);
+                        return message
+                                .filter(msg -> msg.contains("FREG-001") || msg.contains("UtenlandskPersonidentifikasjon er ikke på gyldig format"))
+                                .map(msg -> Optional.<String>empty())
+                                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid request %s".formatted(message.orElse("N/A"))));
                     } else {
                         throw new HttpClientErrorException(response.getStatusCode(), getResponseString(response).orElse("Internal error"));
                     }
