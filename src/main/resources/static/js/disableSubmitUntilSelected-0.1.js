@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (event.target.matches('.country-selector__list li, .country-selector__list li *')) {
             setTimeout(function () { // Timeout to allow for the value to be updated
                 toggleNextButton();
-            }, 100); // Adjust this delay based on your UI's responsiveness
+            }, 100);
         }
     });
 });
