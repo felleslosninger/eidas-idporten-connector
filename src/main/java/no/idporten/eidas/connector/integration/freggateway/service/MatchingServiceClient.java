@@ -1,6 +1,7 @@
 package no.idporten.eidas.connector.integration.freggateway.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.connector.service.CountryCodeConverter;
 import no.idporten.eidas.connector.service.EIDASIdentifier;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @RequiredArgsConstructor
+@Slf4j
 public class MatchingServiceClient {
 
     private final RestClient.Builder fregGatewayEndpointBuilder;
@@ -32,6 +34,13 @@ public class MatchingServiceClient {
                         return Optional.empty();
                     } else if (HttpStatus.OK == response.getStatusCode()) {
                         return getResponseString(response);
+                    } else if (HttpStatus.BAD_REQUEST == response.getStatusCode()) {
+                        Optional<String> message = getResponseString(response);
+                        log.warn("Bad request from freg-gw with message: {}", message.orElse("N/A"));
+                        return message
+                                .filter(msg -> msg.contains("FREG-001") || msg.contains("UtenlandskPersonidentifikasjon er ikke på gyldig format"))
+                                .map(msg -> Optional.<String>empty())
+                                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid request %s".formatted(message.orElse("N/A"))));
                     } else {
                         throw new HttpClientErrorException(response.getStatusCode(), getResponseString(response).orElse("Internal error"));
                     }

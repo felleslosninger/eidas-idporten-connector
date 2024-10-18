@@ -78,8 +78,21 @@ class MatchingServiceClientTest {
                 .andExpect(method(HttpMethod.GET))
                 .andExpect(header("X-API-KEY", "123"))
                 .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
-                .andRespond(withBadRequest());
+                .andRespond(withBadRequest().body("{\"code\":\"FREG-002\",\"message\":\"wrong country code\"}").contentType(MediaType.APPLICATION_JSON));
 
         assertThrows(HttpClientErrorException.class, () -> matchingServiceClient.match(new EIDASIdentifier("SE/NO/123"), "1990-01-01"));
+    }
+
+    @DisplayName("then return empty optional when wrong format error")
+    @Test
+    void testMatchReturnsEmtpyWhenFormatErrrort() {
+        mockServer.expect(requestTo(("http://localhost:8080/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=CHE")))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header("X-API-KEY", "123"))
+                .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
+                .andRespond(withBadRequest().body("{\"code\":\"FREG-001\",\"message\":\"wrong format\"}").contentType(MediaType.APPLICATION_JSON));
+        Optional<String> result = matchingServiceClient.match(new EIDASIdentifier("CH/NO/123"), "1990-01-01");
+        assertTrue(result.isEmpty());
+
     }
 }
