@@ -5,13 +5,17 @@ import no.idporten.eidas.connector.logging.AuditService;
 import no.idporten.eidas.connector.service.SpecificConnectorService;
 import no.idporten.eidas.lightprotocol.messages.LightRequest;
 import no.idporten.sdk.oidcserver.OpenIDConnectIntegration;
+import no.idporten.sdk.oidcserver.protocol.AuthorizationResponse;
 import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
+import no.idporten.sdk.oidcserver.protocol.RedirectedResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.net.URI;
 
 import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST;
 import static org.hamcrest.Matchers.containsString;
@@ -52,6 +56,39 @@ class CitizenCountryControllerTest {
 
 
         verify(auditService, times(1)).auditLightRequest(any(LightRequest.class));
+    }
+
+    @Test
+    @DisplayName("if the countryid is empty, return error")
+    void testValidation() throws Exception {
+        PushedAuthorizationRequest authorizationRequest = mock(PushedAuthorizationRequest.class);
+
+        mockMvc.perform(post("/citizencountry")
+                        .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, authorizationRequest)
+                        .formField("action", "next"))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().string(containsString("Please select a country")));
+
+
+        verifyNoInteractions(auditService);
+    }
+
+    @Test
+    @DisplayName("if the user cancels, return with access_denied")
+    void testCancel() throws Exception {
+        PushedAuthorizationRequest authorizationRequest = mock(PushedAuthorizationRequest.class);
+        when(openIDConnectSdk.errorResponse(any(), any(), any())).thenReturn(mock(AuthorizationResponse.class));
+        RedirectedResponse redirectedResponse = mock(RedirectedResponse.class);
+        when(openIDConnectSdk.createClientResponse(any())).thenReturn(redirectedResponse);
+        when(redirectedResponse.toQueryRedirectUri()).thenReturn(URI.create("http://backToIdporten"));
+        mockMvc.perform(post("/citizencountry")
+                        .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, authorizationRequest)
+                        .formField("action", "cancel"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("http://backToIdporten"));
+
+
+        verifyNoInteractions(auditService);
     }
 
 

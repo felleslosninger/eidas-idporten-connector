@@ -31,7 +31,11 @@ public class WebExceptionControllerAdvice {
     public String handleSpecificConnectorException(HttpServletResponse response, HttpSession httpSession, SpecificConnectorException e) {
         log.warn("SpecificConnectorException occurred for request: {} ", e.getMessage());
         try {
-            sendHttpResponse(openIDConnectSdk.createClientResponse(openIDConnectSdk.errorResponse((PushedAuthorizationRequest) httpSession.getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST), OAuth2Exception.SERVER_ERROR, e.getMessage())), response);
+            if ("access_denied".equals(e.getErrorCode())) {
+                sendHttpResponse(openIDConnectSdk.createClientResponse(openIDConnectSdk.errorResponse((PushedAuthorizationRequest) httpSession.getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST), e.getErrorCode(), e.getMessage())), response);
+            } else {
+                sendHttpResponse(openIDConnectSdk.createClientResponse(openIDConnectSdk.errorResponse((PushedAuthorizationRequest) httpSession.getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST), OAuth2Exception.SERVER_ERROR, e.getMessage())), response);
+            }
         } catch (IOException ex) {
             log.error("Error sending response: {}", ex.getMessage());
             return "error";
@@ -53,6 +57,10 @@ public class WebExceptionControllerAdvice {
     }
 
     protected void sendHttpResponse(ClientResponse clientResponse, HttpServletResponse response) throws IOException {
+        if (response.isCommitted()) {
+            log.warn("Response is already committed, cannot send redirect or write response.");
+            return;
+        }
         switch (clientResponse) {
             case RedirectedResponse redirectedResponse ->
                     response.sendRedirect(redirectedResponse.toQueryRedirectUri().toString());
