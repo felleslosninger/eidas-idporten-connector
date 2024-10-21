@@ -17,6 +17,8 @@ spring:
 eidas:
   countries:
     test: true
+  included:
+    - NO # hack for ikkje få inn alle andre land sidan norge ikkje er i lista
   eu-connector:
     redirect-uri: https://connector.eidasnode.dev/SpecificConnectorRequest
   cache:

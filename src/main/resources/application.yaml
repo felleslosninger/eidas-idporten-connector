@@ -59,11 +59,36 @@ spring:
 eidas:
   countries:
     included:
-      - SE
-      - IS
-      - DK
+      - AT
       - BE
+      - BE
+      - BG
+      - CY
       - CZ
+      - CZ
+      - DK
+      - EE
+      - EL
+      - ES
+      - EU
+      - FI
+      - FR
+      - HR
+      - IS
+      - IT
+      - IT
+      - LI
+      - LT
+      - LU
+      - LV
+      - MT
+      - NL
+      - PL
+      - PT
+      - RO
+      - SE
+      - SK
+      - SL
     test: false
   eu-connector:
     issuer-name: ${eidas.cache.request-issuer-name}

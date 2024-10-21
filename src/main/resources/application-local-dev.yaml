@@ -28,6 +28,8 @@ digdir:
 eidas:
   countries:
     test: true
+    included:
+      - NO # hack for ikkje få inn alle andre land sidan norge ikkje er i lista
   eu-connector:
     redirect-uri: http://eidas-connector:8083/SpecificConnectorRequest
   oidc-server:
