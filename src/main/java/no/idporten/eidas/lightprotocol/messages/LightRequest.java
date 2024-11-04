@@ -33,7 +33,8 @@ public class LightRequest implements ILightRequest, AuditDataProvider {
     private String relayState;
     private String providerName;
     private String spType;
-    private String nameIdFormat;
+    @Builder.Default
+    private String nameIdFormat = "unspecified";
     private String requesterId;
     private String spCountryCode;
     @XmlElementWrapper(name = "requestedAttributes")
