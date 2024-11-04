@@ -3,6 +3,7 @@ package no.idporten.eidas.lightprotocol.messages;
 import eu.eidas.auth.commons.attribute.ImmutableAttributeMap;
 import eu.eidas.auth.commons.light.ILevelOfAssurance;
 import eu.eidas.auth.commons.light.ILightRequest;
+import eu.eidas.auth.commons.protocol.impl.SamlNameIdFormat;
 import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.*;
 import lombok.*;
@@ -34,7 +35,7 @@ public class LightRequest implements ILightRequest, AuditDataProvider {
     private String providerName;
     private String spType;
     @Builder.Default
-    private String nameIdFormat = "unspecified";
+    private String nameIdFormat = SamlNameIdFormat.UNSPECIFIED.getNameIdFormat();
     private String requesterId;
     private String spCountryCode;
     @XmlElementWrapper(name = "requestedAttributes")

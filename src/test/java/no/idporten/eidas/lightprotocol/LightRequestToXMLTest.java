@@ -39,7 +39,7 @@ class LightRequestToXMLTest {
                     () -> assertTrue(xml.contains("name"), "should include requested attribute name"),
                     () -> assertTrue(xml.contains(LevelOfAssurance.EIDAS_LOA_LOW), "should include level of assurance LOW"),
                     () -> assertTrue(xml.contains(LevelOfAssurance.EIDAS_LOA_HIGH), "should include level of assurance HIGH"),
-                    () -> assertTrue(xml.contains("unspecified"), "should include unspecified as nameidformat")
+                    () -> assertTrue(xml.contains("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"), "should include unspecified as nameidformat")
             );
 
 
