@@ -91,6 +91,7 @@ public class SpecificConnectorService {
                 .issuer(euConnectorProperties.getIssuer())
                 .relayState(UUID.randomUUID().toString())
                 .spType("public")
+                .providerName("Norwegian National Identity Authority")
                 .build();
     }
 

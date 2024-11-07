@@ -127,6 +127,7 @@ class SpecificConnectorServiceTest {
         assertEquals(LevelOfAssurance.EIDAS_LOA_HIGH, result.getLevelOfAssurance());
         assertEquals("issuerId", result.getIssuer());
         assertEquals("public", result.getSpType());
+        assertEquals("Norwegian National Identity Authority", result.getProviderName());
         assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME)));
         assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME)));
         assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH)));
