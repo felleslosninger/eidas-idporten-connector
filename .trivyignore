@@ -3,3 +3,4 @@ CVE-2024-26308 # event log - commons-compress: OutOfMemoryError unpacking broken
 CVE-2024-34156 # golang - decoding
 CVE-2024-38816 # spring webmvc path traversal
 CVE-2024-47554 # xml stream
+CVE-2024-47535 # io.netty:netty-common, Fixed 4.1.115. Windows app, not us.
