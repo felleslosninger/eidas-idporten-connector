@@ -13,6 +13,7 @@ class EIDASIdentifierTest {
     void whenValidFormat_thenIsValidReturnsTrue() {
         assertTrue(EIDASIdentifier.isValid("AA/BB/1234567"));
         assertTrue(EIDASIdentifier.isValid("XY/ZZ/vivaldi-æøå-987654321"));
+        assertTrue(EIDASIdentifier.isValid("XY/ZZ/ichbineinosterreicherin="));
     }
 
     @Test
