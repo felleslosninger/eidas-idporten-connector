@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 @Data
 public class EIDASIdentifier {
-    private static final String EIDAS_USERIDENTIFIER_FORMAT_REGEX = "^[A-Z]{2}/[A-Z]{2}/[\\p{L}0-9-]+$";
+    private static final String EIDAS_USERIDENTIFIER_FORMAT_REGEX = "^[A-Z]{2}/[A-Z]{2}/[\\p{L}0-9-=]+$";
     private static final Pattern PATTERN = Pattern.compile(EIDAS_USERIDENTIFIER_FORMAT_REGEX);
     private String foreignIdentifier;
     private String subjectCountryCode;
