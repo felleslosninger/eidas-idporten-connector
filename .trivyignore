@@ -6,3 +6,5 @@ CVE-2024-47554 # xml stream
 CVE-2024-47535 # io.netty:netty-common, Fixed 4.1.115. Windows app, not us.
 CVE-2024-45337 # golang igjen
 CVE-2024-45338 # og atter golang
+CVE-2025-24970 # netty
+CVE-2024-57699 # jsonsmart
