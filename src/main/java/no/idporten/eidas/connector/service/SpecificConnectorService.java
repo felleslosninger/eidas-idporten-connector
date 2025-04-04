@@ -126,13 +126,13 @@ public class SpecificConnectorService {
     public Authorization getAuthorization(LightResponse lightResponse) {
         Map<String, String> eidasClaims = extractEidasClaims(lightResponse);
         Authorization.AuthorizationBuilder authorizationBuilder = Authorization.builder()
+                .sub(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM))
                 .acr(levelOfAssuranceHelper.eidasAcrToIdportenAcr(lightResponse.getLevelOfAssurance()))
                 .amr(EIDAS_AMR);
 
         eidasClaims.forEach(authorizationBuilder::attribute);
         Optional<String> userMatch = matchUser(eidasClaims);
-        userMatch.ifPresentOrElse(s -> authorizationBuilder.attribute(PID_CLAIM, s).sub(s),
-                () -> authorizationBuilder.sub(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)));
+        userMatch.ifPresent(s -> authorizationBuilder.attribute(PID_CLAIM, s));
 
         authorizationBuilder.attribute(IDPORTEN_EIDAS_CITIZEN_COUNTRY_CODE,
                 //already validated claim value
