@@ -27,7 +27,7 @@
         <joda-time.version>2.14.0</joda-time.version>
         <icu4j-countrycode-converter.version>77.1</icu4j-countrycode-converter.version>
         <surefire.plugin.version>3.5.3</surefire.plugin.version>
-        <idporten-oidc-server-redis-cache-starter.version>0.2.0</idporten-oidc-server-redis-cache-starter.version>
+        <idporten-oidc-server-redis-cache-starter.version>1.0.2</idporten-oidc-server-redis-cache-starter.version>
     </properties>
     <dependencies>
 
