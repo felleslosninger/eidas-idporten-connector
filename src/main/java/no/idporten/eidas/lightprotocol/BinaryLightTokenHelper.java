@@ -25,10 +25,9 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import no.idporten.eidas.connector.exceptions.ErrorCodes;
 import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
-import org.joda.time.DateTime;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Calendar;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -120,7 +119,7 @@ public class BinaryLightTokenHelper {
         final String lightTokenId = UUID.randomUUID().toString();
         return new LightToken.Builder().id(lightTokenId)
                 .issuer(issuerName)
-                .createdOn(new DateTime(Calendar.getInstance().getTimeInMillis()))
+                .createdOn(ZonedDateTime.now())
                 .build();
     }
 

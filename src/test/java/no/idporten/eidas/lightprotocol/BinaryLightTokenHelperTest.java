@@ -4,9 +4,10 @@ package no.idporten.eidas.lightprotocol;
 import eu.eidas.auth.commons.light.impl.LightToken;
 import eu.eidas.auth.commons.tx.BinaryLightToken;
 import jakarta.servlet.http.HttpServletRequest;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -32,7 +33,7 @@ class BinaryLightTokenHelperTest {
 
     @Test
     void encodeBinaryLightTokenBase64() {
-        LightToken lightToken = LightToken.builder().id("113df59f-3113-4a98-a839-72a4b07af79b").issuer("specificCommunicationDefinitionConnectorserviceRequest").createdOn(DateTime.now())
+        LightToken lightToken = LightToken.builder().id("113df59f-3113-4a98-a839-72a4b07af79b").issuer("specificCommunicationDefinitionConnectorserviceRequest").createdOn(ZonedDateTime.now())
                 .build();
         String tokenBytes = "c3BlY2lmaWNDb21tdW5pY2F0aW9uRGVmaW5pdGlvbkNvbm5lY3RvcnNlcnZpY2VSZXF1ZXN0fDExM2RmNTlmLTMxMTMtNGE5OC1hODM5LTcyYTRiMDdhZjc5YnwyMDI0LTA1LTI5IDA5OjQwOjM0IDY1M3xCWXM0Yk9zcnF3bCtQT2NlUUJHMms5eDNzZWZTVEhOKzFQbTMzamNCT2ZjPQ==";
         BinaryLightToken binaryLightToken = new BinaryLightToken(lightToken, tokenBytes.getBytes());
