@@ -16,7 +16,7 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <open.telemetry.version>1.49.0</open.telemetry.version>
+        <open.telemetry.version>1.50.0</open.telemetry.version>
         <logstash.logback.version>8.1</logstash.logback.version>
         <idporten-audit.version>2.5.0</idporten-audit.version>
         <idporten-access-log.version>2.7.2</idporten-access-log.version>
