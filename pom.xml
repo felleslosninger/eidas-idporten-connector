@@ -28,7 +28,7 @@
         <icu4j-countrycode-converter.version>77.1</icu4j-countrycode-converter.version>
         <surefire.plugin.version>3.5.3</surefire.plugin.version>
         <idporten-oidc-server-redis-cache-starter.version>1.0.2</idporten-oidc-server-redis-cache-starter.version>
-        <compiler-plugin.version>3.14.0</compiler-plugin.version>
+        <maven.compiler-plugin.version>3.14.0</maven.compiler-plugin.version>
         <maven.compiler.proc>full</maven.compiler.proc>
     </properties>
     <dependencies>
@@ -148,7 +148,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${compiler-plugin.version}</version> <!-- Ny og støtter Java 21 -->
+                <version>${maven.compiler-plugin.version}</version> <!-- Ny og støtter Java 21 -->
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
