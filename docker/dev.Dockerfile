@@ -1,4 +1,4 @@
-FROM maven:3.9-eclipse-temurin-23 AS builder
+FROM maven:3.9-eclipse-temurin-24 AS builder
 
 ARG GIT_PACKAGE_TOKEN
 ARG GIT_PACKAGE_USERNAME
@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/root/.m2/repository mvn -B package  dependency:go
 
 RUN curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar 
 
-FROM eclipse-temurin:23-jre-noble
+FROM eclipse-temurin:24-jre-noble
 
 ARG APPLICATION=eidas-idporten-connector
 RUN mkdir /var/log/${APPLICATION}

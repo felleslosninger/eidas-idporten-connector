@@ -14,7 +14,7 @@
     <name>eidas-idporten-connector</name>
     <description>Specific eidas-connector for Norway</description>
     <properties>
-        <java.version>23</java.version>
+        <java.version>24</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <open.telemetry.version>1.50.0</open.telemetry.version>
         <logstash.logback.version>8.1</logstash.logback.version>
