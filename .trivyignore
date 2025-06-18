@@ -1,10 +1,2 @@
-CVE-2024-25710 # event log - commons-compress: Denial of service caused by an infinite
-CVE-2024-26308 # event log - commons-compress: OutOfMemoryError unpacking broken Pack200
-CVE-2024-34156 # golang - decoding
-CVE-2024-38816 # spring webmvc path traversal
-CVE-2024-47554 # xml stream
-CVE-2024-47535 # io.netty:netty-common, Fixed 4.1.115. Windows app, not us.
-CVE-2024-45337 # golang igjen
-CVE-2024-45338 # og atter golang
-CVE-2025-24970 # netty
-CVE-2024-57699 # jsonsmart
+#trivyignore file for ignoring specific vulnerabilities in the project
+CVE-2025-22874 # gobinary crypto/x509 fixed in version 1.24.4
