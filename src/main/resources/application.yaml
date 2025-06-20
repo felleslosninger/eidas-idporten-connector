@@ -10,6 +10,10 @@ server:
   error:
     whitelabel:
       enabled: true
+idporten:
+  static:
+    design:
+      version: /latest
 # Spring Boot Actuator
 management:
   server:
