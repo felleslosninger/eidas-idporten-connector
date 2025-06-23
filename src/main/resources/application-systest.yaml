@@ -12,8 +12,13 @@ spring:
   data:
     redis:
       password: ${REDIS_PASSWORD}
-      port: 6379
-      host: eidas-redis-sentinel-master
+      sentinel:
+        master: mymaster
+        password: ${REDIS_PASSWORD}
+        nodes:
+          - eidas-redis-sentinel-node-0.eidas-redis-sentinel-headless:26379
+          - eidas-redis-sentinel-node-1.eidas-redis-sentinel-headless:26379
+          - eidas-redis-sentinel-node-2.eidas-redis-sentinel-headless:26379
 eidas:
   countries:
     test: true

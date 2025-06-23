@@ -10,6 +10,11 @@ server:
   error:
     whitelabel:
       enabled: true
+idporten:
+  static:
+    design:
+      themeId: idporten
+      version: v0.8.3
 # Spring Boot Actuator
 management:
   server:

@@ -4,8 +4,9 @@
 
 
 <div th:fragment="toplogo" class="box--over">
-    <img th:src="@{/img/logo/logo-{themeId}.svg(themeId=idporten)}" src="../img/logo/logo-idporten.svg"
-         th:alt="#{no.idporten.themed.logo.alt}">
+    <img th:src="${staticResourcesBaseUri + '/img/logo/logo-' + themeId + '.svg'}"
+         src="https://static.idporten.no/latest/img/logo/logo-idporten.svg"
+         th:alt="#{no.idporten.themed.logo.alt}" />
 </div>
 
 
