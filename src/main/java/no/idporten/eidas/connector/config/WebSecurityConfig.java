@@ -16,7 +16,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                //because we're going all over the eu..maybe dynamic csrf one day
+                //look at this https://digdir.atlassian.net/browse/ID-5536
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) ->
                         authorize
