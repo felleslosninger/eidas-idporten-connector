@@ -56,8 +56,9 @@ spring:
           no-transform: true
   session:
     store-type: redis
+#'unsafe-inline' because of the form post response
 idporten-security:
-  csp-header: default-src 'self' https://static.idporten.no; script-src 'self' https://static.idporten.no; img-src 'self' https://static.idporten.no data:; font-src 'self' https://static.idporten.no data:; frame-src 'self'; frame-ancestors 'none';
+  csp-header: default-src 'self' https://static.idporten.no; script-src 'self' https://static.idporten.no 'unsafe-inline'; img-src 'self' https://static.idporten.no data:; font-src 'self' https://static.idporten.no data:; frame-src 'self'; frame-ancestors 'none'; form-action *;
 
 eidas:
   countries:
