@@ -39,6 +39,8 @@ digdir:
     log-dir:
     filters:
       bearer-token: false
+idporten-security:
+  csp-header: default-src 'self' https://static.idporten.no; script-src 'self' https://static.idporten.no; img-src 'self' https://static.idporten.no data:; font-src 'self' https://static.idporten.no data:; frame-src 'self'; frame-ancestors 'none';
 
 
 eidas:

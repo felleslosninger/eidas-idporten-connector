@@ -10,11 +10,6 @@ server:
   error:
     whitelabel:
       enabled: true
-idporten:
-  static:
-    design:
-      themeId: idporten
-      version: v0.8.3
 # Spring Boot Actuator
 management:
   server:
@@ -61,6 +56,9 @@ spring:
           no-transform: true
   session:
     store-type: redis
+idporten-security:
+  csp-header: default-src 'self' https://static.idporten.no; script-src 'self' https://static.idporten.no; img-src 'self' https://static.idporten.no data:; font-src 'self' https://static.idporten.no data:; frame-src 'self'; frame-ancestors 'none';
+
 eidas:
   countries:
     included:
@@ -141,6 +139,10 @@ eidas:
     base-uri: http://eidas-freg-gateway-service:8080
     api-key: ${FREG_GW_API_KEY}
 digdir:
+  static:
+    design:
+      themeId: idporten
+      version: v0.8.3
   audit:
     application-name: ${spring.application.name}
     application-environment: ${spring.application.environment}

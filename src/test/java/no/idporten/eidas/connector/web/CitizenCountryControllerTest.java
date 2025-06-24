@@ -1,6 +1,8 @@
 package no.idporten.eidas.connector.web;
 
 import no.idporten.eidas.connector.config.EUCountriesProperties;
+import no.idporten.eidas.connector.config.StaticResourcesProperties;
+import no.idporten.eidas.connector.config.WebSecurityConfig;
 import no.idporten.eidas.connector.logging.AuditService;
 import no.idporten.eidas.connector.service.SpecificConnectorService;
 import no.idporten.eidas.lightprotocol.messages.LightRequest;
@@ -12,7 +14,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
@@ -27,16 +30,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(CitizenCountryController.class)
 @DisplayName("When calling the CitizenCountryController")
+@Import(WebSecurityConfig.class)
 class CitizenCountryControllerTest {
     @Autowired
     private MockMvc mockMvc;
-    @MockBean
+
+    @MockitoBean
+    private StaticResourcesProperties staticResourcesProperties;
+
+    @MockitoBean
     private OpenIDConnectIntegration openIDConnectSdk;
-    @MockBean
+    @MockitoBean
     private AuditService auditService;
-    @MockBean
+    @MockitoBean
     private SpecificConnectorService specificConnectorService;
-    @MockBean
+    @MockitoBean
     private EUCountriesProperties euCountriesProperties;
 
     @Test
