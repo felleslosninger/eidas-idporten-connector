@@ -7,6 +7,8 @@ import eu.eidas.auth.commons.EIDASStatusCode;
 import eu.eidas.auth.commons.EidasParameterKeys;
 import eu.eidas.auth.commons.light.ILightResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import no.idporten.eidas.connector.config.StaticResourcesProperties;
+import no.idporten.eidas.connector.config.WebSecurityConfig;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.connector.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.connector.integration.specificcommunication.service.OIDCRequestStateParams;
@@ -28,7 +30,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
@@ -43,20 +46,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ConnectorResponseController.class)
 @DisplayName("When calling the ProxyServiceRequestController")
+@Import(WebSecurityConfig.class)
 class ConnectorResponseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
+    private StaticResourcesProperties staticResourcesProperties;
+
+    @MockitoBean
     private SpecificCommunicationService specificCommunicationService;
-    @MockBean
+    @MockitoBean
     private OpenIDConnectIntegration openIDConnectSdk;
-    @MockBean
+    @MockitoBean
     private AuditService auditService;
-    @MockBean
+    @MockitoBean
     private SpecificConnectorService specificConnectorService;
-    @MockBean
+    @MockitoBean
     private EidasCacheProperties eidasCacheProperties;
 
     private final static String lightTokenId = "mockedLightTokenId";
@@ -83,6 +90,7 @@ class ConnectorResponseControllerTest {
         when(mockLightResponse.getStatus()).thenReturn(new Status("200", "OK", null, false));
         AuthorizationResponse authorizationResponse = mock(AuthorizationResponse.class);
         when(authorizationResponse.getState()).thenReturn(state);
+        when(staticResourcesProperties.getStaticResourcesBaseUri()).thenReturn("http://static.idporten.no/latest/");
     }
 
     @Test

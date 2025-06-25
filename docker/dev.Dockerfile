@@ -12,7 +12,7 @@ WORKDIR /home/app
 COPY pom.xml .
 COPY src ./src
 
-RUN --mount=type=cache,target=/root/.m2/repository mvn -B package  dependency:go-offline -Dmaven.gitcommitid.skip=true 
+RUN --mount=type=cache,target=/root/.m2/repository mvn -B package  dependency:go-offline -Dmaven.gitcommitid.skip=true -Dmaven.test.skip=true
 # -Dmaven.test.skip=true
 
 RUN curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar 
