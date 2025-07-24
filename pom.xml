@@ -24,7 +24,7 @@
         <lombok.version>1.18.38</lombok.version>
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
         <idporten-actuator-starter.version>2.0.0</idporten-actuator-starter.version>
-        <nimbus.oauth2-oidc-sdk.version>11.26</nimbus.oauth2-oidc-sdk.version>
+        <nimbus.oauth2-oidc-sdk.version>11.26.1</nimbus.oauth2-oidc-sdk.version>
         <icu4j-countrycode-converter.version>77.1</icu4j-countrycode-converter.version>
         <surefire.plugin.version>3.5.3</surefire.plugin.version>
         <idporten-oidc-server-redis-cache-starter.version>1.0.3</idporten-oidc-server-redis-cache-starter.version>
