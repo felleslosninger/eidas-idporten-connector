@@ -28,7 +28,7 @@ class SpecificConnectorServiceTest {
     @Mock
     private OIDCRequestCache oidcRequestCache;
     @Mock
-    private NobidSession matchingSession;
+    private NobidSession nobidSession;
 
     @Mock
     private FregGwMatchingServiceClient matchingServiceClient;
@@ -40,7 +40,7 @@ class SpecificConnectorServiceTest {
         when(euConnectorProperties.getIssuer()).thenReturn("issuerId");
         EidasUser eidasUser = new EidasUser(new EIDASIdentifier("SE/NO/1234"), "2000-12-1", null);
         when(matchingServiceClient.match(eidasUser)).thenReturn(new UserMatchFound(eidasUser, "123-abc"));
-        specificConnectorService = new SpecificConnectorService(euConnectorProperties, specificCommunicationServiceImpl, levelOfAssuranceHelper, oidcRequestCache, Optional.of(matchingServiceClient), matchingSession);
+        specificConnectorService = new SpecificConnectorService(euConnectorProperties, specificCommunicationServiceImpl, levelOfAssuranceHelper, oidcRequestCache, Optional.of(matchingServiceClient), nobidSession);
     }
 
   /*  @Test

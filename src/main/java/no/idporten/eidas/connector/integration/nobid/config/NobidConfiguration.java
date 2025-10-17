@@ -45,13 +45,13 @@ public class NobidConfiguration {
     @Bean
     NobidMatchingServiceClient matchingService(
             OidcProvider nobidClaimsProvider,
-            NobidSession matchingSession,
+            NobidSession nobidSession,
             ObjectMapper objectMapper,
             AuditService auditService
     ) {
         return new NobidMatchingServiceClient(
                 nobidClaimsProvider,
-                matchingSession,
+                nobidSession,
                 objectMapper,
                 auditService);
     }

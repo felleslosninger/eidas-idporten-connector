@@ -1,5 +1,8 @@
 package no.idporten.eidas.connector.integration.nobid.web;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.openid.connect.sdk.Nonce;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +36,7 @@ import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUT
 public class NobidCallbackController {
 
     private final AuthorizationResponseHelper authorizationResponseHelper;
-    private final NobidSession matchingSession;
+    private final NobidSession nobidSession;
     private final NobidMatchingServiceClient matchingServiceClient;
 
     /**
@@ -47,24 +50,45 @@ public class NobidCallbackController {
         log.info("Received Nobid callback for state={}", state);
 
         try {
-            OidcProtocolVerifiers protocolVerifiers = matchingSession.getOidcProtocolVerifiers();
+            OidcProtocolVerifiers protocolVerifiers = nobidSession.getOidcProtocolVerifiers();
             if (protocolVerifiers == null) {
                 throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Matching session missing at callback.");
             }
             if (!Objects.equals(protocolVerifiers.state().getValue(), state)) {
                 throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Invalid state in protocol verifies when integrating with nobid. Expected %s, got %s".formatted(protocolVerifiers.state(), state));
             }
-            //todo rydd i sesjonsparametre og rydd sesjonen ved feil og avslutning.
-            String levelOfAssurance = matchingSession.getLevelOfAssurance() != null ? matchingSession.getLevelOfAssurance() : "http://eidas.europa.eu/LoA/low"; //tmp
+            //todo get the token and validate it
+            String levelOfAssurance = nobidSession.getLevelOfAssurance() != null ? nobidSession.getLevelOfAssurance() : "http://eidas.europa.eu/LoA/low"; //tmp
+            EidasUser eidasUser = nobidSession.getEidasUser();
+            clearNobidSession();
+            //to the thing.
             PushedAuthorizationRequest parRequest = (PushedAuthorizationRequest) request.getSession().getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST);
             try {
-                authorizationResponseHelper.returnAuthorizationCode(request, response, levelOfAssurance, parRequest, matchingSession.getEidasUser(), null);//todo
+                authorizationResponseHelper.returnAuthorizationCode(request, response, levelOfAssurance, parRequest, eidasUser, null);//todo
             } catch (IOException e) {
                 throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Failed to return authorization code.", e);
             }
             return ResponseEntity.ok("ok");
         } finally {
-            matchingSession.setOidcProtocolVerifiers(null);
+            clearNobidSession();
+        }
+    }
+
+    private void clearNobidSession() {
+        nobidSession.setOidcProtocolVerifiers(null);
+        nobidSession.setEidasUser(null);
+        nobidSession.setPushedAuthorizationRequest(null);
+        nobidSession.setLevelOfAssurance(null);
+    }
+
+    private void validateSessionState(NobidSession session, String expectedState) {
+        if (session.getOidcProtocolVerifiers() == null) {
+            throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(),
+                    "Session state missing");
+        }
+        if (!Objects.equals(session.getOidcProtocolVerifiers().state().getValue(), expectedState)) {
+            throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(),
+                    "Invalid session state");
         }
     }
 
@@ -77,6 +101,25 @@ public class NobidCallbackController {
             return "redirect:http://localhost:7070/authorize?client_id=democlient1&request_uri=%s".formatted(redirectUrl);
         } else {
             return "foo";
+        }
+    }
+
+
+    private String validateAndExtractPidFromIdToken(String idToken, Nonce expectedNonce) {
+        try {
+            JWTClaimsSet claims = SignedJWT.parse(idToken).getJWTClaimsSet();
+            String nonceInToken = claims.getStringClaim("nonce");
+
+            if (!Objects.equals(nonceInToken, expectedNonce.getValue())) {
+                throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(),
+                        "Invalid nonce in ID token");
+            }
+
+            String pid = claims.getStringClaim("pid");
+            return pid;
+        } catch (Exception e) {
+            throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(),
+                    "Failed to validate nonce in ID token", e);
         }
     }
 }

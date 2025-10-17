@@ -34,7 +34,7 @@ import java.util.Set;
 public class NobidMatchingServiceClient implements MatchingService {
 
     private final OidcProvider nobidClaimsProvider;
-    private final NobidSession matchingSession;
+    private final NobidSession nobidSession;
     private final ObjectMapper objectMapper;
     private final AuditService auditService;
 
@@ -53,8 +53,8 @@ public class NobidMatchingServiceClient implements MatchingService {
 
     private UserMatchResponse createParAndReturnState(EidasUser eidasUser) {
         OidcProtocolVerifiers protocolVerifiers = new OidcProtocolVerifiers("nobid");
-        matchingSession.setOidcProtocolVerifiers(protocolVerifiers);
-        matchingSession.setEidasUser(eidasUser);
+        nobidSession.setOidcProtocolVerifiers(protocolVerifiers);
+        nobidSession.setEidasUser(eidasUser);
         AuthenticationRequest parRequestToNobid = createNobidAuthenticationRequest(eidasUser, protocolVerifiers);
         try {
             return sendPushedAuthorizationRequest(parRequestToNobid);
@@ -72,6 +72,7 @@ public class NobidMatchingServiceClient implements MatchingService {
                 new ClientID(nobidClaimsProvider.clientId()),
                 nobidClaimsProvider.redirectUri());
         requestBuilder
+                .codeChallenge(protocolVerifiers.codeVerifier(), CodeChallengeMethod.S256)
                 .responseMode(nobidClaimsProvider.responseMode())
                 .endpointURI(nobidClaimsProvider.authorizationEndpoint())
                 .state(protocolVerifiers.state())
@@ -94,7 +95,7 @@ public class NobidMatchingServiceClient implements MatchingService {
     public UserMatchResponse sendPushedAuthorizationRequest(AuthenticationRequest internalRequest) throws Exception {
         ClientAuthentication clientAuthentication = ClientAuthenticationService.createClientAuthentication(nobidClaimsProvider);
         PushedAuthorizationRequest pushedAuthorizationRequest = new PushedAuthorizationRequest(nobidClaimsProvider.pushedAuthorizationRequestEndpoint(), clientAuthentication, internalRequest);
-        matchingSession.setPushedAuthorizationRequest(pushedAuthorizationRequest);
+        nobidSession.setPushedAuthorizationRequest(pushedAuthorizationRequest);
         auditService.auditSendPushedAuthorizationRequestToNobid(pushedAuthorizationRequest);
         HTTPRequest httpRequest = pushedAuthorizationRequest.toHTTPRequest();
         httpRequest.setConnectTimeout(getMillisAsIntSafely(nobidClaimsProvider.connectTimeout()));
@@ -148,4 +149,6 @@ public class NobidMatchingServiceClient implements MatchingService {
             return (int) millis;
         }
     }
+
+
 }
