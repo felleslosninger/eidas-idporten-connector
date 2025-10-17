@@ -49,7 +49,7 @@ public class SpecificConnectorService {
     private final LevelOfAssuranceHelper levelOfAssuranceHelper;
     private final OIDCRequestCache oidcRequestCache;
     private final Optional<MatchingService> matchingServiceClient;
-    private final NobidSession matchingSession;
+    private final NobidSession nobidSession;
 
     public String getEuConnectorRedirectUri() {
         return euConnectorProperties.getRedirectUri();
@@ -118,7 +118,7 @@ public class SpecificConnectorService {
         if (matchingServiceClient.isEmpty()) {
             return new UserMatchNotFound(eidasUser, "Matching service disabled");
         }
-        matchingSession.setLevelOfAssurance(lightResponse.getLevelOfAssurance());
+        nobidSession.setLevelOfAssurance(lightResponse.getLevelOfAssurance());
 
         return matchingServiceClient.get().match(eidasUser);
     }
