@@ -9,19 +9,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.connector.config.EidasClaims;
 import no.idporten.eidas.connector.config.EuConnectorProperties;
+import no.idporten.eidas.connector.domain.EidasUser;
 import no.idporten.eidas.connector.exceptions.ErrorCodes;
 import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
-import no.idporten.eidas.connector.integration.freggateway.service.MatchingServiceClient;
+import no.idporten.eidas.connector.integration.nobid.web.NobidSession;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.OIDCRequestCache;
 import no.idporten.eidas.connector.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationServiceImpl;
 import no.idporten.eidas.connector.logging.MDCFilter;
+import no.idporten.eidas.connector.matching.domain.UserMatchNotFound;
+import no.idporten.eidas.connector.matching.domain.UserMatchResponse;
+import no.idporten.eidas.connector.matching.service.MatchingService;
 import no.idporten.eidas.lightprotocol.BinaryLightTokenHelper;
 import no.idporten.eidas.lightprotocol.messages.LightRequest;
 import no.idporten.eidas.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.lightprotocol.messages.RequestedAttribute;
-import no.idporten.sdk.oidcserver.protocol.Authorization;
 import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
@@ -39,14 +42,14 @@ import static no.idporten.eidas.connector.config.EidasClaims.*;
 @Slf4j
 public class SpecificConnectorService {
 
-    protected static final String EIDAS_AMR = "eidas";
-    protected static final String PID_CLAIM = "pid";
+
 
     private final EuConnectorProperties euConnectorProperties;
     private final SpecificCommunicationServiceImpl specificCommunicationServiceImpl;
     private final LevelOfAssuranceHelper levelOfAssuranceHelper;
     private final OIDCRequestCache oidcRequestCache;
-    private final Optional<MatchingServiceClient> matchingServiceClient;
+    private final Optional<MatchingService> matchingServiceClient;
+    private final NobidSession matchingSession;
 
     public String getEuConnectorRedirectUri() {
         return euConnectorProperties.getRedirectUri();
@@ -110,33 +113,27 @@ public class SpecificConnectorService {
         return eidasClaims;
     }
 
-    protected Optional<String> matchUser(Map<String, String> eidasClaims) {
+    public UserMatchResponse matchUser(LightResponse lightResponse) {
+        EidasUser eidasUser = getEidasUser(lightResponse);
         if (matchingServiceClient.isEmpty()) {
-            return Optional.empty();
+            return new UserMatchNotFound(eidasUser, "Matching service disabled");
         }
+        matchingSession.setLevelOfAssurance(lightResponse.getLevelOfAssurance());
 
-        return matchingServiceClient.get().match(new EIDASIdentifier(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)),
-                eidasClaims.get(IDPORTEN_EIDAS_DATE_OF_BIRTH_CLAIM));
+        return matchingServiceClient.get().match(eidasUser);
     }
 
     private String getAttributeName(String definition) {
         return EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES.get(definition);
     }
 
-    public Authorization getAuthorization(LightResponse lightResponse) {
+    public EidasUser getEidasUser(LightResponse lightResponse) {
         Map<String, String> eidasClaims = extractEidasClaims(lightResponse);
-        Authorization.AuthorizationBuilder authorizationBuilder = Authorization.builder()
-                .sub(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM))
-                .acr(levelOfAssuranceHelper.eidasAcrToIdportenAcr(lightResponse.getLevelOfAssurance()))
-                .amr(EIDAS_AMR);
-
-        eidasClaims.forEach(authorizationBuilder::attribute);
-        Optional<String> userMatch = matchUser(eidasClaims);
-        userMatch.ifPresent(s -> authorizationBuilder.attribute(PID_CLAIM, s));
-
-        authorizationBuilder.attribute(IDPORTEN_EIDAS_CITIZEN_COUNTRY_CODE,
-                //already validated claim value
-                eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM).substring(0, 2));
-        return authorizationBuilder.build();
+        return new EidasUser(new EIDASIdentifier(eidasClaims.get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)),
+                eidasClaims.get(IDPORTEN_EIDAS_DATE_OF_BIRTH_CLAIM),
+                eidasClaims
+        );
     }
+
+
 }

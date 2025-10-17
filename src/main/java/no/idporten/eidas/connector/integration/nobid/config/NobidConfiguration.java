@@ -1,9 +1,12 @@
 package no.idporten.eidas.connector.integration.nobid.config;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import no.idporten.eidas.connector.integration.matching.MatchingService;
+import no.idporten.eidas.connector.integration.nobid.domain.OidcProvider;
 import no.idporten.eidas.connector.integration.nobid.service.NobidMatchingServiceClient;
+import no.idporten.eidas.connector.integration.nobid.web.NobidSession;
+import no.idporten.eidas.connector.logging.AuditService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -35,8 +38,22 @@ public class NobidConfiguration {
     }
 
     @Bean
-    MatchingService matchingService(RestClient.Builder nobidEndpointBuilder) {
-        return new NobidMatchingServiceClient(nobidEndpointBuilder);
+    OidcProvider nobidClaimsProvider(NobidProperties nobidProperties) {
+        return nobidProperties.matchingService();
+    }
+
+    @Bean
+    NobidMatchingServiceClient matchingService(
+            OidcProvider nobidClaimsProvider,
+            NobidSession matchingSession,
+            ObjectMapper objectMapper,
+            AuditService auditService
+    ) {
+        return new NobidMatchingServiceClient(
+                nobidClaimsProvider,
+                matchingSession,
+                objectMapper,
+                auditService);
     }
 
 }

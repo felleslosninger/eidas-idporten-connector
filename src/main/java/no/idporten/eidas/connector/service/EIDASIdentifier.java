@@ -27,6 +27,11 @@ public class EIDASIdentifier {
         }
     }
 
+
+    public String getFormattedEidasIdentifier() {
+        return "%s/%s/%s".formatted(subjectCountryCode, spCountryCode, foreignIdentifier);
+    }
+
     public static boolean isValid(String value) {
         if (!StringUtils.hasText(value)) {
             return false;

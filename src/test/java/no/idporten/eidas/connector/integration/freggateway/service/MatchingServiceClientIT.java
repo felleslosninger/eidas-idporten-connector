@@ -1,5 +1,9 @@
 package no.idporten.eidas.connector.integration.freggateway.service;
 
+import no.idporten.eidas.connector.domain.EidasUser;
+import no.idporten.eidas.connector.matching.domain.UserMatchFound;
+import no.idporten.eidas.connector.matching.domain.UserMatchNotFound;
+import no.idporten.eidas.connector.matching.domain.UserMatchResponse;
 import no.idporten.eidas.connector.service.EIDASIdentifier;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -8,10 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 @DisplayName("When calling freg")
 @SpringBootTest
@@ -20,22 +22,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MatchingServiceClientIT {
 
     @Autowired
-    private MatchingServiceClient matchingServiceClient;
+    private FregGwMatchingServiceClient matchingServiceClient;
 
     @Test
     @DisplayName("then match returns value when status OK")
     void testMatchReturnsValueIfOk() {
 
-        Optional<String> result = matchingServiceClient.match(new EIDASIdentifier("SE/NO/1634736525341-3"), "2000-01-01");
-        assertEquals(Optional.of("41810060822"), result);
+        UserMatchResponse userMatchResponse = matchingServiceClient.match(new EidasUser(
+                new EIDASIdentifier("SE/NO/1634736525341-3"),
+                "2000-01-01", null));
+        assertInstanceOf(UserMatchFound.class, userMatchResponse);
+        assertEquals("41810060822", ((UserMatchFound) userMatchResponse).pid());
     }
 
     @Test
     @DisplayName("then match returns empty optional when wrong format")
     void testMatchReturnsEmptyOptionalWhenWrongFormat() {
 
-        Optional<String> result = matchingServiceClient.match(new EIDASIdentifier("CH/NO/dff77f55-85a5-48ff-a3c1-aad4210a0bdb"), "2000-01-01");
-        assertTrue(result.isEmpty());
+        UserMatchResponse userMatchResponse = matchingServiceClient.match(new EidasUser(
+                new EIDASIdentifier("CH/NO/dff77f55-85a5-48ff-a3c1-aad4210a0bdb"),
+                "2000-01-01",
+                null));
+        assertInstanceOf(UserMatchNotFound.class, userMatchResponse);
+        assertEquals("user not found", ((UserMatchNotFound) userMatchResponse).message());
     }
 
 }

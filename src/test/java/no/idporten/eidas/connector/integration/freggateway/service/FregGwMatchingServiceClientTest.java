@@ -1,5 +1,9 @@
 package no.idporten.eidas.connector.integration.freggateway.service;
 
+import no.idporten.eidas.connector.domain.EidasUser;
+import no.idporten.eidas.connector.matching.domain.UserMatchFound;
+import no.idporten.eidas.connector.matching.domain.UserMatchNotFound;
+import no.idporten.eidas.connector.matching.domain.UserMatchResponse;
 import no.idporten.eidas.connector.service.EIDASIdentifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,14 +14,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureMockRestServiceServer;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
@@ -27,13 +29,13 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @SpringBootTest
 @AutoConfigureMockRestServiceServer
 @ExtendWith(MockitoExtension.class)
-class MatchingServiceClientTest {
-    @SpyBean
+class FregGwMatchingServiceClientTest {
+    @MockitoSpyBean
     private RestClient.Builder fregGatewayEndpointBuilder;
 
     @Autowired
     @InjectMocks
-    private MatchingServiceClient matchingServiceClient;
+    private FregGwMatchingServiceClient matchingServiceClient;
 
     private MockRestServiceServer mockServer;
 
@@ -45,54 +47,55 @@ class MatchingServiceClientTest {
     @Test
     @DisplayName("then match returns value when status OK")
     void testMatchReturnsEmptyOptionalWhenNoContent() {
-        mockServer.expect(requestTo(("http://localhost:8080/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=SWE")))
+        mockServer.expect(requestTo(("http://junit/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=SWE")))
                 .andExpect(method(HttpMethod.GET))
                 .andExpect(header("X-API-KEY", "123"))
                 .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
                 .andRespond(withSuccess("123456789", MediaType.TEXT_PLAIN));
 
-        Optional<String> result = matchingServiceClient.match(new EIDASIdentifier("SE/NO/123"), "1990-01-01");
+        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/123"), "1990-01-01", null));
         mockServer.verify();
-        assertEquals(Optional.of("123456789"), result);
+        assertInstanceOf(UserMatchFound.class, result);
+        assertEquals("123456789", ((UserMatchFound) result).pid());
     }
 
     @Test
     @DisplayName("then match returns optional emtpy when status NOT_FOUND")
     void testMatchReturnsEmtpyWhenStatusOkButEmpty() {
-        mockServer.expect(requestTo(("http://localhost:8080/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=SWE")))
+        mockServer.expect(requestTo(("http://junit/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=SWE")))
                 .andExpect(method(HttpMethod.GET))
                 .andExpect(header("X-API-KEY", "123"))
                 .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
                 .andRespond(withResourceNotFound());
 
-        Optional<String> result = matchingServiceClient.match(new EIDASIdentifier("SE/NO/123"), "1990-01-01");
+        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/123"), "1990-01-01", null));
 
-        assertTrue(result.isEmpty());
+        assertInstanceOf(UserMatchNotFound.class, result);
     }
 
 
     @DisplayName("then match throws exception when error status")
     @Test
     void testMatchThrowsExceptionWhenStatusNotOkOrNoContent() {
-        mockServer.expect(requestTo(("http://localhost:8080/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=SWE")))
+        mockServer.expect(requestTo(("http://junit/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=SWE")))
                 .andExpect(method(HttpMethod.GET))
                 .andExpect(header("X-API-KEY", "123"))
                 .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
                 .andRespond(withBadRequest().body("{\"code\":\"FREG-002\",\"message\":\"wrong country code\"}").contentType(MediaType.APPLICATION_JSON));
 
-        assertThrows(HttpClientErrorException.class, () -> matchingServiceClient.match(new EIDASIdentifier("SE/NO/123"), "1990-01-01"));
+        assertThrows(HttpClientErrorException.class, () -> matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/123"), "1990-01-01", null)));
     }
 
     @DisplayName("then return empty optional when wrong format error")
     @Test
     void testMatchReturnsEmtpyWhenFormatErrrort() {
-        mockServer.expect(requestTo(("http://localhost:8080/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=CHE")))
+        mockServer.expect(requestTo(("http://junit/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=CHE")))
                 .andExpect(method(HttpMethod.GET))
                 .andExpect(header("X-API-KEY", "123"))
                 .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
                 .andRespond(withBadRequest().body("{\"code\":\"FREG-001\",\"message\":\"wrong format\"}").contentType(MediaType.APPLICATION_JSON));
-        Optional<String> result = matchingServiceClient.match(new EIDASIdentifier("CH/NO/123"), "1990-01-01");
-        assertTrue(result.isEmpty());
+        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("CH/NO/123"), "1990-01-01", null));
+        assertInstanceOf(UserMatchNotFound.class, result);
 
     }
 }

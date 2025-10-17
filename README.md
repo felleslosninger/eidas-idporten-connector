@@ -60,3 +60,42 @@ sequenceDiagram
     IL ->> EIC: getToken
 
 ```    
+
+### Matching with Nobid (PAR + callback). Internal workings
+
+```mermaid
+sequenceDiagram
+    autonumber
+    box lightpink eidas-idporten-connector
+        participant CRC as ConnectorResponseController
+        participant SCS as SpecificConnectorService
+        participant NCC as NobidCallbackController
+        participant NMC as NobidMatchingServiceClient
+        participant AS as AuthorizationResponseService
+    end
+    participant NOB as Nobid Matching Service
+    note over CRC: Eidas login response (see sequence diagram above)
+    CRC ->> CRC: Extract lightprotocol response
+    CRC ->> SCS: Match user (EidasUser)
+    SCS ->> SCS: getEidasUser
+    SCS ->> NMC: Match user (EidasUser)
+    NMC ->> NOB: send PAR request (back channel)
+    NOB ->> NOB: store PAR request and return request_uri
+    NOB -->> NMC: par response with request_uri
+    NMC ->> NMC: matching required
+    NMC -->> SCS: UserMatchResult: UserMatchRedirect
+    SCS -->> CRC: UserMatchRedirect
+    CRC ->> NOB: redirect to Nobid with request_uri (front channel)
+    NOB ->> NOB: match user
+    NOB -->> NCC: /callback/nobid?code=...
+    NCC ->> NMC: getClaims
+    NMC ->> NOB: get token
+    NOB -->> NMC: token response w/ID-token
+    NMC ->> NMC: extract user claims
+    NMC -->> NCC: return result
+    NCC ->> AS: generateAuthorizationResponse
+    AS -->> NCC: authorizationResponse
+    note over NCC: return authorization code
+
+
+```
