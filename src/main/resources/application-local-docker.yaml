@@ -51,9 +51,20 @@ eidas:
     response-secret: mySecretConnectorResponse
     request-secret: mySecretConnectorRequest
   freg-gw:
+    enabled: false
     base-uri: http://freg-gateway:8080
     api-key: addf4903-9b76-47ca-b6f5-beb937cab8bb
     demo-country-code-map:
       CA: SWE
+  nobid:
+    enabled: true
+    matching-service:
+      id: nobid
+      issuer: http://localhost:8080
+      par-endpoint: ${eidas.nobid.issuer}/par
+      client-id: democlient1
+      client-secret: secret
+      redirect-uri: http://eidas-connector:8083/nobid/callback
+
 server:
   port: 8086

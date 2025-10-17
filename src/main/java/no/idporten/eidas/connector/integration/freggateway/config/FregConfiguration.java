@@ -1,8 +1,9 @@
 package no.idporten.eidas.connector.integration.freggateway.config;
 
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import no.idporten.eidas.connector.integration.freggateway.service.MatchingServiceClient;
+import no.idporten.eidas.connector.integration.freggateway.service.FregGwMatchingServiceClient;
 import no.idporten.eidas.connector.service.CountryCodeConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,11 +20,12 @@ import java.util.Optional;
 
 @Configuration
 @EnableConfigurationProperties(FregProperties.class)
-@ConditionalOnProperty(prefix = "eidas.freg-gw", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "eidas.freg-gw", name = "enabled", havingValue = "true")
 @Slf4j
 public class FregConfiguration {
     @Value("${spring.application.environment:prod}")
     private String environment;
+
 
     @Bean
     RestClient.Builder fregGatewayEndpointBuilder(FregProperties fregProperties) {
@@ -39,9 +41,15 @@ public class FregConfiguration {
                 .baseUrl(fregProperties.getBaseUri().toString());
     }
 
+
     @Bean
-    MatchingServiceClient matchingService(RestClient.Builder fregGatewayEndpointBuilder, FregProperties fregProperties) {
-        return new MatchingServiceClient(fregGatewayEndpointBuilder, new CountryCodeConverter(Optional.ofNullable(fregProperties.getDemoCountryCodeMap())));
+    FregGwMatchingServiceClient matchingService(RestClient.Builder fregGatewayEndpointBuilder, FregProperties fregProperties) {
+        return new FregGwMatchingServiceClient(fregGatewayEndpointBuilder, new CountryCodeConverter(Optional.ofNullable(fregProperties.getDemoCountryCodeMap())));
+    }
+
+    @PostConstruct
+    void logMe() {
+        log.info("FregGateway integration enabled");
     }
 
 }

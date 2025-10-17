@@ -15,7 +15,7 @@ spring:
     log-startup-info: true
   data:
     redis:
-      port: 6400
+      port: 6399
       host: localhost
   devtools:
     restart:
@@ -51,13 +51,13 @@ eidas:
           - http://localhost:8888/authorize/response
           - http://127.0.0.1:8888/authorize/response
   freg-gw:
-    enabled: true
+    enabled: false
     base-uri: http://localhost:7799
     api-key: addf4903-9b76-47ca-b6f5-beb937cab8bb
     demo-country-code-map:
       CA: SWE
   nobid:
-    enabled: false
+    enabled: true
     matching-service:
       id: nobid
       issuer: http://c2id:8080
@@ -69,7 +69,7 @@ eidas:
       scopes:
         - openid
       client-secret: myvery1234long123secret123so123you123know
-      redirect-uri: http://eidas-idporten-connector:8088/nobid/callback
+      redirect-uri: http://eidas-idporten-connector:8088/callback/nobid
       client-authenticaction-method: client_secret_basic
   cache:
     secret: mySecretConnectorRequest

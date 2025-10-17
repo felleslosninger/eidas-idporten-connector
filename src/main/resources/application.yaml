@@ -139,6 +139,11 @@ eidas:
     connect-timeout-ms: 5000
     base-uri: http://eidas-freg-gateway-service:8080
     api-key: ${FREG_GW_API_KEY}
+  nobid:
+    enabled: false
+    read-timeout: 5s
+    connect-timeout: 5s
+
 digdir:
   static:
     design:

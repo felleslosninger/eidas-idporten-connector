@@ -12,6 +12,9 @@ import no.idporten.sdk.oidcserver.audit.OpenIDConnectAuditLogger;
 import no.idporten.sdk.oidcserver.protocol.*;
 import org.springframework.stereotype.Service;
 
+import static no.idporten.eidas.connector.logging.AuditService.AuditIdPattern.NOBID_PUSHED_AUTHORIZATION_RESPONSE;
+import static no.idporten.eidas.connector.logging.AuditService.AuditIdPattern.NOBID_SEND_PUSHED_AUTHORIZATION_REQUEST;
+
 @Service
 @RequiredArgsConstructor
 public class AuditService implements OpenIDConnectAuditLogger {
@@ -36,7 +39,9 @@ public class AuditService implements OpenIDConnectAuditLogger {
         OIDC_USERINFO_RESPONSE("%s-SEND-USERINFO-RESPONSE"),
         EIDAS_CONNECTOR_COUNTRY_SELECTION("%s-SELECT-COUNTRY"),
         EIDAS_LIGHT_REQUEST("%s-LIGHT-REQUEST"),
-        EIDAS_LIGHT_RESPONSE("%s-LIGHT-RESPONSE");
+        EIDAS_LIGHT_RESPONSE("%s-LIGHT-RESPONSE"),
+        NOBID_SEND_PUSHED_AUTHORIZATION_REQUEST("NOBID-SEND-PUSHED-AUTHORIZATION-REQUEST"),
+        NOBID_PUSHED_AUTHORIZATION_RESPONSE("NOBID-PUSHED-AUTHORIZATION-RESPONSE");
 
         private final String pattern;
 
@@ -45,6 +50,9 @@ public class AuditService implements OpenIDConnectAuditLogger {
         }
     }
 
+    private static final String ENDPOINT_URI = "endpoint_uri";
+    private static final String PUSHED_AUTHORIZATION_REQUEST = "pushed_authorization_request";
+    private static final String PUSHED_AUTHORIZATION_RESPONSE = "pushed_authorization_response";
     private void log(AuditIdPattern auditIdPattern, String auditDataAttribute, AuditDataProvider auditDataProvider) {
         log(auditIdPattern, auditDataAttribute, auditDataProvider, null);
     }
@@ -132,6 +140,38 @@ public class AuditService implements OpenIDConnectAuditLogger {
 
     public void auditLightResponse(LightResponse lightResponse, String relatedTraceid) {
         log(AuditIdPattern.EIDAS_LIGHT_RESPONSE, "light_response", lightResponse, relatedTraceid);
+    }
+
+    /**
+     * Audit a pushed authorization request to the nobid OIDC provider.
+     *
+     * @param authorizationRequest pushed authorization request
+     */
+    public void auditSendPushedAuthorizationRequestToNobid(com.nimbusds.oauth2.sdk.PushedAuthorizationRequest authorizationRequest) {
+        auditLogger.log(AuditEntry.builder()
+                .auditId(NOBID_SEND_PUSHED_AUTHORIZATION_REQUEST.auditIdentifier())
+                .clientId(authorizationRequest.getAuthorizationRequest() != null ? authorizationRequest.getAuthorizationRequest().getClientID().getValue() : null)
+                .attribute(ENDPOINT_URI, authorizationRequest.getEndpointURI())
+                .attribute(PUSHED_AUTHORIZATION_REQUEST, authorizationRequest.getAuthorizationRequest().toParameters())
+                .logNullAttributes(false)
+                .build());
+    }
+
+    /**
+     * Audit a response to a pushed authorization request from an OIDC provider.
+     *
+     * @param authorizationResponse pushed authorization response
+     */
+    public void auditPushedAuthorizationResponseFromNobid(String clientId, com.nimbusds.oauth2.sdk.PushedAuthorizationResponse authorizationResponse) {
+        auditLogger.log(AuditEntry.builder()
+                .auditId(NOBID_PUSHED_AUTHORIZATION_RESPONSE.auditIdentifier())
+                .clientId(clientId)
+                .attribute(PUSHED_AUTHORIZATION_RESPONSE,
+                        authorizationResponse.indicatesSuccess()
+                                ? authorizationResponse.toSuccessResponse().toJSONObject()
+                                : authorizationResponse.toErrorResponse().getErrorObject().toJSONObject())
+                .logNullAttributes(false)
+                .build());
     }
 
 }

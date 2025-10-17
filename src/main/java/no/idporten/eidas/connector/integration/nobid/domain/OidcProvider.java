@@ -3,184 +3,65 @@ package no.idporten.eidas.connector.integration.nobid.domain;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
-import com.nimbusds.oauth2.sdk.jarm.JARMValidator;
-import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.net.URI;
+import java.time.Duration;
 import java.util.*;
 
 /**
- * Abstract, INTERNAL representation of an oidc provider ID-porten is integrating with.
+ * Representation of an OIDC provider eidas connector is integrating with.
  */
-@Data
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class OidcProvider implements Serializable {
+public record OidcProvider(
+        @NotEmpty String id,
+        boolean enabled,
+        List<String> acrValues,
+        List<String> amr,
+        @NotEmpty URI issuer,
+        @NotEmpty URI authorizationEndpoint,
+        URI pushedAuthorizationRequestEndpoint,
+        @NotEmpty URI tokenEndpoint,
+        URI jwksEndpoint,
+        @DefaultValue("5m") Duration jwksCacheRefresh,
+        @DefaultValue("60m") Duration jwksCacheLifetime,
+        @DefaultValue("2s") Duration connectTimeout,
+        @DefaultValue("5s") Duration readTimeout,
+        @NotEmpty String clientId,
+        @NotEmpty String clientSecret,
+        @NotNull ClientAuthenticationMethod clientAuthenticationMethod,
+        Set<String> scopes,
+        @NotNull ResponseMode responseMode,
+        Map<String, String> customParameters,
+        Set<String> cancelErrorCodes,
+        Set<String> requiredClaims,
+        Map<String, String> claimsMapping,
+        @NotEmpty Set<JWSAlgorithm> jwsAlgorithms,
+        @NotEmpty URI redirectUri
+) implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 141594090657324127L;
-    @NotEmpty
-    @EqualsAndHashCode.Include
-    private String id;
-    /**
-     * Disables or enables the eid. Default is true.
-     */
-    @Builder.Default
-    private boolean enabled = true;
 
-    @Builder.Default
-    private List<String> acrValues = new ArrayList<>();
-
-    /**
-     * List of amr values to be used for this eid.  Uses amr claim from id_token if not set.  Last resort is to
-     * use {@link #id}.
-     */
-    @Builder.Default
-    private List<String> amr = new ArrayList<>();
-
-    /**
-     * The name to be displayed in the selector
-     */
-    @NotEmpty
-    private String displayName;
-
-    /**
-     * The issuer of the eid
-     */
-    @NotEmpty
-    private String issuer;
-
-    /**
-     * The authorization path of the eid
-     */
-    @NotEmpty
-    private String authorizationEndpoint;
-
-    /**
-     * The URI to the pushed authorization endpoint.  Optional.
-     */
-    private String pushedAuthorizationRequestEndpoint;
-
-    /**
-     * The token path of the eid
-     */
-    @NotEmpty
-    private String tokenEndpoint;
-
-    /**
-     * The jwks path of the eid
-     * Not mandatory..yet
-     */
-    private String jwksEndpoint;
-
-    /**
-     * JWKS cache refresh in minutes
-     */
-    @Min(1)
-    @Builder.Default
-    private int jwksCacheRefreshMinutes = 5;
-    /**
-     * JWKS cache lifetime in minutes
-     */
-    @Min(1)
-    @Builder.Default
-    private int jwksCacheLifetimeMinutes = 60;
-
-    /**
-     * The connect timeout in millis for backchannel endpoint HTTP requests
-     */
-    @Min(1)
-    private int connectTimeoutMs;
-
-    /**
-     * The read timeout in millis for backchannel endpoint HTTP requests
-     */
-    @Min(1)
-    private int readTimeoutMs;
-
-    /**
-     * The selectors credentials towards the oidc provider.
-     * Might consider storing these in a KeyVault later
-     * DO NOT expose externally
-     */
-    @NotEmpty
-    private String clientId;
-
-    @NotEmpty
-    private String clientSecret;
-
-    @Builder.Default
-    @NotNull
-    private ClientAuthenticationMethod clientAuthenticationMethod = ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
-
-    @Builder.Default
-    private Set<String> scopes = new HashSet<>();
-
-    @Builder.Default
-    @NotNull
-    private ResponseMode responseMode = ResponseMode.QUERY;
-
-    /**
-     * The custom parameters for the selectors to use towards the eid.
-     * Do not expose externally
-     */
-    @Builder.Default
-    private Map<String, String> customParameters = new HashMap<>();
-
-    /**
-     * A set of error codes that signals user cancel in the claims provider.  Default code "access_denied" always included.
-     */
-    @Builder.Default
-    private Set<String> cancelErrorCodes = new HashSet<>(List.of("access_denied"));
-
-    /**
-     * Required claims in returned id_token from oidc provider.
-     */
-    @Builder.Default
-    private Set<String> requiredClaims = new HashSet<>();
-    /**
-     * Claims extraction mapping from returned id_token to internal claims.
-     * The keys are names of claims in the target structure.
-     * The values are names of claims in the id_token issued by oidc provider.
-     */
-    @Builder.Default
-    private Map<String, String> claimsMapping = new HashMap<>();
-
-    /**
-     * Algorithms for id_token validation.
-     */
-    @NotEmpty
-    @Builder.Default
-    private Set<JWSAlgorithm> jwsAlgorithms = Set.of(JWSAlgorithm.RS256);
-
-    public boolean usePushedAuthorizationRequest() {
-        return pushedAuthorizationRequestEndpoint != null && !pushedAuthorizationRequestEndpoint.isEmpty();
+    public OidcProvider {
+        acrValues = acrValues == null ? Collections.emptyList() : List.copyOf(acrValues);
+        amr = amr == null ? Collections.emptyList() : List.copyOf(amr);
+        scopes = scopes == null ? Collections.emptySet() : Set.copyOf(scopes);
+        responseMode = responseMode == null ? ResponseMode.QUERY : responseMode;
+        clientAuthenticationMethod = clientAuthenticationMethod == null ? ClientAuthenticationMethod.CLIENT_SECRET_BASIC : clientAuthenticationMethod;
+        customParameters = customParameters == null ? Collections.emptyMap() : Map.copyOf(customParameters);
+        cancelErrorCodes = cancelErrorCodes == null || cancelErrorCodes.isEmpty() ? Set.of("access_denied") : Set.copyOf(cancelErrorCodes);
+        requiredClaims = requiredClaims == null ? Collections.emptySet() : Set.copyOf(requiredClaims);
+        claimsMapping = claimsMapping == null ? Collections.emptyMap() : Map.copyOf(claimsMapping);
+        jwsAlgorithms = (jwsAlgorithms == null || jwsAlgorithms.isEmpty()) ? Set.of(JWSAlgorithm.RS256) : Set.copyOf(jwsAlgorithms);
     }
 
-    public boolean useSignedAuthorizationResponse() {
-        return ResponseMode.QUERY_JWT.equals(responseMode);
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
-
-    public boolean isClaimsProvider() {
-        return false;
-    }
-
-    /**
-     * A custom id token validator for this OIDC provider (must be set after reading config)
-     */
-    private IDTokenValidator idTokenValidator;
-
-    /**
-     * A validator for signed authorization responses if this OIDC provider requests signed responses (JARM)
-     * (must be set after reading config)
-     */
-    private JARMValidator jarmValidator;
 }
