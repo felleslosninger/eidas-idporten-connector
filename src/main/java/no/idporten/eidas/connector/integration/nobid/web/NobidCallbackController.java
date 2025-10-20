@@ -104,7 +104,7 @@ public class NobidCallbackController {
         }
     }
 
-
+    //todo when we get an idtoken from nobid, we should validate it and extract the pid from it.
     private String validateAndExtractPidFromIdToken(String idToken, Nonce expectedNonce) {
         try {
             JWTClaimsSet claims = SignedJWT.parse(idToken).getJWTClaimsSet();
@@ -115,8 +115,7 @@ public class NobidCallbackController {
                         "Invalid nonce in ID token");
             }
 
-            String pid = claims.getStringClaim("pid");
-            return pid;
+            return claims.getStringClaim("pid");
         } catch (Exception e) {
             throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(),
                     "Failed to validate nonce in ID token", e);
