@@ -36,4 +36,6 @@ class NobidMatchingServiceClientIT {
     //go to
     //http://localhost:7070/authorize?client_id=democlient1&request_uri=urn:ietf:params:oauth:request_uri:ZnCmzpQZvdKrPYiysP0BqA.rucdH7p-atQK-0tYn8L8sA
 
+
+    //todo må fikse alle testene. og lage tester for dette
 }
