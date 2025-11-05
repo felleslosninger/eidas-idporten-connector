@@ -1,2 +1,9 @@
 #trivyignore file for ignoring specific vulnerabilities in the project
-CVE-2025-22874 # gobinary crypto/x509 fixed in version 1.24.4
+# golang/paketo 1.24.6 vuln (fixed in 1.24.8/9)
+CVE-2025-47912
+CVE-2025-58183
+CVE-2025-58186
+CVE-2025-58187
+CVE-2025-58188
+CVE-2025-61724
+# end golang/paketo 1.24.6 vuln (fixed in 1.24.8/9)
