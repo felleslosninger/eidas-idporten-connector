@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
+import java.util.Map;
 
 @Validated
 @Slf4j
@@ -19,13 +20,15 @@ public record NobidProperties(
         Duration connectTimeout,
         @DefaultValue("5s")
         Duration readTimeout,
-        @NotNull OidcProvider matchingService
+        @NotNull OidcProvider matchingService,
+        Map<String, String> demoCountryCodeMap
 ) {
     @PostConstruct
     public void logInitialized() {
         log.info("Nobid integration enabled: {}", enabled);
-        log.info("Nobid connectTimeout: {}", connectTimeout);
-        log.info("Nobid readTimeout: {}", readTimeout);
+        log.info("Nobid connectTimeout: {}", connectTimeout.toMillis());
+        log.info("Nobid readTimeout: {}", readTimeout.toMillis());
         log.info("Nobid matchingService: {}", matchingService);
+        log.info("Nobid country code map: {}", demoCountryCodeMap);
     }
 }

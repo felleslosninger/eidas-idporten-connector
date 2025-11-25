@@ -115,6 +115,7 @@ eidas:
     authorization-lifetime-seconds: 60
     accesstoken-lifetime-seconds: 120
     authorization-response-iss-parameter-supported: true
+    require-pushed-authorization-requests: true
     response-modes-supported:
       - query
       - query.jwt

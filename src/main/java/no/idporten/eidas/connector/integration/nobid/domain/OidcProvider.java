@@ -5,6 +5,10 @@ import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
+import no.idporten.eidas.connector.integration.nobid.config.KeyStoreProperties;
+import no.idporten.lib.keystore.KeyProvider;
+import no.idporten.lib.keystore.KeystoreDirectAccess;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.io.Serial;
@@ -40,7 +44,9 @@ public record OidcProvider(
         Set<String> requiredClaims,
         Map<String, String> claimsMapping,
         @NotEmpty Set<JWSAlgorithm> jwsAlgorithms,
-        @NotEmpty URI redirectUri
+        @NotEmpty URI redirectUri,
+        KeyStoreProperties clientKeystore,
+        String kid
 ) implements Serializable {
 
     @Serial
@@ -59,6 +65,23 @@ public record OidcProvider(
         jwsAlgorithms = (jwsAlgorithms == null || jwsAlgorithms.isEmpty()) ? Set.of(JWSAlgorithm.RS256) : Set.copyOf(jwsAlgorithms);
     }
 
+    /**
+     * Creates and load a keyprovider
+     * Consider making this a bean
+     * @return keyProvicer
+     */
+    public KeyProvider keyProvider() {
+        if(clientKeystore == null) {
+            throw new SpecificConnectorException("server_error", "Client keystore not configured correctly");
+        }
+        return KeystoreDirectAccess.createKeyProvider(
+                clientKeystore.location(), // location: classpath:, file:, or base64:
+                clientKeystore.type(),
+                clientKeystore.password(),
+                clientKeystore.keyAlias(),
+                clientKeystore.keyPassword()
+        );
+    }
 
     @Override
     public int hashCode() {
