@@ -25,4 +25,11 @@ public class CountryCodeConverter {
         }
         throw new IllegalArgumentException("Invalid eidas identifier");
     }
+
+    public String getMappedCountryCode(String countryCode) {
+        if (demoCountryCodeMap.isPresent() && demoCountryCodeMap.get().containsKey(countryCode)) {
+            return demoCountryCodeMap.get().get(countryCode);
+        }
+        return countryCode;
+    }
 }

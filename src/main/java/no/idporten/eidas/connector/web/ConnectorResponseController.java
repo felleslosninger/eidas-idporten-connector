@@ -87,8 +87,8 @@ public class ConnectorResponseController {
             case UserMatchRedirect r -> {
                 return "redirect:%s".formatted(r.redirectUrl());
             }
-            case UserMatchError userMatchError -> {
-                throw new SpecificConnectorException(userMatchError.errorCode(), userMatchError.errorMessage());
+            case UserMatchError error -> { //ignore errors and carry on
+                return authorizationResponseHelper.returnAuthorizationCode(request, response, lightResponse.getLevelOfAssurance(), parRequest, error.eidasUser(), null);
             }
             default ->
                     throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Unexpected user match response");

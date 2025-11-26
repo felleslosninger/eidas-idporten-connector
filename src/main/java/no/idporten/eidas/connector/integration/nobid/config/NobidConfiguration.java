@@ -7,6 +7,7 @@ import no.idporten.eidas.connector.integration.nobid.domain.OidcProvider;
 import no.idporten.eidas.connector.integration.nobid.service.NobidMatchingServiceClient;
 import no.idporten.eidas.connector.integration.nobid.web.NobidSession;
 import no.idporten.eidas.connector.logging.AuditService;
+import no.idporten.eidas.connector.service.CountryCodeConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,6 +17,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
+
+import java.util.Optional;
 
 @Configuration
 @EnableConfigurationProperties(NobidProperties.class)
@@ -47,13 +50,15 @@ public class NobidConfiguration {
             OidcProvider nobidClaimsProvider,
             NobidSession nobidSession,
             ObjectMapper objectMapper,
-            AuditService auditService
+            AuditService auditService,
+            NobidProperties nobidProperties
     ) {
         return new NobidMatchingServiceClient(
                 nobidClaimsProvider,
                 nobidSession,
                 objectMapper,
-                auditService);
+                auditService,
+                new CountryCodeConverter(Optional.ofNullable(nobidProperties.demoCountryCodeMap())));
     }
 
 }
