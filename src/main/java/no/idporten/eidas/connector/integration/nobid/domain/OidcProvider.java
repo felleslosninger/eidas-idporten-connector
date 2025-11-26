@@ -68,7 +68,6 @@ public record OidcProvider(
     /**
      * Creates and load a keyprovider
      * Consider making this a bean
-     *
      * @return keyProvicer
      */
     public KeyProvider keyProvider() {

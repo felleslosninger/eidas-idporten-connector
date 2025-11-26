@@ -8,15 +8,15 @@ import java.io.Serializable;
 
 /**
  * EIDAS login_hint JSON structure expected by Nobid claims provider.
- * <p>
+ *
  * Example:
  * {
- * "natural_person": {
- * "person_identifier":"SE/NO/199210199320",
- * "current_given_name":"Allslags",
- * "current_family_name":"Lekeplass",
- * "date_of_birth":"1992-10-19"
- * }
+ *   "natural_person": {
+ *     "person_identifier":"SE/NO/199210199320",
+ *     "current_given_name":"Allslags",
+ *     "current_family_name":"Lekeplass",
+ *     "date_of_birth":"1992-10-19"
+ *   }
  * }
  */
 public record EidasLoginHint(

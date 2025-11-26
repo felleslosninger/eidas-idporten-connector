@@ -60,7 +60,6 @@ class NobidMatchingServiceClientTest {
         lenient().when(session.getOidcProtocolVerifiers()).thenReturn(new OidcProtocolVerifiers("nobid", new State("123"), new Nonce("456"), new CodeVerifier(randomPkceValue(53)), Instant.now().minus(Duration.ofMinutes(1))));
         lenient().when(provider.redirectUri()).thenReturn(URI.create("https://client.example.com/cb"));
     }
-
     @Test
     @DisplayName("getToken returns OIDCTokenResponse on success, and add client_id")
     void getToken_success() throws Exception {
