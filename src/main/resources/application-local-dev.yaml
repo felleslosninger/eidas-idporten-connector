@@ -58,6 +58,8 @@ eidas:
       CA: SWE
   nobid:
     enabled: false
+    demo-country-code-map:
+      CA: SE
     matching-service:
       id: nobid
       issuer: http://c2id:8080
@@ -68,8 +70,6 @@ eidas:
       client-id: democlient1
       scopes:
         - openid
-      demo-country-code-map:
-        CA: SE
       client-secret: myvery1234long123secret123so123you123know
       redirect-uri: http://eidas-idporten-connector:8088/nobid/callback
       client-authenticaction-method: client_secret_basic

@@ -51,6 +51,8 @@ eidas:
       CA: SWE
   nobid:
     enabled: true
+    demo-country-code-map:
+      CA: SE
     matching-service:
       id: nobid
       issuer: https://match.nobid.id/oidc
@@ -63,8 +65,6 @@ eidas:
         - openid
       redirect-uri: https://idporten-connector.eidasnode.dev/nobid/callback
       client-authentication-method: private_key_jwt
-      demo-country-code-map:
-        CA: SE
       kid: dev #ikke egentlig i bruk
       client-keystore:
         type: ${NOBID_CLIENT_KEYSTORE_TYPE}

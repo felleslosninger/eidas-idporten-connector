@@ -58,6 +58,8 @@ eidas:
       CA: SWE
   nobid:
     enabled: true
+    demo-country-code-map:
+      CA: SE
     matching-service:
       enabled: true
       id: nobid
@@ -69,8 +71,6 @@ eidas:
       client-id: idporten-eidas-connector
       scopes:
         - openid
-      demo-country-code-map:
-        CA: SE
       redirect-uri: http://localhost:8088/nobid/callback
       client-authentication-method: private_key_jwt
       kid: test
