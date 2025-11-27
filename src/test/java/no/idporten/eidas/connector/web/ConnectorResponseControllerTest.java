@@ -96,29 +96,32 @@ class ConnectorResponseControllerTest {
         when(staticResourcesProperties.getStaticResourcesBaseUri()).thenReturn("http://static.idporten.no/latest/");
     }
 
-  /*  @Test
-    @DisplayName("then if there is a valid response return redirect to authorization endpoint")
-    void testValidLightRequest() throws Exception {
+
+    @Test
+    @DisplayName("then if there is a valid response returning UserMatchRedirect, controller redirects to given URL")
+    void testValidLightRequestUserMatchRedirect() throws Exception {
 
         LightResponse lightResponse = getLightResponse("relayState");
-        when(specificConnectorService.getCachedRequest(any(String.class))).thenReturn(new CorrelatedRequestHolder(LightRequest.builder().id("abc").relayState("relayState").build(),
-                new OIDCRequestStateParams(new State("123"),
-                        new Nonce("123"),
-                        null,
-                        "mockedTraceId"
-                )));
+        // Cached request with matching inResponseTo id
+        no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder holder =
+                new no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder(
+                        eu.eidas.auth.commons.light.impl.LightRequest.builder().id("abc").relayState("relayState").build(),
+                        new no.idporten.eidas.connector.integration.specificcommunication.service.OIDCRequestStateParams(
+                                new State("123"), null, null, "traceId")
+                );
+
+        when(specificConnectorService.getCachedRequest(any(String.class))).thenReturn(holder);
         when(specificCommunicationService.getAndRemoveResponse(any(String.class), any())).thenReturn(lightResponse);
-        RedirectedResponse clientResponse = mock(RedirectedResponse.class);
-        when(clientResponse.toQueryRedirectUri()).thenReturn(new URI("http//junit?client_id=123&request_uri=http://redirect-url.com"));
-        PushedAuthorizationRequest authorizationRequest = mock(PushedAuthorizationRequest.class);
-        when(specificConnectorService.getEidasUser(lightResponse)).thenReturn(mock(Authorization.class));
-        when(openIDConnectSdk.authorize(eq(authorizationRequest), any(Authorization.class))).thenReturn(mock(no.idporten.sdk.oidcserver.protocol.AuthorizationResponse.class));
-        when(openIDConnectSdk.createClientResponse(any(no.idporten.sdk.oidcserver.protocol.AuthorizationResponse.class))).thenReturn(clientResponse);
+        when(specificConnectorService.matchUser(lightResponse))
+                .thenReturn(new no.idporten.eidas.connector.matching.domain.UserMatchRedirect("http://redirect.example/next"));
+
         mockMvc.perform(post("/ConnectorResponse")
-                        .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, authorizationRequest)
+                        .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, mock(PushedAuthorizationRequest.class))
                 )
-                .andExpect(redirectedUrl("http//junit?client_id=123&request_uri=http://redirect-url.com"));
-    }*/
+                .andExpect(redirectedUrl("http://redirect.example/next"));
+    }
+
+
 
 
     @Test

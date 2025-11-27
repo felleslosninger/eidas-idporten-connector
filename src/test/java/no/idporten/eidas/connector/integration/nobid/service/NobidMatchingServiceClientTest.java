@@ -3,18 +3,24 @@ package no.idporten.eidas.connector.integration.nobid.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
+import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
+import no.idporten.eidas.connector.domain.EidasUser;
+import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 import no.idporten.eidas.connector.integration.nobid.config.NobidProperties;
 import no.idporten.eidas.connector.integration.nobid.domain.OidcProtocolVerifiers;
 import no.idporten.eidas.connector.integration.nobid.domain.OidcProvider;
 import no.idporten.eidas.connector.integration.nobid.web.NobidSession;
+import no.idporten.eidas.connector.service.EIDASIdentifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,6 +65,115 @@ class NobidMatchingServiceClientTest {
         when(provider.tokenEndpoint()).thenReturn(URI.create("https://example.com/token"));
         lenient().when(session.getOidcProtocolVerifiers()).thenReturn(new OidcProtocolVerifiers("nobid", new State("123"), new Nonce("456"), new CodeVerifier(randomPkceValue(53)), Instant.now().minus(Duration.ofMinutes(1))));
         lenient().when(provider.redirectUri()).thenReturn(URI.create("https://client.example.com/cb"));
+    }
+
+    @Test
+    @DisplayName("sendPushedAuthorizationRequest returns UserMatchRedirect on PAR success")
+    void par_success_returns_redirect() throws Exception {
+
+        // Static mock for client auth
+        try (MockedStatic<ClientAuthenticationService> mocked = Mockito.mockStatic(ClientAuthenticationService.class)) {
+            PrivateKeyJWT mockPrivateKeyJWT = Mockito.mock(PrivateKeyJWT.class);
+            when(mockPrivateKeyJWT.getClientID()).thenReturn(new ClientID("myclient"));
+            mocked.when(() -> ClientAuthenticationService.createClientAuthentication(any(OidcProvider.class)))
+                    .thenReturn(mockPrivateKeyJWT);
+
+            // Provider endpoints
+            when(provider.pushedAuthorizationRequestEndpoint()).thenReturn(URI.create("https://example.com/par"));
+            when(provider.authorizationEndpoint()).thenReturn(URI.create("https://example.com/authorize"));
+            when(provider.issuer()).thenReturn(URI.create("https://example.com"));
+
+            // Spy client to intercept HTTP call
+            NobidMatchingServiceClient spyClient = Mockito.spy(client);
+
+            // Build a minimal AuthenticationRequest
+            AuthenticationRequest authReq = new AuthenticationRequest.Builder(
+                    new ResponseType(ResponseType.Value.CODE),
+                    new Scope("openid"),
+                    new ClientID("myclient"),
+                    URI.create("https://client.example.com/cb")
+            ).state(new State("abc"))
+                    .build();
+
+            // PAR success (201) with request_uri
+            HTTPResponse httpResponse = new HTTPResponse(201);
+            httpResponse.setContentType("application/json");
+            httpResponse.setBody("{\n  \"request_uri\":\"urn:ietf:params:oauth:request_uri:ABC\",\n  \"expires_in\":90\n}");
+            Mockito.doReturn(httpResponse).when(spyClient).sendHttpRequest(any(HTTPRequest.class));
+
+            // Act
+            var result = spyClient.sendPushedAuthorizationRequest(authReq);
+
+            // Assert
+            assertTrue(result instanceof no.idporten.eidas.connector.matching.domain.UserMatchRedirect);
+            String url = ((no.idporten.eidas.connector.matching.domain.UserMatchRedirect) result).redirectUrl();
+            assertTrue(url.startsWith("https://example.com/authorize?request_uri="));
+            assertTrue(url.contains("client_id=myNobidClient"));
+        }
+    }
+
+    @Test
+    @DisplayName("sendPushedAuthorizationRequest throws on PAR error response")
+    void par_error_throws() throws Exception {
+        try (MockedStatic<ClientAuthenticationService> mocked = Mockito.mockStatic(ClientAuthenticationService.class)) {
+            PrivateKeyJWT mockPrivateKeyJWT = Mockito.mock(PrivateKeyJWT.class);
+            when(mockPrivateKeyJWT.getClientID()).thenReturn(new ClientID("myclient"));
+            mocked.when(() -> ClientAuthenticationService.createClientAuthentication(any(OidcProvider.class)))
+                    .thenReturn(mockPrivateKeyJWT);
+
+            when(provider.pushedAuthorizationRequestEndpoint()).thenReturn(URI.create("https://example.com/par"));
+
+            NobidMatchingServiceClient spyClient = Mockito.spy(client);
+
+            AuthenticationRequest authReq = new AuthenticationRequest.Builder(
+                    new ResponseType(ResponseType.Value.CODE),
+                    new Scope("openid"),
+                    new ClientID("myclient"),
+                    URI.create("https://client.example.com/cb")
+            ).state(new State("abc"))
+                    .build();
+
+            // 400 error JSON per RFC pushed auth error
+            HTTPResponse httpResponse = new HTTPResponse(400);
+            httpResponse.setContentType("application/json");
+            httpResponse.setBody("{\"error\":\"invalid_request\",\"error_description\":\"bad\"}");
+            Mockito.doReturn(httpResponse).when(spyClient).sendHttpRequest(any(HTTPRequest.class));
+
+            try {
+                spyClient.sendPushedAuthorizationRequest(authReq);
+            } catch (SpecificConnectorException e) {
+                assertTrue(e.getMessage().contains("Integration with nobidClaimsProvider failed"));
+                return;
+            }
+            throw new AssertionError("Expected SpecificConnectorException");
+        }
+    }
+
+    @Test
+    @DisplayName("match returns UserMatchError when internal exception occurs")
+    void match_returns_error_on_exception() {
+        NobidMatchingServiceClient spyClient = Mockito.spy(client);
+        // Avoid objectMapper usage by stubbing authentication request creation
+        AuthenticationRequest dummy = new AuthenticationRequest.Builder(
+                new ResponseType(ResponseType.Value.CODE), new Scope("openid"), new ClientID("c"), URI.create("https://cb"))
+                .state(new State("s")).build();
+        doReturn(dummy).when(spyClient).createNobidAuthenticationRequest(any(), any());
+        // Force exception during PAR call
+        try {
+            doThrow(new RuntimeException("boom")).when(spyClient).sendPushedAuthorizationRequest(any(AuthenticationRequest.class));
+        } catch (Exception ignored) {
+        }
+
+        var resp = spyClient.match(new EidasUser(new EIDASIdentifier("NO/NO/123"), "2000-01-01", java.util.Map.of()));
+        assertTrue(resp instanceof no.idporten.eidas.connector.matching.domain.UserMatchError);
+    }
+
+    @Test
+    @DisplayName("copyWithSubjectCountry changes subject country in identifier")
+    void copyWithSubjectCountry_changes_country() {
+        EidasUser u = new EidasUser(new EIDASIdentifier("SE/NO/ABC"), "1990-01-01", java.util.Map.of());
+        EidasUser copy = NobidMatchingServiceClient.copyWithSubjectCountry(u, "DE");
+        org.junit.jupiter.api.Assertions.assertEquals("DE/NO/ABC", copy.eidasIdentifier().getFormattedEidasIdentifier());
     }
     @Test
     @DisplayName("getToken returns OIDCTokenResponse on success, and add client_id")
