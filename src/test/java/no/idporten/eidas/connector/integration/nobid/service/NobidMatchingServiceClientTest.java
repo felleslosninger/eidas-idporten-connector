@@ -20,6 +20,10 @@ import no.idporten.eidas.connector.integration.nobid.config.NobidProperties;
 import no.idporten.eidas.connector.integration.nobid.domain.OidcProtocolVerifiers;
 import no.idporten.eidas.connector.integration.nobid.domain.OidcProvider;
 import no.idporten.eidas.connector.integration.nobid.web.NobidSession;
+import no.idporten.eidas.connector.logging.AuditService;
+import no.idporten.eidas.connector.matching.domain.UserMatchError;
+import no.idporten.eidas.connector.matching.domain.UserMatchRedirect;
+import no.idporten.eidas.connector.service.CountryCodeConverter;
 import no.idporten.eidas.connector.service.EIDASIdentifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,8 +37,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -55,6 +58,12 @@ class NobidMatchingServiceClientTest {
     @Mock
     private NobidProperties nobidProperties;
 
+    @Mock
+    private AuditService auditService;
+
+    @Mock
+    private CountryCodeConverter countryCodeConverter;
+
     @InjectMocks
     private NobidMatchingServiceClient client;
 
@@ -62,7 +71,7 @@ class NobidMatchingServiceClientTest {
     void setUp() {
         lenient().when(provider.issuer()).thenReturn(URI.create("https://example.com"));
         lenient().when(provider.clientId()).thenReturn("myNobidClient");
-        when(provider.tokenEndpoint()).thenReturn(URI.create("https://example.com/token"));
+        lenient().when(provider.tokenEndpoint()).thenReturn(URI.create("https://example.com/token"));
         lenient().when(session.getOidcProtocolVerifiers()).thenReturn(new OidcProtocolVerifiers("nobid", new State("123"), new Nonce("456"), new CodeVerifier(randomPkceValue(53)), Instant.now().minus(Duration.ofMinutes(1))));
         lenient().when(provider.redirectUri()).thenReturn(URI.create("https://client.example.com/cb"));
     }
@@ -74,14 +83,13 @@ class NobidMatchingServiceClientTest {
         // Static mock for client auth
         try (MockedStatic<ClientAuthenticationService> mocked = Mockito.mockStatic(ClientAuthenticationService.class)) {
             PrivateKeyJWT mockPrivateKeyJWT = Mockito.mock(PrivateKeyJWT.class);
-            when(mockPrivateKeyJWT.getClientID()).thenReturn(new ClientID("myclient"));
             mocked.when(() -> ClientAuthenticationService.createClientAuthentication(any(OidcProvider.class)))
                     .thenReturn(mockPrivateKeyJWT);
 
             // Provider endpoints
-            when(provider.pushedAuthorizationRequestEndpoint()).thenReturn(URI.create("https://example.com/par"));
-            when(provider.authorizationEndpoint()).thenReturn(URI.create("https://example.com/authorize"));
-            when(provider.issuer()).thenReturn(URI.create("https://example.com"));
+            lenient().when(provider.pushedAuthorizationRequestEndpoint()).thenReturn(URI.create("https://example.com/par"));
+            lenient().when(provider.authorizationEndpoint()).thenReturn(URI.create("https://example.com/authorize"));
+            lenient().when(provider.issuer()).thenReturn(URI.create("https://example.com"));
 
             // Spy client to intercept HTTP call
             NobidMatchingServiceClient spyClient = Mockito.spy(client);
@@ -105,7 +113,7 @@ class NobidMatchingServiceClientTest {
             var result = spyClient.sendPushedAuthorizationRequest(authReq);
 
             // Assert
-            assertTrue(result instanceof no.idporten.eidas.connector.matching.domain.UserMatchRedirect);
+            assertInstanceOf(UserMatchRedirect.class, result);
             String url = ((no.idporten.eidas.connector.matching.domain.UserMatchRedirect) result).redirectUrl();
             assertTrue(url.startsWith("https://example.com/authorize?request_uri="));
             assertTrue(url.contains("client_id=myNobidClient"));
@@ -117,11 +125,10 @@ class NobidMatchingServiceClientTest {
     void par_error_throws() throws Exception {
         try (MockedStatic<ClientAuthenticationService> mocked = Mockito.mockStatic(ClientAuthenticationService.class)) {
             PrivateKeyJWT mockPrivateKeyJWT = Mockito.mock(PrivateKeyJWT.class);
-            when(mockPrivateKeyJWT.getClientID()).thenReturn(new ClientID("myclient"));
             mocked.when(() -> ClientAuthenticationService.createClientAuthentication(any(OidcProvider.class)))
                     .thenReturn(mockPrivateKeyJWT);
 
-            when(provider.pushedAuthorizationRequestEndpoint()).thenReturn(URI.create("https://example.com/par"));
+            lenient().when(provider.pushedAuthorizationRequestEndpoint()).thenReturn(URI.create("https://example.com/par"));
 
             NobidMatchingServiceClient spyClient = Mockito.spy(client);
 
@@ -165,7 +172,7 @@ class NobidMatchingServiceClientTest {
         }
 
         var resp = spyClient.match(new EidasUser(new EIDASIdentifier("NO/NO/123"), "2000-01-01", java.util.Map.of()));
-        assertTrue(resp instanceof no.idporten.eidas.connector.matching.domain.UserMatchError);
+        assertInstanceOf(UserMatchError.class, resp);
     }
 
     @Test
@@ -175,6 +182,7 @@ class NobidMatchingServiceClientTest {
         EidasUser copy = NobidMatchingServiceClient.copyWithSubjectCountry(u, "DE");
         org.junit.jupiter.api.Assertions.assertEquals("DE/NO/ABC", copy.eidasIdentifier().getFormattedEidasIdentifier());
     }
+
     @Test
     @DisplayName("getToken returns OIDCTokenResponse on success, and add client_id")
     void getToken_success() throws Exception {
@@ -189,7 +197,7 @@ class NobidMatchingServiceClientTest {
             // Stub HTTP call via spy
             NobidMatchingServiceClient spyClient = Mockito.spy(client);
             String idToken = new PlainJWT(new JWTClaimsSet.Builder().claim("sub", "123").build()).serialize();
-            // Simulate provider returning only an ID Token without an access_token
+            // Simulate a provider returning only an ID Token without an access_token
             String body = "{" +
                     "\"token_type\":\"Bearer\"," +
                     "\"expires_in\":3600," +
@@ -201,10 +209,10 @@ class NobidMatchingServiceClientTest {
             ok.setBody(body);
             Mockito.doReturn(ok).when(spyClient).sendHttpRequest(any(HTTPRequest.class));
 
-            // Act
+            // when
             OIDCTokenResponse response = spyClient.getToken("auth-code-123", session.getOidcProtocolVerifiers());
 
-            // Assert
+            // then
             // Verify the token request body contains expected parameters
             ArgumentCaptor<HTTPRequest> reqCaptor = ArgumentCaptor.forClass(HTTPRequest.class);
             verify(spyClient).sendHttpRequest(reqCaptor.capture());
@@ -222,7 +230,7 @@ class NobidMatchingServiceClientTest {
             assertNotNull(response);
             assertNotNull(response.getOIDCTokens());
             assertNotNull(response.getOIDCTokens().getIDToken());
-            // Access token may be absent for this provider; only ID Token is required
+            // Access token may be absent for this provider; only ID Token is required, although it will fail in nimbus without one
 
             // Verify static call occurred
             mocked.verify(() -> ClientAuthenticationService.createClientAuthentication(any(OidcProvider.class)));

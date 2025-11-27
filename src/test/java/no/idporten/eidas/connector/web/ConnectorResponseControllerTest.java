@@ -4,6 +4,7 @@ import com.nimbusds.oauth2.sdk.AuthorizationResponse;
 import com.nimbusds.oauth2.sdk.id.State;
 import eu.eidas.auth.commons.EIDASStatusCode;
 import eu.eidas.auth.commons.EidasParameterKeys;
+import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.light.ILightResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import no.idporten.eidas.connector.config.StaticResourcesProperties;
@@ -103,9 +104,11 @@ class ConnectorResponseControllerTest {
 
         LightResponse lightResponse = getLightResponse("relayState");
         // Cached request with matching inResponseTo id
+        ILightRequest iLightRequest = mock(ILightRequest.class);
+        when(iLightRequest.getId()).thenReturn("abc");
         no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder holder =
                 new no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder(
-                        eu.eidas.auth.commons.light.impl.LightRequest.builder().id("abc").relayState("relayState").build(),
+                        iLightRequest,
                         new no.idporten.eidas.connector.integration.specificcommunication.service.OIDCRequestStateParams(
                                 new State("123"), null, null, "traceId")
                 );
@@ -119,6 +122,7 @@ class ConnectorResponseControllerTest {
                         .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, mock(PushedAuthorizationRequest.class))
                 )
                 .andExpect(redirectedUrl("http://redirect.example/next"));
+        verify(auditService).auditLightResponse(any(LightResponse.class), any());
     }
 
 
@@ -140,6 +144,7 @@ class ConnectorResponseControllerTest {
                         .sessionAttr(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST, authorizationRequest)
                 )
                 .andExpect(redirectedUrl("http//junit?token=hei"));
+        verify(auditService).auditLightResponse(any(LightResponse.class), any());
     }
 
     private static LightResponse getLightResponse(String relayState) {
@@ -160,7 +165,6 @@ class ConnectorResponseControllerTest {
 
     @AfterEach
     void tearDown() {
-        verify(auditService).auditLightResponse(any(LightResponse.class), any());
         // Ensure that the static mocks are closed after each test
         binaryLightTokenHelperMock.close();
         incomingLightResponseValidatorMock.close();
