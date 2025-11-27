@@ -15,10 +15,7 @@ import no.idporten.eidas.connector.exceptions.ErrorCodes;
 import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 import no.idporten.eidas.connector.integration.nobid.domain.OidcProtocolVerifiers;
 import no.idporten.eidas.connector.integration.nobid.service.NobidMatchingServiceClient;
-import no.idporten.eidas.connector.matching.domain.UserMatchRedirect;
-import no.idporten.eidas.connector.matching.domain.UserMatchResponse;
 import no.idporten.eidas.connector.service.AuthorizationResponseHelper;
-import no.idporten.eidas.connector.service.EIDASIdentifier;
 import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
@@ -88,7 +85,7 @@ public class NobidCallbackController {
             return ResponseEntity.ok("ok");
 
         } finally {
-            //clearNobidSession();
+            //clearNobidSession(); //todo
         }
     }
 
@@ -99,28 +96,6 @@ public class NobidCallbackController {
         nobidSession.setLevelOfAssurance(null);
     }
 
-    private void validateSessionState(NobidSession session, String expectedState) {
-        if (session.getOidcProtocolVerifiers() == null) {
-            throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(),
-                    "Session state missing");
-        }
-        if (!Objects.equals(session.getOidcProtocolVerifiers().state().getValue(), expectedState)) {
-            throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(),
-                    "Invalid session state");
-        }
-    }
-
-    @GetMapping("/nobid/test")
-    public String triggerTest(@Nonnull final HttpServletRequest request,
-                              @Nonnull final HttpServletResponse response) {
-        //trigger a test
-        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/1634736525341-3"), "2000-01-01", null));
-        if (result instanceof UserMatchRedirect(String redirectUrl)) {
-            return "redirect:http://localhost:7070/authorize?client_id=democlient1&request_uri=%s".formatted(redirectUrl);
-        } else {
-            return "foo";
-        }
-    }
     private String validateAndExtractPidFromIdToken(String idToken, Nonce expectedNonce) {
         try {
             JWTClaimsSet claims = SignedJWT.parse(idToken).getJWTClaimsSet();

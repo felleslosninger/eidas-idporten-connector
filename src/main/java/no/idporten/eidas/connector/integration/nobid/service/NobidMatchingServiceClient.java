@@ -228,7 +228,6 @@ public class NobidMatchingServiceClient implements MatchingService {
     }
 
     // Convert Duration to int for compatibility with APIs that require int values.
-    // Handles potential overflow and underflow by capping values at Integer.MAX_VALUE and Integer.MIN_VALUE.
     private static int getMillisAsIntSafely(Duration duration) {
         long millis = duration.toMillis();
         if (millis > Integer.MAX_VALUE) {
@@ -240,6 +239,7 @@ public class NobidMatchingServiceClient implements MatchingService {
         }
     }
 
+    //to change to mapped subject country code. only relevant in test environments
     public static EidasUser copyWithSubjectCountry(EidasUser user, String newSubjectCountryCode) {
         EIDASIdentifier oldId = user.eidasIdentifier();
         String formatted = "%s/%s/%s".formatted(

@@ -11,7 +11,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
 
-//eidasClaims not used yet
 public record EidasUser(@NotNull EIDASIdentifier eidasIdentifier, String birthdate,
                         @Nullable Map<String, String> eidasClaims) implements Serializable {
     @Serial
@@ -27,14 +26,4 @@ public record EidasUser(@NotNull EIDASIdentifier eidasIdentifier, String birthda
         return new EidasLoginHint(naturalPerson);
     }
 
-    /*
-      {
-        "natural_person": {
-          "person_identifier":"SE/NO/199210199320",
-          "current_given_name":"Allslags",
-          "current_family_name":"Lekeplass",
-          "date_of_birth":"1992-10-19"
-        }
-      }
-     */
 }

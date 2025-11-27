@@ -3,6 +3,11 @@ package no.idporten.eidas.connector.matching.service;
 import no.idporten.eidas.connector.domain.EidasUser;
 import no.idporten.eidas.connector.matching.domain.UserMatchResponse;
 
+/**
+ * Interface for matching services.
+ * To support configuration of different matching services.
+ *
+ */
 @FunctionalInterface
 public interface MatchingService {
     /**

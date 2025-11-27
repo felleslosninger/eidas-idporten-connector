@@ -8,7 +8,6 @@ import java.io.Serializable;
 
 /**
  * EIDAS login_hint JSON structure expected by Nobid claims provider.
- *
  * Example:
  * {
  *   "natural_person": {
