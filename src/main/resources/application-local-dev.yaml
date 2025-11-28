@@ -72,6 +72,6 @@ eidas:
         - openid
       client-secret: myvery1234long123secret123so123you123know
       redirect-uri: http://eidas-idporten-connector:8088/nobid/callback
-      client-authenticaction-method: client_secret_basic
+      client-authentication-method: client_secret_basic
   cache:
     secret: mySecretConnectorRequest

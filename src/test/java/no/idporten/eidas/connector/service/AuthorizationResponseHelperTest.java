@@ -65,7 +65,7 @@ class AuthorizationResponseHelperTest {
 
         ArgumentCaptor<Authorization> authCaptor = ArgumentCaptor.forClass(Authorization.class);
 
-        // Use spy to bypass Whenual HTTP writing in helper
+        // Use spy to bypass actual HTTP writing in helper
         AuthorizationResponseHelper spyHelper = spy(helper);
         doNothing().when(spyHelper).sendHttpResponse(any(), any());
 

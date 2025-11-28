@@ -238,7 +238,7 @@ class NobidMatchingServiceClientTest {
     }
 
 
-    // Generates a PKCE-compliant code_verifier value using unreserved charWheners, with the requested length.
+    // Generates a PKCE-compliant code_verifier value using unreserved characters, with the requested length.
     private static String randomPkceValue(int length) {
         final char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~".toCharArray();
         SecureRandom random = new SecureRandom();
