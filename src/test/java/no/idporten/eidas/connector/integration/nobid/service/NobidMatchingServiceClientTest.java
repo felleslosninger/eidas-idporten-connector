@@ -109,10 +109,10 @@ class NobidMatchingServiceClientTest {
             httpResponse.setBody("{\n  \"request_uri\":\"urn:ietf:params:oauth:request_uri:ABC\",\n  \"expires_in\":90\n}");
             Mockito.doReturn(httpResponse).when(spyClient).sendHttpRequest(any(HTTPRequest.class));
 
-            // Act
+            // When
             var result = spyClient.sendPushedAuthorizationRequest(authReq);
 
-            // Assert
+            // Then
             assertInstanceOf(UserMatchRedirect.class, result);
             String url = ((no.idporten.eidas.connector.matching.domain.UserMatchRedirect) result).redirectUrl();
             assertTrue(url.startsWith("https://example.com/authorize?request_uri="));
@@ -238,7 +238,7 @@ class NobidMatchingServiceClientTest {
     }
 
 
-    // Generates a PKCE-compliant code_verifier value using unreserved characters, with the requested length.
+    // Generates a PKCE-compliant code_verifier value using unreserved charWheners, with the requested length.
     private static String randomPkceValue(int length) {
         final char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~".toCharArray();
         SecureRandom random = new SecureRandom();

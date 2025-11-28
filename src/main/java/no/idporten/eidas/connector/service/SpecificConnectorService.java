@@ -42,8 +42,6 @@ import static no.idporten.eidas.connector.config.EidasClaims.*;
 @Slf4j
 public class SpecificConnectorService {
 
-
-
     private final EuConnectorProperties euConnectorProperties;
     private final SpecificCommunicationServiceImpl specificCommunicationServiceImpl;
     private final LevelOfAssuranceHelper levelOfAssuranceHelper;

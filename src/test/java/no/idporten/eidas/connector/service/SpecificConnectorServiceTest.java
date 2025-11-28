@@ -1,20 +1,35 @@
 package no.idporten.eidas.connector.service;
 
+import no.idporten.eidas.connector.config.EidasClaims;
 import no.idporten.eidas.connector.config.EuConnectorProperties;
 import no.idporten.eidas.connector.domain.EidasUser;
+import no.idporten.eidas.connector.exceptions.SpecificConnectorException;
 import no.idporten.eidas.connector.integration.freggateway.service.FregGwMatchingServiceClient;
 import no.idporten.eidas.connector.integration.nobid.web.NobidSession;
+import no.idporten.eidas.connector.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.connector.integration.specificcommunication.caches.OIDCRequestCache;
+import no.idporten.eidas.connector.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationServiceImpl;
 import no.idporten.eidas.connector.matching.domain.UserMatchFound;
+import no.idporten.eidas.connector.matching.domain.UserMatchNotFound;
+import no.idporten.eidas.lightprotocol.messages.*;
+import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class SpecificConnectorServiceTest {
@@ -38,89 +53,167 @@ class SpecificConnectorServiceTest {
     @BeforeEach
     void setup() {
         when(euConnectorProperties.getIssuer()).thenReturn("issuerId");
-        EidasUser eidasUser = new EidasUser(new EIDASIdentifier("SE/NO/1234"), "2000-12-1", null);
-        when(matchingServiceClient.match(eidasUser)).thenReturn(new UserMatchFound(eidasUser, "123-abc"));
-        specificConnectorService = new SpecificConnectorService(euConnectorProperties, specificCommunicationServiceImpl, levelOfAssuranceHelper, oidcRequestCache, Optional.of(matchingServiceClient), nobidSession);
-    }
-
-  /*  @Test
-    @DisplayName("when pid exists then get authorization with pid and sub claim still set to eidas identifier")
-    void testGetAuthorizationWithPid() {
-        LightResponse lightResponse = getLightResponse("relayState", "SE/NO/1234");
-        Authorization authorization = specificConnectorService.getAuthorization(lightResponse);
-        assertAll("all claims are present", () ->
-                        assertTrue(authorization.getAttributes().containsKey(PID_CLAIM)),
-                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM)),
-                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_DATE_OF_BIRTH_CLAIM)),
-                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_FAMILY_NAME_CLAIM)),
-                () -> assertTrue(authorization.getAttributes().containsKey(EidasClaims.IDPORTEN_EIDAS_GIVEN_NAME_CLAIM)),
-                () -> assertTrue(authorization.getAttributes().containsKey(IDPORTEN_EIDAS_CITIZEN_COUNTRY_CODE)),
-                () -> assertEquals("SE", authorization.getAttributes().get(IDPORTEN_EIDAS_CITIZEN_COUNTRY_CODE)),
-                () -> assertTrue(authorization.getAttributes().containsKey(PID_CLAIM)),
-                () -> assertEquals(authorization.getAttributes().get(IDPORTEN_EIDAS_PERSON_IDENTIFIER_CLAIM), authorization.getSub())
+        EidasUser eidasUser = new EidasUser(new EIDASIdentifier("SE/NO/1234"), "2000-12-01", null);
+        when(matchingServiceClient.match(any())).thenReturn(new UserMatchFound(eidasUser, "123-abc"));
+        specificConnectorService = new SpecificConnectorService(
+                euConnectorProperties,
+                specificCommunicationServiceImpl,
+                levelOfAssuranceHelper,
+                oidcRequestCache,
+                Optional.of(matchingServiceClient),
+                nobidSession
         );
-
     }
 
     @Test
-    @DisplayName("when pid doesn't exists then get authorization without pid and sub claim set to eidas identifier")
-    void testGetAuthorizationWithoutPid() {
-        LightResponse lightResponse = getLightResponse("relayState", "SE/NO/4321");
-        Authorization authorization = specificConnectorService.getAuthorization(lightResponse);
-        assertAll("pid not set when no match",
-                () -> assertFalse(authorization.getAttributes().containsKey(PID_CLAIM)),
-                () -> assertEquals("SE/NO/4321", authorization.getSub())
-        );
-        assertFalse(authorization.getAttributes().containsKey(PID_CLAIM));
-        assertEquals("SE/NO/4321", authorization.getSub());
+    @DisplayName("getEuConnectorRedirectUri returns property value")
+    void getEuConnectorRedirectUri_returnsConfigured() {
+        when(euConnectorProperties.getRedirectUri()).thenReturn("https://example.org/cb");
+
+        String uri = specificConnectorService.getEuConnectorRedirectUri();
+
+        assertEquals("https://example.org/cb", uri);
     }
 
     @Test
-    @DisplayName("when  personal identifier is invalid then throw a specificconnector exception")
-    void testGetAuthorizationWhenNoEidasSet() {
-        LightResponse lightResponse = getLightResponse("relayState", "banan");
-        assertThrows(SpecificConnectorException.class, () -> specificConnectorService.getAuthorization(lightResponse));
+    @DisplayName("buildLightRequest sets issuer, uppercases country, LoA and 4 requested attributes")
+    void buildLightRequest_populatesFields() {
+        // Given
+        when(euConnectorProperties.getIssuer()).thenReturn("issuerId");
+        PushedAuthorizationRequest par = mock(PushedAuthorizationRequest.class);
+        when(par.getAcrValues()).thenReturn(List.of("idporten-high"));
+        when(levelOfAssuranceHelper.idportenAcrListToEidasAcr(List.of("idporten-high")))
+                .thenReturn(List.of(new LevelOfAssurance("eidas-high")));
+
+        // When
+        LightRequest lr = specificConnectorService.buildLightRequest("se", par);
+
+        // Then
+        assertEquals("SE", lr.getCitizenCountryCode());
+        assertEquals("issuerId", lr.getIssuer());
+        assertEquals("eidas-high", lr.getLevelOfAssurance());
+        assertNotNull(lr.getRelayState());
+        assertNotNull(lr.getId());
+        assertEquals(4, lr.getRequestedAttributesList().size());
+        List<String> defs = lr.getRequestedAttributesList().stream().map(RequestedAttribute::getDefinition).toList();
+        assertTrue(defs.containsAll(List.of(
+                EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME,
+                EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME,
+                EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH,
+                EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER
+        )));
     }
 
-    private static LightResponse getLightResponse(String relayState, String eidasId) {
-        return LightResponse.builder()
-                .citizenCountryCode("NO")
-                .id("123")
-                .issuer("issuer")
-                .attributes(List.of(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME, List.of("myFamilyName")),
-                        new Attribute(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME, List.of("myFirstName")),
-                        new Attribute(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-1")),
-                        new Attribute(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, List.of(eidasId))))
-                .levelOfAssurance(LevelOfAssurance.EIDAS_LOA_LOW)
-                .relayState(relayState)
-                .inResponseToId("abc")
-                .status(Status.builder().statusCode(EIDASStatusCode.SUCCESS_URI.getValue()).failure(false).statusMessage("ok").build())
+    @Test
+    @DisplayName("getEidasUser extracts values and validates person identifier")
+    void getEidasUser_extraction_success() {
+        LightResponse response = LightResponse.builder()
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, List.of("SE/NO/ABC123")))
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME, List.of("Given")))
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME, List.of("Family")))
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-01")))
                 .build();
+
+        EidasUser user = specificConnectorService.getEidasUser(response);
+
+        assertEquals("SE/NO/ABC123", user.eidasIdentifier().getFormattedEidasIdentifier());
+        assertEquals("2000-12-01", user.birthdate());
+        Map<String, String> claims = user.eidasClaims();
+        assertEquals("Given", claims.get(EidasClaims.IDPORTEN_EIDAS_GIVEN_NAME_CLAIM));
+        assertEquals("Family", claims.get(EidasClaims.IDPORTEN_EIDAS_FAMILY_NAME_CLAIM));
     }
 
     @Test
-    @DisplayName("Build LightRequest with valid parameters")
-    void testBuildLightRequest() {
-        when(levelOfAssuranceHelper.idportenAcrListToEidasAcr(any())).thenReturn(List.of(new LevelOfAssurance(LevelOfAssurance.EIDAS_LOA_HIGH)));
-        String citizenCountryCode = "fr";
-        PushedAuthorizationRequest pushedAuthorizationRequest = mock(PushedAuthorizationRequest.class);
-        when(pushedAuthorizationRequest.getAcrValues()).thenReturn(List.of(LevelOfAssurance.EIDAS_LOA_HIGH));
+    @DisplayName("getEidasUser throws when identifier invalid or missing")
+    void getEidasUser_invalidIdentifier_throws() {
+        LightResponse response = LightResponse.builder()
+                // invalid person identifier (missing country codes)
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, List.of("invalid")))
+                .build();
 
-        LightRequest result = specificConnectorService.buildLightRequest(citizenCountryCode, pushedAuthorizationRequest);
+        assertThrows(SpecificConnectorException.class, () -> specificConnectorService.getEidasUser(response));
+    }
 
-        assertNotNull(result);
-        assertEquals("FR", result.getCitizenCountryCode());
-        assertNotNull(result.getId());
-        assertNotNull(result.getRelayState());
-        assertEquals(4, result.getRequestedAttributesList().size());
-        assertEquals(LevelOfAssurance.EIDAS_LOA_HIGH, result.getLevelOfAssurance());
-        assertEquals("issuerId", result.getIssuer());
-        assertEquals("public", result.getSpType());
-        assertEquals("Norwegian National Identity Authority", result.getProviderName());
-        assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME)));
-        assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME)));
-        assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH)));
-        assertTrue(result.getRequestedAttributesList().stream().anyMatch(attr -> attr.getDefinition().equals(EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER)));
-    }*/
+    @Test
+    @DisplayName("getEidasUser builds domain object from LightResponse")
+    void getEidasUser_mapsClaims() {
+        LightResponse response = LightResponse.builder()
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, List.of("SE/NO/USER1")))
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("1999-01-02")))
+                .build();
 
+        EidasUser user = specificConnectorService.getEidasUser(response);
+
+        assertEquals("SE/NO/USER1", user.eidasIdentifier().getFormattedEidasIdentifier());
+        assertEquals("1999-01-02", user.birthdate());
+        assertNotNull(user.eidasClaims());
+    }
+
+    @Test
+    @DisplayName("matchUser returns not found when matching disabled")
+    void matchUser_disabled_returnsNotFound() {
+        SpecificConnectorService serviceWithNoMatching = new SpecificConnectorService(
+                euConnectorProperties,
+                specificCommunicationServiceImpl,
+                levelOfAssuranceHelper,
+                oidcRequestCache,
+                Optional.empty(),
+                nobidSession
+        );
+
+        LightResponse response = LightResponse.builder()
+                .levelOfAssurance("eidas-high")
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, List.of("SE/NO/AAA")))
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-01")))
+                .build();
+
+        assertTrue(serviceWithNoMatching.matchUser(response) instanceof UserMatchNotFound);
+    }
+
+    @Test
+    @DisplayName("matchUser delegates to matching service and sets NobidSession LoA")
+    void matchUser_enabled_delegatesAndSetsLoA() {
+        LightResponse response = LightResponse.builder()
+                .levelOfAssurance("eidas-high")
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, List.of("SE/NO/BBB")))
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-01")))
+                .build();
+
+        specificConnectorService.matchUser(response);
+
+        verify(nobidSession).setLevelOfAssurance("eidas-high");
+        verify(matchingServiceClient).match(any(EidasUser.class));
+    }
+
+    @Test
+    @DisplayName("storeStateParams stores in cache and returns relayState; getCachedRequest retrieves and removes")
+    void storeAndGetCachedRequest_works() {
+        LightRequest request = LightRequest.builder()
+                .id("req1")
+                .issuer("issuerId")
+                .relayState("relay-123")
+                .build();
+        PushedAuthorizationRequest par = mock(PushedAuthorizationRequest.class);
+        when(par.getState()).thenReturn("state-xyz");
+        when(par.getNonce()).thenReturn("nonce-xyz");
+
+        // When storing
+        String relay = specificConnectorService.storeStateParams(request, par);
+        assertEquals("relay-123", relay);
+
+        ArgumentCaptor<CorrelatedRequestHolder> holderCaptor = ArgumentCaptor.forClass(CorrelatedRequestHolder.class);
+        verify(oidcRequestCache).put(eq("relay-123"), holderCaptor.capture());
+        CorrelatedRequestHolder stored = holderCaptor.getValue();
+        assertEquals("req1", stored.getiLightRequest().getId());
+        OIDCRequestStateParams params = stored.getAuthenticationRequest();
+        assertEquals("state-xyz", params.getState().getValue());
+        assertEquals("nonce-xyz", params.getNonce().getValue());
+        assertNotNull(params.getCodeVerifier());
+
+        // When getting
+        when(oidcRequestCache.get("relay-123")).thenReturn(stored);
+        CorrelatedRequestHolder retrieved = specificConnectorService.getCachedRequest("relay-123");
+        assertSame(stored, retrieved);
+        verify(oidcRequestCache).remove("relay-123");
+    }
 }
