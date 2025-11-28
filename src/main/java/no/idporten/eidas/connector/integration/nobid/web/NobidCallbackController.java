@@ -45,6 +45,8 @@ public class NobidCallbackController {
     @GetMapping(value = {"/callback/nobid", "nobid/callback"})
     public ResponseEntity<String> handleCallback(@RequestParam("state") String state,
                                                  @RequestParam(value = "code", required = false) String code,
+                                                 @RequestParam(value = "error_code", required = false) String errorCode,
+                                                 @RequestParam(value = "error_description", required = false) String errorDescription,
                                                  @Nonnull final HttpServletRequest request,
                                                  @Nonnull final HttpServletResponse response) {
         log.info("Received Nobid callback for state={}", state);
@@ -58,10 +60,8 @@ public class NobidCallbackController {
                 throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Invalid state in protocol verifies when integrating with nobid. Expected %s, got %s".formatted(protocolVerifiers.state(), state));
             }
             String pid = null; //may or may not find a match
-            // If no authorization code, then no match probably
-            if (code == null) {
-                throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "No authorization code received from Nobid.");
-            } else {
+            // If no authorization code, then no match probably. todo agree on error codes with nobid
+            if (code != null) {
                 OIDCTokenResponse tokenResponse = matchingServiceClient.getToken(code, protocolVerifiers);
 
                 JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
@@ -71,6 +71,9 @@ public class NobidCallbackController {
                 log.info("Received tokens from Nobid. ID Token present: {}", idToken);
                 pid = validateAndExtractPidFromIdToken(idToken.serialize(), protocolVerifiers.nonce());
                 log.info("Extracted pid from ID token: {}", pid);
+            } else {
+                //nb nobid currently returns server_error when no match to be fixed later
+                log.info("No authorization code received from Nobid. error_code={} error_description={}", errorCode, errorDescription);
             }
             String levelOfAssurance = nobidSession.getLevelOfAssurance() != null ? nobidSession.getLevelOfAssurance() : "http://eidas.europa.eu/LoA/low"; //tmp
             EidasUser eidasUser = nobidSession.getEidasUser();
