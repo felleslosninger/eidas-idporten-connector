@@ -37,7 +37,7 @@ public class NobidConfiguration {
         return RestClient.builder()
                 .requestFactory(requestFactory)
                 .defaultHeader(HttpHeaders.ACCEPT, "%s,%s".formatted(MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE))
-                .defaultHeader("Client-Id", "eidas-idporten-connector-%s".formatted(environment));
+                .defaultHeader("idporten-eidas-environment", environment));
     }
 
     @Bean
