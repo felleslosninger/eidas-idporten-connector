@@ -66,7 +66,7 @@ public record OidcProvider(
     }
 
     /**
-     * Creates and load a keyprovider
+     * Creates and loads a keyprovider
      * Consider making this a bean
      * @return keyProvicer
      */
