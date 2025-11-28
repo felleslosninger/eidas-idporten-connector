@@ -51,45 +51,43 @@ public class NobidCallbackController {
                                                  @Nonnull final HttpServletResponse response) {
         log.info("Received Nobid callback for state={}", state);
 
-        try {
-            OidcProtocolVerifiers protocolVerifiers = nobidSession.getOidcProtocolVerifiers();
-            if (protocolVerifiers == null) {
-                throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Matching session missing at callback.");
-            }
-            if (!Objects.equals(protocolVerifiers.state().getValue(), state)) {
-                throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Invalid state in protocol verifies when integrating with nobid. Expected %s, got %s".formatted(protocolVerifiers.state(), state));
-            }
-            String pid = null; //may or may not find a match
-            // If no authorization code, then no match probably. todo agree on error codes with nobid
-            if (code != null) {
-                OIDCTokenResponse tokenResponse = matchingServiceClient.getToken(code, protocolVerifiers);
-
-                JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
-                if (idToken == null) {
-                    throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "IDToken from nobid was missing in the token response");
-                }
-                log.info("Received tokens from Nobid. ID Token present: {}", idToken);
-                pid = validateAndExtractPidFromIdToken(idToken.serialize(), protocolVerifiers.nonce());
-                log.info("Extracted pid from ID token: {}", pid);
-            } else {
-                //nb nobid currently returns server_error when no match to be fixed later
-                log.info("No authorization code received from Nobid. error_code={} error_description={}", errorCode, errorDescription);
-            }
-            String levelOfAssurance = nobidSession.getLevelOfAssurance() != null ? nobidSession.getLevelOfAssurance() : "http://eidas.europa.eu/LoA/low"; //tmp
-            EidasUser eidasUser = nobidSession.getEidasUser();
-
-            //Fetch the cached par request and return the code to idporten
-            PushedAuthorizationRequest originalParRequest = (PushedAuthorizationRequest) request.getSession().getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST);
-            try {
-                authorizationResponseHelper.returnAuthorizationCode(request, response, levelOfAssurance, originalParRequest, eidasUser, pid);
-            } catch (IOException e) {
-                throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Failed to return authorization code.", e);
-            }
-            return ResponseEntity.ok("ok");
-
-        } finally {
-            //clearNobidSession(); //todo
+        OidcProtocolVerifiers protocolVerifiers = nobidSession.getOidcProtocolVerifiers();
+        if (protocolVerifiers == null) {
+            throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Matching session missing at callback.");
         }
+        if (!Objects.equals(protocolVerifiers.state().getValue(), state)) {
+            throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Invalid state in protocol verifies when integrating with nobid. Expected %s, got %s".formatted(protocolVerifiers.state(), state));
+        }
+        String pid = null; //may or may not find a match
+        // If no authorization code, then no match probably. todo agree on error codes with nobid
+        if (code != null) {
+            OIDCTokenResponse tokenResponse = matchingServiceClient.getToken(code, protocolVerifiers);
+
+            JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
+            if (idToken == null) {
+                throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "IDToken from nobid was missing in the token response");
+            }
+            log.info("Received tokens from Nobid. ID Token present: {}", idToken);
+            pid = validateAndExtractPidFromIdToken(idToken.serialize(), protocolVerifiers.nonce());
+            log.info("Extracted pid from ID token: {}", pid);
+        } else {
+            //nb nobid currently returns server_error when no match to be fixed later
+            log.info("No authorization code received from Nobid. error_code={} error_description={}", errorCode, errorDescription);
+        }
+        String levelOfAssurance = nobidSession.getLevelOfAssurance() != null ? nobidSession.getLevelOfAssurance() : "http://eidas.europa.eu/LoA/low"; //tmp
+        EidasUser eidasUser = nobidSession.getEidasUser();
+
+        //Fetch the cached par request and return the code to idporten
+        PushedAuthorizationRequest originalParRequest = (PushedAuthorizationRequest) request.getSession().getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST);
+        try {
+            //session is removed here
+            authorizationResponseHelper.returnAuthorizationCode(request, response, levelOfAssurance, originalParRequest, eidasUser, pid);
+        } catch (IOException e) {
+            throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Failed to return authorization code.", e);
+        }
+        return ResponseEntity.ok("ok");
+
+
     }
 
     private void clearNobidSession() {
