@@ -119,6 +119,7 @@ class SpecificConnectorServiceTest {
         assertEquals("SE/NO/ABC123", user.eidasIdentifier().getFormattedEidasIdentifier());
         assertEquals("2000-12-01", user.birthdate());
         Map<String, String> claims = user.eidasClaims();
+        assertNotNull(claims);
         assertEquals("Given", claims.get(EidasClaims.IDPORTEN_EIDAS_GIVEN_NAME_CLAIM));
         assertEquals("Family", claims.get(EidasClaims.IDPORTEN_EIDAS_FAMILY_NAME_CLAIM));
     }
@@ -167,7 +168,7 @@ class SpecificConnectorServiceTest {
                 .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-01")))
                 .build();
 
-        assertTrue(serviceWithNoMatching.matchUser(response) instanceof UserMatchNotFound);
+        assertInstanceOf(UserMatchNotFound.class, serviceWithNoMatching.matchUser(response));
     }
 
     @Test
