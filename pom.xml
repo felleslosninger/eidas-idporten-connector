@@ -26,7 +26,7 @@
         <lombok.version>1.18.42</lombok.version>
         <commons-lang.version>2.6</commons-lang.version>
         <glassfish-jaxb.version>4.0.6</glassfish-jaxb.version>
-        <ibm-icu4j.version>77.1</ibm-icu4j.version>
+        <ibm-icu4j.version>78.1</ibm-icu4j.version>
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
         <idporten-actuator-starter.version>2.0.0</idporten-actuator-starter.version>
         <nimbus.oauth2-oidc-sdk.version>11.30</nimbus.oauth2-oidc-sdk.version>
