@@ -25,7 +25,7 @@ import java.util.Optional;
 @ConditionalOnProperty(prefix = "eidas.nobid", name = "enabled", havingValue = "true")
 @Slf4j
 public class NobidConfiguration {
-    @Value("${spring.application.environment:prod}")
+    @Value("${spring.application.environment}")
     private String environment;
 
     @Bean
