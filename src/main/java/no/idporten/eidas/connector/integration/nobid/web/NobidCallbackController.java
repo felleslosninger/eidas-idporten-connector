@@ -45,7 +45,7 @@ public class NobidCallbackController {
     @GetMapping(value = {"/callback/nobid", "nobid/callback"})
     public ResponseEntity<String> handleCallback(@RequestParam("state") String state,
                                                  @RequestParam(value = "code", required = false) String code,
-                                                 @RequestParam(value = "error_code", required = false) String errorCode,
+                                                 @RequestParam(value = "error", required = false) String errorCode,
                                                  @RequestParam(value = "error_description", required = false) String errorDescription,
                                                  @Nonnull final HttpServletRequest request,
                                                  @Nonnull final HttpServletResponse response) {
