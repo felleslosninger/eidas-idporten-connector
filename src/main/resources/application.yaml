@@ -115,6 +115,7 @@ eidas:
     authorization-lifetime-seconds: 60
     accesstoken-lifetime-seconds: 120
     authorization-response-iss-parameter-supported: true
+    require-pushed-authorization-requests: true
     response-modes-supported:
       - query
       - query.jwt
@@ -139,6 +140,11 @@ eidas:
     connect-timeout-ms: 5000
     base-uri: http://eidas-freg-gateway-service:8080
     api-key: ${FREG_GW_API_KEY}
+  nobid:
+    enabled: false
+    read-timeout: 5s
+    connect-timeout: 5s
+
 digdir:
   static:
     design:

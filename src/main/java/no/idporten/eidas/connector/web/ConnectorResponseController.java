@@ -15,12 +15,13 @@ import no.idporten.eidas.connector.integration.specificcommunication.caches.Corr
 import no.idporten.eidas.connector.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationService;
 import no.idporten.eidas.connector.logging.AuditService;
+import no.idporten.eidas.connector.matching.domain.*;
+import no.idporten.eidas.connector.service.AuthorizationResponseHelper;
 import no.idporten.eidas.connector.service.SpecificConnectorService;
 import no.idporten.eidas.lightprotocol.BinaryLightTokenHelper;
 import no.idporten.eidas.lightprotocol.IncomingLightResponseValidator;
 import no.idporten.eidas.lightprotocol.messages.LightResponse;
-import no.idporten.sdk.oidcserver.OpenIDConnectIntegration;
-import no.idporten.sdk.oidcserver.protocol.*;
+import no.idporten.sdk.oidcserver.protocol.PushedAuthorizationRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,14 +38,18 @@ public class ConnectorResponseController {
 
     private final SpecificCommunicationService specificCommunicationService;
     private final EidasCacheProperties eidasCacheProperties;
-    private final OpenIDConnectIntegration openIDConnectSdk;
+
     private final SpecificConnectorService specificConnectorService;
+    private final AuthorizationResponseHelper authorizationResponseHelper;
     private final AuditService auditService;
 
+
     @RequestMapping(path = "/ConnectorResponse", method = {RequestMethod.GET, RequestMethod.POST})
-    public String handleConnectorResponse(@Nonnull final HttpServletRequest request, @Nonnull final HttpServletResponse response) throws IOException {
+    public String handleConnectorResponse(@Nonnull final HttpServletRequest request,
+                                          @Nonnull final HttpServletResponse response) throws IOException {
 
         final ILightResponse iLightResponse = getIncomingiLightResponse(request, null);
+
         if (!IncomingLightResponseValidator.validate(iLightResponse)) {
             throw new SpecificConnectorException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Response is invalid. Rejecting request.");
         }
@@ -63,19 +68,31 @@ public class ConnectorResponseController {
         }
         final StatusCodeTranslator statusCodeTranslator = StatusCodeTranslator.fromEidasStatusCodeString(iLightResponse.getStatus().getStatusCode());
         if (StatusCodeTranslator.SUCCESS == statusCodeTranslator) {
-            return returnAuthorizationCode(request, response, (LightResponse) iLightResponse);
+            return handleConnectorResponse(request, response, (LightResponse) iLightResponse);
         } else {
             throw new SpecificConnectorException(ErrorCodes.INVALID_REQUEST.getValue(), "IDP reported an error status: %s.".formatted(iLightResponse.getStatus()));
         }
     }
 
-    private String returnAuthorizationCode(HttpServletRequest request, HttpServletResponse response, LightResponse lightResponse) throws IOException {
-        PushedAuthorizationRequest authorizationRequest = (PushedAuthorizationRequest) request.getSession().getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST);
-        Authorization authorization = specificConnectorService.getAuthorization(lightResponse);
-        AuthorizationResponse authorizationResponse = openIDConnectSdk.authorize(authorizationRequest, authorization);
-        request.getSession().invalidate();
-        sendHttpResponse(openIDConnectSdk.createClientResponse(authorizationResponse), response);
-        return null;
+    private String handleConnectorResponse(HttpServletRequest request, HttpServletResponse response, LightResponse lightResponse) throws IOException {
+        PushedAuthorizationRequest parRequest = (PushedAuthorizationRequest) request.getSession().getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST);
+        UserMatchResponse userMatchResponse = specificConnectorService.matchUser(lightResponse);
+        switch (userMatchResponse) {
+            case UserMatchFound f -> {
+                return authorizationResponseHelper.returnAuthorizationCode(request, response, lightResponse.getLevelOfAssurance(), parRequest, f.eidasUser(), f.pid());
+            }
+            case UserMatchNotFound nf -> {
+                return authorizationResponseHelper.returnAuthorizationCode(request, response, lightResponse.getLevelOfAssurance(), parRequest, nf.eidasUser(), null);
+            }
+            case UserMatchRedirect r -> {
+                return "redirect:%s".formatted(r.redirectUrl());
+            }
+            case UserMatchError error -> { //ignore errors and carry on
+                return authorizationResponseHelper.returnAuthorizationCode(request, response, lightResponse.getLevelOfAssurance(), parRequest, error.eidasUser(), null);
+            }
+            default ->
+                    throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Unexpected user match response");
+        }
     }
 
 
@@ -89,18 +106,5 @@ public class ConnectorResponseController {
         return BinaryLightTokenHelper.getBinaryLightTokenId(tokenBase64, eidasCacheProperties.getResponseSecret(), eidasCacheProperties.getAlgorithm());
     }
 
-    protected void sendHttpResponse(ClientResponse clientResponse, HttpServletResponse response) throws IOException {
-        switch (clientResponse) {
-            case RedirectedResponse redirectedResponse ->
-                    response.sendRedirect(redirectedResponse.toQueryRedirectUri().toString());
 
-            case FormPostResponse formPostResponse -> {
-                response.setContentType("text/html;charset=UTF-8");
-                response.setCharacterEncoding("UTF-8");
-                response.getWriter().write(formPostResponse.getRedirectForm());
-            }
-            default ->
-                    throw new IllegalStateException("Unexpected client response type %s".formatted(clientResponse.getClass().getName()));
-        }
-    }
 }

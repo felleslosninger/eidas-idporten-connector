@@ -51,9 +51,27 @@ eidas:
           - http://localhost:8888/authorize/response
           - http://127.0.0.1:8888/authorize/response
   freg-gw:
+    enabled: true
     base-uri: http://localhost:7799
     api-key: addf4903-9b76-47ca-b6f5-beb937cab8bb
     demo-country-code-map:
       CA: SWE
+  nobid:
+    enabled: false
+    demo-country-code-map:
+      CA: SE
+    matching-service:
+      id: nobid
+      issuer: http://c2id:8080
+      authorization-endpoint: ${eidas.nobid.matching-service.issuer}/authorization
+      token-endpoint: ${eidas.nobid.matching-service.issuer}/token
+      jwks-uri: ${eidas.nobid.matching-service.issuer}/jwks.json
+      pushed-authorization-request-endpoint: ${eidas.nobid.matching-service.issuer}/par
+      client-id: democlient1
+      scopes:
+        - openid
+      client-secret: myvery1234long123secret123so123you123know
+      redirect-uri: http://eidas-idporten-connector:8088/nobid/callback
+      client-authentication-method: client_secret_basic
   cache:
     secret: mySecretConnectorRequest

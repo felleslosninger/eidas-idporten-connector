@@ -94,7 +94,7 @@ eidas:
     enabled: true
     read-timeout-ms: 50000
     connect-timeout-ms: 1000
-    base-uri: http://localhost:8080/
+    base-uri: http://junit/
     api-key: 123
     demo-country-code-map:
       CA: SWE
