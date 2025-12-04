@@ -30,5 +30,29 @@ eidas:
         redirect-uris:
           - https://login.test.idporten.no/authorize/callback/eidas
   freg-gw:
+    enabled: false
     demo-country-code-map:
       CA: SWE
+  nobid:
+    enabled: true
+    demo-country-code-map:
+      CA: SE
+    matching-service:
+      id: nobid
+      issuer: https://match.nobid.id/oidc
+      authorization-endpoint: ${eidas.nobid.matching-service.issuer}/authorization
+      token-endpoint: ${eidas.nobid.matching-service.issuer}/token
+      jwks-uri: ${eidas.nobid.matching-service.issuer}/jwks.json
+      pushed-authorization-request-endpoint: ${eidas.nobid.matching-service.issuer}/par
+      client-id: idporten-eidas-connector
+      scopes:
+        - openid
+      redirect-uri: https://idporten-connector.test.eidasnode.no/nobid/callback
+      client-authentication-method: private_key_jwt
+      kid: dev #ikke egentlig i bruk
+      client-keystore:
+        type: ${NOBID_CLIENT_KEYSTORE_TYPE}
+        location: base64:${NOBID_CLIENT_KEYSTORE}
+        password: ${NOBID_CLIENT_KEYSTORE_PASSWORD}
+        key-alias: ${NOBID_CLIENT_KEY_ALIAS}
+        key-password: ${NOBID_CLIENT_KEY_PASSWORD}
