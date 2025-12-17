@@ -22,10 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -185,6 +182,26 @@ class SpecificConnectorServiceTest {
 
         verify(nobidSession).setLevelOfAssurance("eidas-high");
         verify(matchingServiceClient).match(any(EidasUser.class), eq(Collections.emptySet()));
+    }
+
+    @Test
+    @DisplayName("matchUser forwards non-empty requestedScopes to matching service")
+    void matchUser_forwards_requested_scopes() {
+        // Given
+        EidasUser eidasUser = new EidasUser(new EIDASIdentifier("SE/NO/BBB"), "2000-12-01", null);
+        when(matchingServiceClient.match(any(), eq(Set.of("nobid:sandbox")))).thenReturn(new UserMatchFound(eidasUser, "match-id"));
+
+        LightResponse response = LightResponse.builder()
+                .levelOfAssurance("eidas-high")
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_PERSON_IDENTIFIER, List.of("SE/NO/BBB")))
+                .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-01")))
+                .build();
+
+        // When
+        specificConnectorService.matchUser(response, Set.of("nobid:sandbox"));
+
+        // Then
+        verify(matchingServiceClient).match(any(EidasUser.class), eq(Set.of("nobid:sandbox")));
     }
 
     @Test

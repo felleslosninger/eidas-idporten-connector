@@ -62,6 +62,22 @@ class FregGwMatchingServiceClientTest {
     }
 
     @Test
+    @DisplayName("then match ignores non-empty requestedScopes and still returns value when status OK")
+    void testMatchIgnoresRequestedScopes() {
+        mockServer.expect(requestTo(("http://junit/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=SWE")))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header("X-API-KEY", "123"))
+                .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
+                .andRespond(withSuccess("987654321", MediaType.TEXT_PLAIN));
+
+        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/123"), "1990-01-01", null), java.util.Set.of("email", "address"));
+
+        mockServer.verify();
+        assertInstanceOf(UserMatchFound.class, result);
+        assertEquals("987654321", ((UserMatchFound) result).pid());
+    }
+
+    @Test
     @DisplayName("then match returns optional emtpy when status NOT_FOUND")
     void testMatchReturnsEmtpyWhenStatusOkButEmpty() {
         mockServer.expect(requestTo(("http://junit/eidas/entydig?utenlandskPersonIdentifikasjon=123&foedselsdato=19900101&landkode=SWE")))

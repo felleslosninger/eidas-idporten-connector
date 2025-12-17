@@ -29,7 +29,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
@@ -37,6 +40,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,11 +69,11 @@ class NobidMatchingServiceClientTest {
     @Mock
     private CountryCodeConverter countryCodeConverter;
 
-    @InjectMocks
     private NobidMatchingServiceClient client;
 
     @BeforeEach
     void setUp() {
+        this.client = new NobidMatchingServiceClient(provider, session, OBJECT_MAPPER, auditService, countryCodeConverter);
         lenient().when(provider.issuer()).thenReturn(URI.create("https://example.com"));
         lenient().when(provider.clientId()).thenReturn("myNobidClient");
         lenient().when(provider.tokenEndpoint()).thenReturn(URI.create("https://example.com/token"));
@@ -174,6 +178,33 @@ class NobidMatchingServiceClientTest {
 
         var resp = spyClient.match(new EidasUser(new EIDASIdentifier("NO/NO/123"), "2000-01-01", java.util.Map.of()), Collections.emptySet());
         assertInstanceOf(UserMatchError.class, resp);
+    }
+
+    @Test
+    @DisplayName("createNobidAuthenticationRequest adds only intersecting optional scopes when requestedScopes is non-empty")
+    void create_auth_request_with_requested_scopes_filters_to_optional() {
+        // Given provider default and optional scopes
+        when(provider.scopes()).thenReturn(java.util.Set.of("openid", "profile"));
+        when(provider.optionalScopes()).thenReturn(java.util.Set.of("nobid:sandbox", "address"));
+        when(provider.authorizationEndpoint()).thenReturn(URI.create("https://example.com/authorize"));
+        when(provider.responseMode()).thenReturn(com.nimbusds.oauth2.sdk.ResponseMode.QUERY);
+        when(countryCodeConverter.getMappedCountryCode("SE")).thenReturn("SE");
+
+        EidasUser user = new EidasUser(new EIDASIdentifier("SE/NO/ABC"), "1990-01-01", java.util.Map.of());
+        OidcProtocolVerifiers verifiers = new OidcProtocolVerifiers(
+                "nobid", new State("st"), new Nonce("nonce"), new CodeVerifier(randomPkceValue(53)), Instant.now());
+
+        // When requesting scopes including one optional match and one unknown
+        java.util.Set<String> requested = java.util.Set.of("nobid:sandbox", "phone");
+        AuthenticationRequest req = client.createNobidAuthenticationRequest(user, verifiers, requested);
+
+        // Then: scope should be union(default, intersection(optional, requested)) => openid, profile, nobid:sandbox
+        java.util.Set<String> scopeValues = new HashSet<>(req.getScope().toStringList());
+        assertTrue(scopeValues.contains("openid"));
+        assertTrue(scopeValues.contains("profile"));
+        assertTrue(scopeValues.contains("nobid:sandbox"));
+        assertFalse(scopeValues.contains("phone"));
+        assertFalse(scopeValues.contains("address"));
     }
 
     @Test
