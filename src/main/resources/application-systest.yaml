@@ -36,6 +36,7 @@ eidas:
         client-secret: ${CLIENT_SECRET_IDPORTEN_SYSTEST_CLIENT_SECRET_BASIC}
         scopes:
           - openid
+          - nobid:sandbox
         redirect-uris:
           - https://login.idporten.dev/authorize/callback/eidas
       - client-id: testclient
@@ -43,6 +44,7 @@ eidas:
         scopes:
           - openid
           - profile
+          - nobid:sandbox
         redirect-uris:
           - https://test-client.tools.idporten.dev/authorize/response
   freg-gw:
@@ -63,6 +65,8 @@ eidas:
       client-id: idporten-eidas-connector
       scopes:
         - openid
+      optional-scopes:
+        - nobid:sandbox
       redirect-uri: https://idporten-connector.eidasnode.dev/nobid/callback
       client-authentication-method: private_key_jwt
       kid: dev #ikke egentlig i bruk

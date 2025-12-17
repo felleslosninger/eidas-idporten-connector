@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -33,7 +34,7 @@ class NobidMatchingServiceClientIT {
         UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/199210199320"),
                 "1992-10-19",
                 Map.of(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_GIVEN_NAME, "Allslags",
-                        EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME, "Lekeplass"))
+                        EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_FAMILY_NAME, "Lekeplass")), Collections.emptySet()
         );
         assertInstanceOf(UserMatchRedirect.class, result);
         assertNotNull(((UserMatchRedirect) result).redirectUrl());

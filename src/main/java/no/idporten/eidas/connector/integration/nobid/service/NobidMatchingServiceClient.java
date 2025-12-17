@@ -31,6 +31,7 @@ import no.idporten.eidas.connector.matching.domain.UserMatchResponse;
 import no.idporten.eidas.connector.matching.service.MatchingService;
 import no.idporten.eidas.connector.service.CountryCodeConverter;
 import no.idporten.eidas.connector.service.EIDASIdentifier;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -48,22 +49,23 @@ public class NobidMatchingServiceClient implements MatchingService {
     private final AuditService auditService;
     private final CountryCodeConverter countryCodeConverter;
 
+
     @Override
-    public UserMatchResponse match(EidasUser eidasUser) {
+    public UserMatchResponse match(EidasUser eidasUser, Set<String> requestedScopes) {
         try {
-            return createParAndReturnState(eidasUser);
+            return createParAndReturnState(eidasUser, requestedScopes);
         } catch (Exception e) {
             log.warn("Nobid matching failed: {}", e.getMessage());
             return new UserMatchError(eidasUser, "internal_error", "No match found");
         }
     }
 
-    private UserMatchResponse createParAndReturnState(EidasUser eidasUser) {
+    private UserMatchResponse createParAndReturnState(EidasUser eidasUser, Set<String> requestedScopes) {
         OidcProtocolVerifiers protocolVerifiers = new OidcProtocolVerifiers("nobid");
 
         nobidSession.setOidcProtocolVerifiers(protocolVerifiers);
         nobidSession.setEidasUser(eidasUser);
-        AuthenticationRequest parRequestToNobid = createNobidAuthenticationRequest(eidasUser, protocolVerifiers);
+        AuthenticationRequest parRequestToNobid = createNobidAuthenticationRequest(eidasUser, protocolVerifiers, requestedScopes);
         try {
             return sendPushedAuthorizationRequest(parRequestToNobid);
         } catch (Exception e) {
@@ -140,7 +142,7 @@ public class NobidMatchingServiceClient implements MatchingService {
         );
     }
 
-    public AuthenticationRequest createNobidAuthenticationRequest(final EidasUser eidasUser, OidcProtocolVerifiers protocolVerifiers) {
+    public AuthenticationRequest createNobidAuthenticationRequest(final EidasUser eidasUser, OidcProtocolVerifiers protocolVerifiers, Set<String> requestedScopes) {
         // forwarded scopes from rp union default scopes for claims provider
         List<LangTag> langTags = null;
         try {
@@ -148,7 +150,14 @@ public class NobidMatchingServiceClient implements MatchingService {
         } catch (LangTagException e) {
             log.warn("Failed to parse lang tag nb", e);
         }
+
         Set<String> scopes = new HashSet<>(nobidClaimsProvider.scopes());
+        if (!CollectionUtils.isEmpty(requestedScopes)) {
+            Set<String> selectedOptional = new HashSet<>(nobidClaimsProvider.optionalScopes());
+            selectedOptional.retainAll(requestedScopes);
+            scopes.addAll(selectedOptional);
+        }
+
         AuthenticationRequest.Builder requestBuilder = new AuthenticationRequest.Builder(
                 new ResponseType(ResponseType.Value.CODE),
                 new Scope(scopes.toArray(String[]::new)),

@@ -36,6 +36,7 @@ import java.net.URI;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -164,14 +165,14 @@ class NobidMatchingServiceClientTest {
         AuthenticationRequest dummy = new AuthenticationRequest.Builder(
                 new ResponseType(ResponseType.Value.CODE), new Scope("openid"), new ClientID("c"), URI.create("https://cb"))
                 .state(new State("s")).build();
-        doReturn(dummy).when(spyClient).createNobidAuthenticationRequest(any(), any());
+        doReturn(dummy).when(spyClient).createNobidAuthenticationRequest(any(), any(), eq(Collections.emptySet()));
         // Force exception during PAR call
         try {
             doThrow(new RuntimeException("boom")).when(spyClient).sendPushedAuthorizationRequest(any(AuthenticationRequest.class));
         } catch (Exception ignored) {
         }
 
-        var resp = spyClient.match(new EidasUser(new EIDASIdentifier("NO/NO/123"), "2000-01-01", java.util.Map.of()));
+        var resp = spyClient.match(new EidasUser(new EIDASIdentifier("NO/NO/123"), "2000-01-01", java.util.Map.of()), Collections.emptySet());
         assertInstanceOf(UserMatchError.class, resp);
     }
 

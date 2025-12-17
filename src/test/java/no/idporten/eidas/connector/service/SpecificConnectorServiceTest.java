@@ -22,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,7 +55,7 @@ class SpecificConnectorServiceTest {
     void setup() {
         when(euConnectorProperties.getIssuer()).thenReturn("issuerId");
         EidasUser eidasUser = new EidasUser(new EIDASIdentifier("SE/NO/1234"), "2000-12-01", null);
-        when(matchingServiceClient.match(any())).thenReturn(new UserMatchFound(eidasUser, "123-abc"));
+        when(matchingServiceClient.match(any(), eq(Collections.emptySet()))).thenReturn(new UserMatchFound(eidasUser, "123-abc"));
         specificConnectorService = new SpecificConnectorService(
                 euConnectorProperties,
                 specificCommunicationServiceImpl,
@@ -168,7 +169,7 @@ class SpecificConnectorServiceTest {
                 .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-01")))
                 .build();
 
-        assertInstanceOf(UserMatchNotFound.class, serviceWithNoMatching.matchUser(response));
+        assertInstanceOf(UserMatchNotFound.class, serviceWithNoMatching.matchUser(response, Collections.emptySet()));
     }
 
     @Test
@@ -180,10 +181,10 @@ class SpecificConnectorServiceTest {
                 .attribute(new Attribute(EidasClaims.EIDAS_EUROPA_EU_ATTRIBUTES_NATURALPERSON_DATE_OF_BIRTH, List.of("2000-12-01")))
                 .build();
 
-        specificConnectorService.matchUser(response);
+        specificConnectorService.matchUser(response, Collections.emptySet());
 
         verify(nobidSession).setLevelOfAssurance("eidas-high");
-        verify(matchingServiceClient).match(any(EidasUser.class));
+        verify(matchingServiceClient).match(any(EidasUser.class), eq(Collections.emptySet()));
     }
 
     @Test

@@ -38,6 +38,7 @@ public record OidcProvider(
         @NotEmpty String clientSecret,
         @NotNull ClientAuthenticationMethod clientAuthenticationMethod,
         Set<String> scopes,
+        Set<String> optionalScopes,
         @NotNull ResponseMode responseMode,
         Map<String, String> customParameters,
         Set<String> cancelErrorCodes,
@@ -56,6 +57,7 @@ public record OidcProvider(
         acrValues = acrValues == null ? Collections.emptyList() : List.copyOf(acrValues);
         amr = amr == null ? Collections.emptyList() : List.copyOf(amr);
         scopes = scopes == null ? Collections.emptySet() : Set.copyOf(scopes);
+        optionalScopes = optionalScopes == null ? Collections.emptySet() : Set.copyOf(optionalScopes);
         responseMode = responseMode == null ? ResponseMode.QUERY : responseMode;
         clientAuthenticationMethod = clientAuthenticationMethod == null ? ClientAuthenticationMethod.CLIENT_SECRET_BASIC : clientAuthenticationMethod;
         customParameters = customParameters == null ? Collections.emptyMap() : Map.copyOf(customParameters);

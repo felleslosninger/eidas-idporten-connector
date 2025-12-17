@@ -47,6 +47,8 @@ eidas:
       client-id: idporten-eidas-connector
       scopes:
         - openid
+      optional-scopes:
+        - nobid:sandbox
       redirect-uri: https://idporten-connector.test.eidasnode.no/nobid/callback
       client-authentication-method: private_key_jwt
       kid: dev #ikke egentlig i bruk

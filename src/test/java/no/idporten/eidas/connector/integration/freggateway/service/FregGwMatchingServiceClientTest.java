@@ -21,6 +21,8 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
@@ -53,7 +55,7 @@ class FregGwMatchingServiceClientTest {
                 .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
                 .andRespond(withSuccess("123456789", MediaType.TEXT_PLAIN));
 
-        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/123"), "1990-01-01", null));
+        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/123"), "1990-01-01", null), Collections.emptySet());
         mockServer.verify();
         assertInstanceOf(UserMatchFound.class, result);
         assertEquals("123456789", ((UserMatchFound) result).pid());
@@ -68,7 +70,7 @@ class FregGwMatchingServiceClientTest {
                 .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
                 .andRespond(withResourceNotFound());
 
-        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/123"), "1990-01-01", null));
+        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/123"), "1990-01-01", null), Collections.emptySet());
 
         assertInstanceOf(UserMatchNotFound.class, result);
     }
@@ -83,7 +85,7 @@ class FregGwMatchingServiceClientTest {
                 .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
                 .andRespond(withBadRequest().body("{\"code\":\"FREG-002\",\"message\":\"wrong country code\"}").contentType(MediaType.APPLICATION_JSON));
 
-        assertThrows(HttpClientErrorException.class, () -> matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/123"), "1990-01-01", null)));
+        assertThrows(HttpClientErrorException.class, () -> matchingServiceClient.match(new EidasUser(new EIDASIdentifier("SE/NO/123"), "1990-01-01", null), Collections.emptySet()));
     }
 
     @DisplayName("then return empty optional when wrong format error")
@@ -94,7 +96,7 @@ class FregGwMatchingServiceClientTest {
                 .andExpect(header("X-API-KEY", "123"))
                 .andExpect(header("Client-Id", "eidas-idporten-connector-junit"))
                 .andRespond(withBadRequest().body("{\"code\":\"FREG-001\",\"message\":\"wrong format\"}").contentType(MediaType.APPLICATION_JSON));
-        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("CH/NO/123"), "1990-01-01", null));
+        UserMatchResponse result = matchingServiceClient.match(new EidasUser(new EIDASIdentifier("CH/NO/123"), "1990-01-01", null), Collections.emptySet());
         assertInstanceOf(UserMatchNotFound.class, result);
 
     }
