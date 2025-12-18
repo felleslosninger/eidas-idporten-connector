@@ -27,6 +27,7 @@ eidas:
         client-secret: ${CLIENT_SECRET_IDPORTEN_TEST_CLIENT_SECRET_BASIC}
         scopes:
           - openid
+          - nobid:sandbox
         redirect-uris:
           - https://login.test.idporten.no/authorize/callback/eidas
   freg-gw:
