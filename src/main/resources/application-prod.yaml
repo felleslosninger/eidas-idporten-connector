@@ -23,5 +23,6 @@ eidas:
         client-secret: ${CLIENT_SECRET_IDPORTEN_PROD_CLIENT_SECRET_BASIC}
         scopes:
           - openid
+          - nobid:sandbox
         redirect-uris:
           - https://login.idporten.no/authorize/callback/eidas

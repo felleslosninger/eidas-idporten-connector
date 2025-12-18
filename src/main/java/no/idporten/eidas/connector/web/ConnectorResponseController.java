@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 
 import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST;
 
@@ -76,7 +77,7 @@ public class ConnectorResponseController {
 
     private String handleConnectorResponse(HttpServletRequest request, HttpServletResponse response, LightResponse lightResponse) throws IOException {
         PushedAuthorizationRequest parRequest = (PushedAuthorizationRequest) request.getSession().getAttribute(SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST);
-        UserMatchResponse userMatchResponse = specificConnectorService.matchUser(lightResponse);
+        UserMatchResponse userMatchResponse = specificConnectorService.matchUser(lightResponse, new HashSet(parRequest.getScope()));
         switch (userMatchResponse) {
             case UserMatchFound f -> {
                 return authorizationResponseHelper.returnAuthorizationCode(request, response, lightResponse.getLevelOfAssurance(), parRequest, f.eidasUser(), f.pid());

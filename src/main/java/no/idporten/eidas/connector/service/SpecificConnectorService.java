@@ -111,14 +111,14 @@ public class SpecificConnectorService {
         return eidasClaims;
     }
 
-    public UserMatchResponse matchUser(LightResponse lightResponse) {
+    public UserMatchResponse matchUser(LightResponse lightResponse, Set<String> requestedScopes) {
         EidasUser eidasUser = getEidasUser(lightResponse);
         if (matchingServiceClient.isEmpty()) {
             return new UserMatchNotFound(eidasUser, "Matching service disabled");
         }
         nobidSession.setLevelOfAssurance(lightResponse.getLevelOfAssurance());
 
-        return matchingServiceClient.get().match(eidasUser);
+        return matchingServiceClient.get().match(eidasUser, requestedScopes);
     }
 
     private String getAttributeName(String definition) {

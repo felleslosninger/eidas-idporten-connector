@@ -11,6 +11,7 @@ import no.idporten.eidas.connector.service.CountryCodeConverter;
 import no.idporten.eidas.connector.service.EIDASIdentifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
@@ -18,6 +19,7 @@ import org.springframework.web.client.RestClient;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -27,7 +29,14 @@ public class FregGwMatchingServiceClient implements MatchingService {
     private final CountryCodeConverter countryCodeConverter;
 
     @Override
-    public UserMatchResponse match(EidasUser eidasUser) {
+    public UserMatchResponse match(EidasUser eidasUser, Set<String> requestedScopes) {
+        if (!CollectionUtils.isEmpty(requestedScopes)) {
+            log.warn("Optional scopes not supported for freg-gw matching service. Ignoring scopes: {}", requestedScopes);
+        }
+        return match(eidasUser);
+    }
+
+    private UserMatchResponse match(EidasUser eidasUser) {
         Optional<String> matchingUserId = fregGatewayEndpointBuilder.build().get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/eidas/entydig")
@@ -39,6 +48,7 @@ public class FregGwMatchingServiceClient implements MatchingService {
         if (matchingUserId.isPresent()) return new UserMatchFound(eidasUser, matchingUserId.get());
         else return new UserMatchNotFound(eidasUser, "No match found for user");
     }
+
 
     private String getCountryCode(EIDASIdentifier eidasIdentifier) {
         return countryCodeConverter.getISOAlpha3CountryCode(eidasIdentifier.getSubjectCountryCode());

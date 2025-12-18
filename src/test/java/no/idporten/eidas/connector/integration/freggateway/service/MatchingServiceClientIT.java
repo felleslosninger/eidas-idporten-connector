@@ -30,7 +30,7 @@ class MatchingServiceClientIT {
 
         UserMatchResponse userMatchResponse = matchingServiceClient.match(new EidasUser(
                 new EIDASIdentifier("SE/NO/1634736525341-3"),
-                "2000-01-01", null));
+                "2000-01-01", null), null);
         assertInstanceOf(UserMatchFound.class, userMatchResponse);
         assertEquals("41810060822", ((UserMatchFound) userMatchResponse).pid());
     }
@@ -42,7 +42,7 @@ class MatchingServiceClientIT {
         UserMatchResponse userMatchResponse = matchingServiceClient.match(new EidasUser(
                 new EIDASIdentifier("CH/NO/dff77f55-85a5-48ff-a3c1-aad4210a0bdb"),
                 "2000-01-01",
-                null));
+                null), null);
         assertInstanceOf(UserMatchNotFound.class, userMatchResponse);
         assertEquals("user not found", ((UserMatchNotFound) userMatchResponse).message());
     }

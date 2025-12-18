@@ -36,6 +36,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST;
@@ -115,7 +116,7 @@ class ConnectorResponseControllerTest {
 
         when(specificConnectorService.getCachedRequest(any(String.class))).thenReturn(holder);
         when(specificCommunicationService.getAndRemoveResponse(any(String.class), any())).thenReturn(lightResponse);
-        when(specificConnectorService.matchUser(lightResponse))
+        when(specificConnectorService.matchUser(lightResponse, Collections.emptySet()))
                 .thenReturn(new no.idporten.eidas.connector.matching.domain.UserMatchRedirect("http://redirect.example/next"));
 
         mockMvc.perform(post("/ConnectorResponse")

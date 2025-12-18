@@ -39,12 +39,14 @@ eidas:
         client-secret: password
         scopes:
           - openid
+          - nobid:sandbox
         redirect-uris:
           - http://127.0.0.1:7070/authorize/callback/eidas
       - client-id: testclient
         client-secret: password
         scopes:
           - openid
+          - nobid:sandbox
         redirect-uris:
           - http://localhost:8888/idporten-oidc-client/authorize/response
           - http://127.0.0.1:8888/idporten-oidc-client/authorize/response
@@ -71,6 +73,8 @@ eidas:
       client-id: idporten-eidas-connector
       scopes:
         - openid
+      optional-scopes:
+        - nobid:sandbox
       redirect-uri: http://localhost:8088/nobid/callback
       client-authentication-method: private_key_jwt
       kid: test
