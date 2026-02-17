@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.Map;
 
+import static no.idporten.eidas.connector.web.HttpHeadersConverter.toMap;
 import static no.idporten.eidas.connector.web.SessionAttributes.SESSION_ATTRIBUTE_AUTHORIZATION_REQUEST;
 
 @Slf4j
@@ -40,13 +41,13 @@ public class IDPortenConnectorController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<PushedAuthorizationResponse> par(@RequestHeader HttpHeaders headers, @RequestParam MultiValueMap<String, String> parameters) {
-        return ResponseEntity.ok(openIDConnectSdk.process(new PushedAuthorizationRequest(headers, parameters)));
+        return ResponseEntity.ok(openIDConnectSdk.process(new PushedAuthorizationRequest(toMap(headers), parameters)));
     }
 
 
     @GetMapping("/authorize")
     public String authorize(@RequestHeader HttpHeaders headers, @RequestParam MultiValueMap<String, String> parameters, HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
-        PushedAuthorizationRequest authorizationRequest = new PushedAuthorizationRequest(headers, parameters);
+        PushedAuthorizationRequest authorizationRequest = new PushedAuthorizationRequest(toMap(headers), parameters);
         ClientMetadata clientMetadata = openIDConnectSdk.findClient(authorizationRequest.getClientId());
         try {
             openIDConnectSdk.validate(authorizationRequest, clientMetadata);
@@ -67,7 +68,7 @@ public class IDPortenConnectorController {
             case FormPostResponse formPostResponse -> {
                 response.setContentType("text/html;charset=UTF-8");
                 response.setCharacterEncoding("UTF-8");
-                response.getWriter().write(formPostResponse.getRedirectForm());
+                response.getWriter().write(formPostResponse.getRedirectForm(true));
             }
             default -> throw new IllegalStateException("Unexpected client response type %s".formatted(clientResponse.getClass().getName()));
         }
@@ -77,7 +78,7 @@ public class IDPortenConnectorController {
     public String authorizePAR(@RequestHeader HttpHeaders headers, @RequestParam MultiValueMap<String, String> parameters, HttpServletRequest request, Model model) {
         request.getSession().invalidate();
         try {
-            PushedAuthorizationRequest pushedAuthorizationRequest = openIDConnectSdk.process(new AuthorizationRequest(headers, parameters));
+            PushedAuthorizationRequest pushedAuthorizationRequest = openIDConnectSdk.process(new AuthorizationRequest(toMap(headers), parameters));
             return authorize(pushedAuthorizationRequest, request);
         } catch (OAuth2Exception e) {
             log.warn("Failed to process authorization request", e);
@@ -105,7 +106,7 @@ public class IDPortenConnectorController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<TokenResponse> token(@RequestHeader HttpHeaders headers, @RequestParam MultiValueMap<String, String> parameters) {
-        return ResponseEntity.ok(openIDConnectSdk.process(new TokenRequest(headers, parameters)));
+        return ResponseEntity.ok(openIDConnectSdk.process(new TokenRequest(toMap(headers), parameters)));
     }
 
     @GetMapping(value = {"/jwk", "/jwks", "/.well-known/jwks.json"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -123,13 +124,13 @@ public class IDPortenConnectorController {
     @GetMapping(value = "/userinfo", produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin(origins = "*")
     public ResponseEntity<UserInfoResponse> userInfoGet(@RequestHeader HttpHeaders headers, @RequestParam MultiValueMap<String, String> parameters) {
-        return ResponseEntity.ok(openIDConnectSdk.process(new UserInfoRequest(headers, parameters)));
+        return ResponseEntity.ok(openIDConnectSdk.process(new UserInfoRequest(toMap(headers), parameters)));
     }
 
     @PostMapping(value = "/userinfo", produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin(origins = "*")
     public ResponseEntity<UserInfoResponse> userInfoPost(@RequestHeader HttpHeaders headers, @RequestParam MultiValueMap<String, String> parameters) {
-        return ResponseEntity.ok(openIDConnectSdk.process(new UserInfoRequest(headers, parameters)));
+        return ResponseEntity.ok(openIDConnectSdk.process(new UserInfoRequest(toMap(headers), parameters)));
     }
 
     @ExceptionHandler(OAuth2Exception.class)

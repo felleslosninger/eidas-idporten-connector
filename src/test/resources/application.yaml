@@ -7,9 +7,6 @@ server:
     min-response-size: 1024
   http2:
     enabled: true
-  error:
-    whitelabel:
-      enabled: true
 # Spring Boot Actuator
 management:
   server:
@@ -32,6 +29,10 @@ spring:
   application:
     name: junit
     environment: junit
+  web:
+    error:
+      whitelabel:
+        enabled: true
 digdir:
   audit:
     application-name: ${spring.application.name}

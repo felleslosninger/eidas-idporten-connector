@@ -82,7 +82,7 @@ public class CitizenCountryController {
                 parameterMap);
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(formPostResponse.getRedirectForm());
+        response.getWriter().write(formPostResponse.getRedirectForm(true));
     }
 
     private Map<String, String> createLightRequest(String selectedCountry, PushedAuthorizationRequest pushedAuthorizationRequest) {

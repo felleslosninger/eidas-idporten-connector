@@ -4,19 +4,17 @@ import no.idporten.eidas.connector.domain.EidasUser;
 import no.idporten.eidas.connector.matching.domain.UserMatchFound;
 import no.idporten.eidas.connector.matching.domain.UserMatchNotFound;
 import no.idporten.eidas.connector.matching.domain.UserMatchResponse;
+import no.idporten.eidas.connector.service.CountryCodeConverter;
 import no.idporten.eidas.connector.service.EIDASIdentifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureMockRestServiceServer;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
@@ -24,26 +22,34 @@ import org.springframework.web.client.RestClient;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
-@DisplayName("When calling the MatchigServiceClient")
-@SpringBootTest
-@AutoConfigureMockRestServiceServer
+@DisplayName("When calling the MatchingServiceClient")
 @ExtendWith(MockitoExtension.class)
 class FregGwMatchingServiceClientTest {
-    @MockitoSpyBean
+
+    @Mock
+    private CountryCodeConverter countryCodeConverter;
+
     private RestClient.Builder fregGatewayEndpointBuilder;
-
-    @Autowired
-    @InjectMocks
     private FregGwMatchingServiceClient matchingServiceClient;
-
     private MockRestServiceServer mockServer;
 
     @BeforeEach
     public void setUp() {
+        fregGatewayEndpointBuilder = RestClient.builder()
+                .baseUrl("http://junit")
+                .defaultHeader(HttpHeaders.ACCEPT, "%s,%s".formatted(MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE))
+                .defaultHeader("X-API-KEY", "123")
+                .defaultHeader("Client-Id", "eidas-idporten-connector-junit");
         mockServer = MockRestServiceServer.bindTo(fregGatewayEndpointBuilder).build();
+
+        lenient().when(countryCodeConverter.getISOAlpha3CountryCode("SE")).thenReturn("SWE");
+        lenient().when(countryCodeConverter.getISOAlpha3CountryCode("CH")).thenReturn("CHE");
+
+        matchingServiceClient = new FregGwMatchingServiceClient(fregGatewayEndpointBuilder, countryCodeConverter);
     }
 
     @Test

@@ -18,13 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collection;
 
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class SpecificCommunicationServiceImplTest {
 
     @Mock
@@ -51,8 +51,8 @@ class SpecificCommunicationServiceImplTest {
         binaryLightTokenHelperMock = Mockito.mockStatic(BinaryLightTokenHelper.class);
         String tokenBase64 = "mockedTokenBase64";
         BinaryLightToken binaryLightToken = mock(BinaryLightToken.class);
-        when(binaryLightToken.getToken()).thenReturn(mock(LightToken.class));
-        when(binaryLightToken.getToken().getId()).thenReturn(lightTokenId);
+        lenient().when(binaryLightToken.getToken()).thenReturn(mock(LightToken.class));
+        lenient().when(binaryLightToken.getToken().getId()).thenReturn(lightTokenId);
         binaryLightTokenHelperMock.when(() -> BinaryLightTokenHelper.getBinaryToken(any(HttpServletRequest.class), eq(EidasParameterKeys.TOKEN.toString()))).thenReturn(tokenBase64);
         binaryLightTokenHelperMock.when(() -> BinaryLightTokenHelper.getBinaryLightTokenId(eq(tokenBase64), any(), any())).thenReturn(lightTokenId);
         binaryLightTokenHelperMock.when(() -> BinaryLightTokenHelper.createBinaryLightToken(any(), any(), any())).thenReturn(binaryLightToken);
@@ -71,9 +71,11 @@ class SpecificCommunicationServiceImplTest {
     @Test
     @DisplayName("Test getAndRemove LightResponse")
     void testGetAndRemoveResponse() throws Exception {
-        when(lightRedisCache.get(anyString())).thenReturn("<xml>responseXml</xml>");
+        String cacheKey = "response_prefix_token";
+        when(eidasCacheProperties.getLightResponsePrefix("token")).thenReturn(cacheKey);
+        when(lightRedisCache.get(cacheKey)).thenReturn("<xml>responseXml</xml>");
         service.getAndRemoveResponse("token", mock(Collection.class));
-        verify(lightRedisCache).get(any());
+        verify(lightRedisCache).get(cacheKey);
     }
 
     @AfterEach

@@ -8,16 +8,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 @DisplayName("When checking level of assurance")
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class LevelOfAssuranceHelperTest {
 
     @Mock
@@ -27,10 +27,10 @@ class LevelOfAssuranceHelperTest {
 
     @BeforeEach
     void setup() {
-        when(acrPropertiesMock.getSupportedAcrValues()).thenReturn(List.of("http://eidas.europa.eu/LoA/low",
+        lenient().when(acrPropertiesMock.getSupportedAcrValues()).thenReturn(List.of("http://eidas.europa.eu/LoA/low",
                 "http://eidas.europa.eu/LoA/substantial",
                 "http://eidas.europa.eu/LoA/high"));
-        when(acrPropertiesMock.getAcrValueMap()).thenReturn(Map.of("eidas-loa-low", "http://eidas.europa.eu/LoA/low",
+        lenient().when(acrPropertiesMock.getAcrValueMap()).thenReturn(Map.of("eidas-loa-low", "http://eidas.europa.eu/LoA/low",
                 "eidas-loa-substantial", "http://eidas.europa.eu/LoA/substantial",
                 "eidas-loa-high", "http://eidas.europa.eu/LoA/high"));
     }

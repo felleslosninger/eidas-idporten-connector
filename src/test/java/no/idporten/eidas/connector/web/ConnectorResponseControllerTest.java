@@ -8,7 +8,6 @@ import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.light.ILightResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import no.idporten.eidas.connector.config.StaticResourcesProperties;
-import no.idporten.eidas.connector.config.WebSecurityConfig;
 import no.idporten.eidas.connector.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.connector.integration.specificcommunication.service.SpecificCommunicationService;
 import no.idporten.eidas.connector.logging.AuditService;
@@ -30,8 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -48,7 +46,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ConnectorResponseController.class)
 @DisplayName("When calling the ProxyServiceRequestController")
-@Import(WebSecurityConfig.class)
 class ConnectorResponseControllerTest {
 
     @Autowired

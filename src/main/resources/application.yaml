@@ -7,9 +7,6 @@ server:
     min-response-size: 1024
   http2:
     enabled: true
-  error:
-    whitelabel:
-      enabled: true
 # Spring Boot Actuator
 management:
   server:
@@ -54,6 +51,9 @@ spring:
           must-revalidate: true
           stale-if-error: 604800
           no-transform: true
+    error:
+      whitelabel:
+        enabled: true
   session:
     store-type: redis
 #'unsafe-inline' because of the form post response

@@ -1,7 +1,5 @@
 package no.idporten.eidas.connector.integration.nobid.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.langtag.LangTag;
 import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.*;
@@ -32,6 +30,8 @@ import no.idporten.eidas.connector.matching.service.MatchingService;
 import no.idporten.eidas.connector.service.CountryCodeConverter;
 import no.idporten.eidas.connector.service.EIDASIdentifier;
 import org.springframework.util.CollectionUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -181,7 +181,7 @@ public class NobidMatchingServiceClient implements MatchingService {
             String serializedLoginHint = objectMapper.writeValueAsString(loginHint);
             log.info("Serialized login hint {}", serializedLoginHint);
             requestBuilder.loginHint(serializedLoginHint);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Failed to serialize login hint {}", loginHint, e);
             throw new SpecificConnectorException(ErrorCodes.INTERNAL_ERROR.getValue(), "Failed to perform matching because of invalid login hint", e);
         }
