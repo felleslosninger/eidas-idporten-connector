@@ -67,7 +67,7 @@ public class WebExceptionControllerAdvice {
             case FormPostResponse formPostResponse -> {
                 response.setContentType("text/html;charset=UTF-8");
                 response.setCharacterEncoding("UTF-8");
-                response.getWriter().write(formPostResponse.getRedirectForm());
+                response.getWriter().write(formPostResponse.getRedirectForm(true));
             }
             default ->
                     throw new IllegalStateException("Unexpected client response type %s".formatted(clientResponse.getClass().getName()));

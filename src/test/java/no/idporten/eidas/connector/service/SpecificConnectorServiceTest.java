@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class SpecificConnectorServiceTest {
 
     @Mock
@@ -50,9 +50,9 @@ class SpecificConnectorServiceTest {
 
     @BeforeEach
     void setup() {
-        when(euConnectorProperties.getIssuer()).thenReturn("issuerId");
+        lenient().when(euConnectorProperties.getIssuer()).thenReturn("issuerId");
         EidasUser eidasUser = new EidasUser(new EIDASIdentifier("SE/NO/1234"), "2000-12-01", null);
-        when(matchingServiceClient.match(any(), eq(Collections.emptySet()))).thenReturn(new UserMatchFound(eidasUser, "123-abc"));
+        lenient().when(matchingServiceClient.match(any(), eq(Collections.emptySet()))).thenReturn(new UserMatchFound(eidasUser, "123-abc"));
         specificConnectorService = new SpecificConnectorService(
                 euConnectorProperties,
                 specificCommunicationServiceImpl,

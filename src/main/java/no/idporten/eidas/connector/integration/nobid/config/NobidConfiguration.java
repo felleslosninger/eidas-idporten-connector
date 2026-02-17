@@ -1,7 +1,5 @@
 package no.idporten.eidas.connector.integration.nobid.config;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.connector.integration.nobid.domain.OidcProvider;
 import no.idporten.eidas.connector.integration.nobid.service.NobidMatchingServiceClient;
@@ -17,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Optional;
 

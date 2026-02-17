@@ -2,7 +2,6 @@ package no.idporten.eidas.connector.web;
 
 import no.idporten.eidas.connector.config.EUCountriesProperties;
 import no.idporten.eidas.connector.config.StaticResourcesProperties;
-import no.idporten.eidas.connector.config.WebSecurityConfig;
 import no.idporten.eidas.connector.logging.AuditService;
 import no.idporten.eidas.connector.service.SpecificConnectorService;
 import no.idporten.eidas.lightprotocol.messages.LightRequest;
@@ -13,8 +12,7 @@ import no.idporten.sdk.oidcserver.protocol.RedirectedResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(CitizenCountryController.class)
 @DisplayName("When calling the CitizenCountryController")
-@Import(WebSecurityConfig.class)
 class CitizenCountryControllerTest {
     @Autowired
     private MockMvc mockMvc;

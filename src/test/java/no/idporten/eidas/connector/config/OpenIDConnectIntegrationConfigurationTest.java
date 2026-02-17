@@ -10,14 +10,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class OpenIDConnectIntegrationConfigurationTest {
 
     @Mock
@@ -31,9 +32,9 @@ class OpenIDConnectIntegrationConfigurationTest {
 
     @BeforeEach
     void setUp() {
-        when(properties.getIssuer()).thenReturn(URI.create("http://localhost:8080"));
-        when(properties.isRequirePkce()).thenReturn(true);
-        when(properties.getParLifetimeSeconds()).thenReturn(3600);
+        lenient().when(properties.getIssuer()).thenReturn(URI.create("http://localhost:8080"));
+        lenient().when(properties.isRequirePkce()).thenReturn(true);
+        lenient().when(properties.getParLifetimeSeconds()).thenReturn(3600);
     }
 
     @Test
