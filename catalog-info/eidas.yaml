@@ -11,5 +11,5 @@ spec:
   lifecycle: production
   system: eidas
   dependsOn:
-    - resource:default/eidas-redis
+    - resource:eidas-redis
     - component:eidas-connector
