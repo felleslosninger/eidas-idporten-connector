@@ -1,6 +1,4 @@
 name: On PR label
-permissions:
-  contents: read
 on:
   pull_request:
     types: [ labeled ]
