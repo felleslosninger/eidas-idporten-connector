@@ -3,8 +3,9 @@
 
 name: Build/publish Docker image & update image version in config
 permissions:
+  id-token: write
   contents: read
-
+  pull-requests: read
 on:
   push:
     branches: [main]
