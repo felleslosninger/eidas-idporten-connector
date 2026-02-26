@@ -92,7 +92,7 @@ eidas:
       - RO
       - SE
       - SK
-      - SL
+      - SI
     test: false
   eu-connector:
     issuer-name: ${eidas.cache.request-issuer-name}

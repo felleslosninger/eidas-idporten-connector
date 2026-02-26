@@ -29,7 +29,7 @@
         <nimbus.oauth2-oidc-sdk.version>11.33</nimbus.oauth2-oidc-sdk.version>
         <idporten-actuator-starter.version>3.0.0</idporten-actuator-starter.version>
         <icu4j-countrycode-converter.version>78.1</icu4j-countrycode-converter.version>
-        <surefire.plugin.version>3.5.4</surefire.plugin.version>
+        <surefire.plugin.version>3.5.5</surefire.plugin.version>
         <idporten-oidc-server-redis-cache-starter.version>1.0.6</idporten-oidc-server-redis-cache-starter.version>
         <mockito-inline.version>5.2.0</mockito-inline.version>
         <maven.compiler-plugin.version>3.15.0</maven.compiler-plugin.version>
