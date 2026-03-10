@@ -2,3 +2,5 @@
 CVE-2025-61726 # stdlib golang net/url
 CVE-2025-61728 # stdlib golang archive/zip
 CVE-2025-68121 # stdlib
+CVE-2026-29062 # jackson-core
+GHSA-72hv-8253-57qq # jackson-core

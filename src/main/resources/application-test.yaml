@@ -14,6 +14,37 @@ spring:
           - eidas-redis-sentinel-node-2.eidas-redis-sentinel-headless:26379
 eidas:
   countries:
+    included:
+      - AT
+      - BE
+      - BG
+      - CY
+      - CZ
+      - CZ
+      - DK
+      - EE
+      - EL
+      - ES
+      - EU
+      - FI
+      - FR
+      - HR
+      - HU
+      - IE
+      - IS
+      - IT
+      - LI
+      - LT
+      - LU
+      - LV
+      - MT
+      - NL
+      - PL
+      - PT
+      - RO
+      - SE
+      - SK
+      - SI
     test: true
   eu-connector:
     redirect-uri: https://connector.test.eidasnode.no/SpecificConnectorRequest
