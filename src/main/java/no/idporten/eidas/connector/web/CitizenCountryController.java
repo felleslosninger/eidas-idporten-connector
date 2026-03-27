@@ -68,9 +68,9 @@ public class CitizenCountryController {
     }
 
     private static void handleUnknownAction(HttpServletResponse response, String action) throws IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        response.getWriter().write("<html><body>Error: Unknown action '" + action + "'</body></html>");
+        response.setContentType("text/plain;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        response.getWriter().write("Error: Unknown action");
     }
 
     private void handleSubmit(HttpServletResponse response, CitizenCountryForm form, PushedAuthorizationRequest authorizationRequest) throws IOException {
