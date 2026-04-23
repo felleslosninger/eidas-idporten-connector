@@ -4,3 +4,8 @@ CVE-2025-61728 # stdlib golang archive/zip
 CVE-2025-68121 # stdlib
 CVE-2026-29062 # jackson-core
 GHSA-72hv-8253-57qq # jackson-core
+CVE-2026-34483 # tomcat-embed-core
+CVE-2026-34487 # tomcat-embed-core
+CVE-2026-40477 # thymeleaf-spring6/thymeleaf
+CVE-2026-40478 # thymeleaf-spring6/thymeleaf
+GHSA-2m67-wjpj-xhg9 # jackson-core

@@ -27,7 +27,6 @@ eidas:
       - ES
       - EU
       - FI
-      - FR
       - HR
       - HU
       - IE
@@ -43,8 +42,8 @@ eidas:
       - PT
       - RO
       - SE
-      - SK
       - SI
+      - SK
     test: true
   eu-connector:
     redirect-uri: https://connector.test.eidasnode.no/SpecificConnectorRequest
