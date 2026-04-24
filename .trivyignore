@@ -1,7 +1,1 @@
 #trivyignore file for ignoring specific vulnerabilities in the project
-GHSA-72hv-8253-57qq # jackson-core
-CVE-2026-34483 # tomcat-embed-core
-CVE-2026-34487 # tomcat-embed-core
-CVE-2026-40477 # thymeleaf-spring6/thymeleaf
-CVE-2026-40478 # thymeleaf-spring6/thymeleaf
-GHSA-2m67-wjpj-xhg9 # jackson-core
