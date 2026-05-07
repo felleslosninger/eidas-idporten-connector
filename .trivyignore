@@ -1,1 +1,2 @@
 #trivyignore file for ignoring specific vulnerabilities in the project
+CVE-2026-42579 # io.netty:netty-codec-dns fixed in 4.2.13.Final, 4.1.133.Final

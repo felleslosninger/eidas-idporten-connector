@@ -65,7 +65,6 @@ eidas:
     included:
       - AT
       - BE
-      - BE
       - BG
       - CY
       - CZ
@@ -78,7 +77,6 @@ eidas:
       - FI
       - FR
       - HR
-      - IS
       - IT
       - IT
       - LI
