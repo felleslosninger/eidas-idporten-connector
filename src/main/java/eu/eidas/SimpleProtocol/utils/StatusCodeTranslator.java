@@ -28,6 +28,8 @@ import javax.annotation.Nullable;
 /**
  * Translates between supported Status Code in the eIDAS specification and the
  * simple status_code values.
+ * Copied from EIDAS-SimpleProtocol
+ * Sist sjekket ifm EIDAS-3.0.0
  */
 public enum StatusCodeTranslator {
 
