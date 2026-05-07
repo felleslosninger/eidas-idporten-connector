@@ -14,14 +14,13 @@ on:
       - "LICENSE"
       - "catalog-info/**"
 
-permissions:
-  contents: write
-  packages: write
-  id-token: write
-
 jobs:
   build-publish-image:
     uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-build-publish-image.yml@main
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
     with:
       image-name: eidas-idporten-connector
       java-version: 25
@@ -29,6 +28,10 @@ jobs:
 
   call-update-image:
     uses: felleslosninger/github-workflows/.github/workflows/ci-call-update-image.yml@main
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
     needs: build-publish-image
     with:
       application-name: eidas-idporten-connector

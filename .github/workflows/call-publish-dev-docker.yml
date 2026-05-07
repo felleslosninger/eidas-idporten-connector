@@ -13,4 +13,7 @@ permissions:
 jobs:
   build-publish-image:
     uses: felleslosninger/github-workflows/.github/workflows/misc-publish-dev-docker.yml@main
+    permissions:
+      contents: write
+      packages: write
     secrets: inherit
