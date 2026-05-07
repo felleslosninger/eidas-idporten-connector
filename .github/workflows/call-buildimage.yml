@@ -29,9 +29,7 @@ jobs:
   call-update-image:
     uses: felleslosninger/github-workflows/.github/workflows/ci-call-update-image.yml@main
     permissions:
-      contents: write
-      packages: write
-      id-token: write
+      pull-requests: read
     needs: build-publish-image
     with:
       application-name: eidas-idporten-connector
