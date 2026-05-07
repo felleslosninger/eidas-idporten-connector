@@ -18,15 +18,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <eidas.version>3.0.0</eidas.version>
         <open.telemetry.version>1.61.0</open.telemetry.version>
-        <idporten-audit.version>4.0.0</idporten-audit.version>
+        <idporten-audit.version>4.0.2</idporten-audit.version>
         <idporten-access-log.version>4.0.0</idporten-access-log.version>
         <idporten-lib-keystore-core.version>2.0.1</idporten-lib-keystore-core.version>
         <lombok.version>1.18.46</lombok.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <glassfish-jaxb.version>4.0.7</glassfish-jaxb.version>
+        <glassfish-jaxb.version>4.0.8</glassfish-jaxb.version>
         <ibm-icu4j.version>78.3</ibm-icu4j.version>
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
-        <nimbus.oauth2-oidc-sdk.version>11.37</nimbus.oauth2-oidc-sdk.version>
+        <nimbus.oauth2-oidc-sdk.version>11.37.1</nimbus.oauth2-oidc-sdk.version>
         <idporten-actuator-starter.version>3.1.0</idporten-actuator-starter.version>
         <surefire.plugin.version>3.5.5</surefire.plugin.version>
         <idporten-oidc-server-redis-cache-starter.version>1.0.6</idporten-oidc-server-redis-cache-starter.version>
