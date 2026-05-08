@@ -35,7 +35,7 @@ oidc-test-client:
 
 ## matching service
 
-to use Nobid matching service, set the following properties: eidas.nobid.enabled:true and make sure
+To use Nobid matching service, set the following properties: eidas.nobid.enabled:true and make sure
 eidas.freg-gw.enabled: false
 To use F-REG matching service, set the following properties: eidas.freg-gw.enabled: true and make sure
 eidas.nobid.enabled: false
