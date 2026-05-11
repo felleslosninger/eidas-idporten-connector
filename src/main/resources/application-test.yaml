@@ -51,7 +51,6 @@ eidas:
       - SI
       - SK
     test: true
-    european-commission-countries: true
   eu-connector:
     redirect-uri: https://connector.test.eidasnode.no/SpecificConnectorRequest
   cache:
