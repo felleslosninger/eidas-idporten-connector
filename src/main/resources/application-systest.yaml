@@ -19,6 +19,12 @@ spring:
           - eidas-redis-sentinel-node-0.eidas-redis-sentinel-headless:26379
           - eidas-redis-sentinel-node-1.eidas-redis-sentinel-headless:26379
           - eidas-redis-sentinel-node-2.eidas-redis-sentinel-headless:26379
+digdir:
+  static:
+    design:
+      host: https://static.test.idporten.no
+idporten-security:
+  csp-header: default-src 'self' https://static.test.idporten.no; script-src 'self' https://static.test.idporten.no 'unsafe-inline'; img-src 'self' https://static.test.idporten.no data:; font-src 'self' https://static.test.idporten.no data:; frame-src 'self'; frame-ancestors 'none'; form-action *;
 eidas:
   countries:
     test: true

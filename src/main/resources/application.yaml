@@ -148,7 +148,8 @@ digdir:
   static:
     design:
       themeId: idporten
-      version: v0.8.3
+      version: v0.8.6
+      host: https://static.idporten.no
   audit:
     application-name: ${spring.application.name}
     application-environment: ${spring.application.environment}
