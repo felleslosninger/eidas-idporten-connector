@@ -19,6 +19,17 @@ digdir:
   event:
     logging:
       feature-enabled: false
+  static:
+    design:
+      host: https://static.test.idporten.no
+idporten-security:
+  csp-header: default-src 'self' https://static.test.idporten.no; script-src 'self' https://static.test.idporten.no 'unsafe-inline'; img-src 'self' https://static.test.idporten.no data:; font-src 'self' https://static.test.idporten.no data:; frame-src 'self'; frame-ancestors 'none'; form-action *;
+ # When running with Static Resources
+#  static:
+#    design:
+#      host: http://static-resources:8083
+#idporten-security:
+#  csp-header: default-src 'self' http://static-resources:8083; script-src 'self' http://static-resources:8083 'unsafe-inline'; img-src 'self' http://static-resources:8083 data:; font-src 'self' http://static-resources:8083 data:; frame-src 'self'; frame-ancestors 'none'; form-action *;
 
 eidas:
   countries:
