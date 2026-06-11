@@ -29,7 +29,7 @@
         <nimbus.oauth2-oidc-sdk.version>11.37.1</nimbus.oauth2-oidc-sdk.version>
         <idporten-actuator-starter.version>3.1.0</idporten-actuator-starter.version>
         <surefire.plugin.version>3.5.5</surefire.plugin.version>
-        <idporten-oidc-server-redis-cache-starter.version>1.0.6</idporten-oidc-server-redis-cache-starter.version>
+        <idporten-oidc-server-redis-cache-starter.version>2.0.0</idporten-oidc-server-redis-cache-starter.version>
         <mockito-inline.version>5.2.0</mockito-inline.version>
         <maven.compiler-plugin.version>3.15.0</maven.compiler-plugin.version>
         <maven.compiler.proc>full</maven.compiler.proc>
@@ -114,7 +114,7 @@
         </dependency>
         <dependency>
             <groupId>no.digdir</groupId>
-            <artifactId>idporten-oidc-server-redis-cache-starter</artifactId>
+            <artifactId>idporten-oidc-server-redis-cache-spring-boot-4-starter</artifactId>
             <version>${idporten-oidc-server-redis-cache-starter.version}</version>
         </dependency>
         <dependency>
