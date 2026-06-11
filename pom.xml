@@ -114,8 +114,8 @@
         </dependency>
         <dependency>
             <groupId>no.digdir</groupId>
-            <artifactId>idporten-oidc-server-redis-cache-starter</artifactId>
-            <version>${idporten-oidc-server-redis-cache-starter.version}</version>
+            <artifactId>idporten-oidc-server-redis-cache-spring-boot-4-starter</artifactId>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>no.idporten</groupId>
