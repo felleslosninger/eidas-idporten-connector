@@ -28,7 +28,7 @@
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
         <nimbus.oauth2-oidc-sdk.version>11.37.1</nimbus.oauth2-oidc-sdk.version>
         <idporten-actuator-starter.version>3.1.0</idporten-actuator-starter.version>
-        <surefire.plugin.version>3.5.5</surefire.plugin.version>
+        <surefire.plugin.version>3.5.6</surefire.plugin.version>
         <idporten-oidc-server-redis-cache-starter.version>2.0.0</idporten-oidc-server-redis-cache-starter.version>
         <mockito-inline.version>5.2.0</mockito-inline.version>
         <maven.compiler-plugin.version>3.15.0</maven.compiler-plugin.version>
